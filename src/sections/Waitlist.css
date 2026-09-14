@@ -1,0 +1,286 @@
+/* =============================================================================
+   Waitlist (Accelerator) — section-local styles.
+   Uses only tokens from global.css. The media card is the one grey island on the
+   sky: a lit grey-blue glass surface (DESIGN-SPEC §4.5 "light haze/grey glass
+   surface", the composition of reference/air/desktop-03) that reads as a glassy
+   screen, not a slab. The reference frame is a video with white copy on pale grey
+   (≈2:1); ours is a real surface, so it is pitched mid-grey to keep the white
+   u-h2-large caption ≥ 3:1 (JOURNEY-SPEC "Readability"). Free-standing copy (pill,
+   title, body, placeholder, confirmation) carries the .on-sky contrast glow because
+   it sits directly on the moving sky.
+   ========================================================================== */
+
+/* ---------- Top block: everything on the raw sky gets the glow */
+.wl-text > .pill,
+.wl-text > h2,
+.wl-text > p,
+.wl-text .wl-confirm,
+.wl-text .wl-error {
+  text-shadow:
+    0 2px 24px rgba(6, 18, 58, 0.45),
+    0 0 2px rgba(6, 18, 58, 0.25);
+}
+
+/* ---------- Form row: input + button stay on ONE row down to 640px; below that the
+   reference (mobile-04) stacks a full-width ghost input over a full-width "Notify me",
+   so the pair reads as one block rather than an input with a stray centred button. */
+.wl-form {
+  width: 100%;
+}
+.wl-form__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+}
+.input-air.wl-input {
+  width: 371px;
+  max-width: 100%;
+  flex: 0 1 371px;
+}
+.input-air.wl-input[aria-invalid="true"] {
+  border-color: rgba(var(--fg-rgb), 0.85);
+}
+@media (max-width: 640px) {
+  .input-air.wl-input {
+    width: 100%;
+    flex-basis: 100%;
+  }
+  /* The .btn primary keeps its 38px height, label and hover fill — only the width changes. */
+  .wl-form__row .btn {
+    width: 100%;
+    flex: 0 0 100%;
+  }
+}
+
+/* Confirmation line replaces the form row (16px, fades in). */
+.wl-confirm {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: wl-fade 600ms var(--ease) both;
+}
+@keyframes wl-fade {
+  from {
+    opacity: 0;
+    translate: 0 6px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+/* ---------- Media card (stand-in for the reference product video)
+   A lit grey-blue glass island — a radial gradient that is brightest along the top edge
+   (#8c96a4, white ≈ 3.0:1) and settles into a deeper grey-blue toward the bottom
+   (#6f7988, white ≈ 4.4:1), so it reads as a screen catching the sky light rather than a
+   flat slate. The white 56px caption sits at the vertical centre, where the gradient is
+   already ≈ 55 % of the way to the dark end (white ≈ 3.6:1 — above the 3:1 large-text
+   floor); the step row sits on the dark end. The caption is absolutely centred in the card
+   and the step row is pinned to the bottom edge, so the caption stays at the true vertical
+   centre regardless of the row height. */
+.wl-card {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  box-sizing: border-box;
+  border-radius: 20px;
+  overflow: hidden;
+  background-color: #6f7988; /* fallback under the gradient */
+  background-image: radial-gradient(120% 90% at 50% 0%, #8c96a4 0%, #6f7988 100%);
+  color: var(--white);
+}
+
+/* Faint 12-column grid: eleven interior 1px lines (no lines on the outer edges).
+   Barely-there light lines on the grey glass — a whisper of structure, never a slab. */
+.wl-card__grid {
+  position: absolute;
+  inset: 0 0 0 calc(100% / 12);
+  pointer-events: none;
+  background-image: linear-gradient(90deg, rgba(var(--white-rgb), 0.07) 1px, transparent 1px);
+  background-size: calc(100% / 11) 100%;
+  background-repeat: repeat-x;
+}
+
+.wl-card__body {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 32px 96px;
+  box-sizing: border-box;
+}
+.wl-card__caption {
+  max-width: 22ch;
+  margin: 0 auto;
+  text-align: center;
+  text-wrap: balance;
+  /* JOURNEY-SPEC "Readability": soft contrast glow, not a drop shadow. The second,
+     tighter layer (same as the top block) gives the white display copy a defined edge
+     on the grey glass without reading as a drop shadow. The surface itself carries the
+     contrast (≥ 3:1, see .wl-card); the glow only sharpens the edge. */
+  text-shadow:
+    0 2px 24px rgba(6, 18, 58, 0.45),
+    0 0 2px rgba(6, 18, 58, 0.25);
+}
+
+/* ---------- Animated step row (Idea → MVP → Demo Day → Astana Hub)
+   One registered custom property (--wl-p, 0 → 1 over the cycle) drives everything:
+   segment i fills while step i is current, and pill i lights up for its 1/N slice. */
+@property --wl-p {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
+.wl-steps {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin: 0;
+  padding: 32px;
+  box-sizing: border-box;
+  list-style: none;
+  animation: wl-progress var(--wl-cycle, 6000ms) linear infinite;
+}
+@keyframes wl-progress {
+  from {
+    --wl-p: 0;
+  }
+  to {
+    --wl-p: 1;
+  }
+}
+
+.wl-step {
+  /* x = 0 when this step becomes current, 1 when the next one does */
+  --x: calc(var(--wl-p) * var(--wl-n, 4) - var(--seg, 0));
+  /* 1 while current, with a short cross-fade (10% of a step) around each boundary */
+  --on: calc(clamp(0, calc(var(--x) * 10 + 1), 1) - clamp(0, calc((var(--x) - 1) * 10 + 1), 1));
+  display: flex;
+  align-items: center;
+  flex: 1 1 0%;
+}
+.wl-step:last-child {
+  flex: 0 0 auto;
+}
+
+/* Inactive pills are a DARK ink tint on the grey glass — a white label on ink/28 over the
+   #6f7988 end of the gradient (where the row sits) composites to ≈ #575f69 and measures
+   ≈ 6.5:1 (full AA). The current pill cross-fades to solid white with an ink label. Both
+   ends of the mix are readable, so every intermediate frame of the fade is too. */
+.wl-steps .wl-step__pill {
+  flex-shrink: 0;
+  height: 32px;
+  padding: 0 14px;
+  font-size: 14px;
+  color: var(--white);
+  color: color-mix(in srgb, var(--black) calc(var(--on) * 100%), var(--white));
+  background-color: rgba(var(--black-rgb), 0.28);
+  background-color: color-mix(in srgb, var(--white) calc(var(--on) * 100%), rgba(var(--black-rgb), 0.28));
+}
+
+/* Progress line: ink on the grey glass — a dark line reads as drawn into the screen, and
+   the ink/72 fill (≈ #333a42) stays clearly separated from the ink/16 track. */
+.wl-step__track {
+  position: relative;
+  flex: 1 1 8px;
+  min-width: 8px;
+  height: 2px;
+  margin: 0 8px;
+  background-color: rgba(var(--black-rgb), 0.16);
+  overflow: hidden;
+}
+.wl-step__fill {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(var(--black-rgb), 0.72);
+  transform-origin: left center;
+  transform: scaleX(clamp(0, var(--x), 1));
+  will-change: transform;
+}
+
+/* ---------- Responsive */
+@media (max-width: 768px) {
+  .wl-card {
+    aspect-ratio: auto;
+    min-height: 320px;
+  }
+  .wl-card__body {
+    position: relative;
+    inset: auto;
+    min-height: 320px;
+    padding: 48px 20px 88px;
+  }
+  .wl-steps {
+    padding: 20px;
+  }
+  .wl-steps .wl-step__pill {
+    padding: 0 9px;
+    font-size: 12px;
+  }
+  .wl-step__track {
+    flex-basis: 6px;
+    min-width: 6px;
+    margin: 0 3px;
+  }
+}
+
+/* Phones: the four pills cannot share one line (at 320px the row overflowed the card and
+   clipped "Astana Hub"; at 360–375px the connectors collapsed to their minimum and the
+   progress-line animation vanished). Let the row wrap onto two centred lines instead, with
+   every pill keeping a visible 28px connector. The card body's bottom padding grows to
+   clear two rows of pills (2 × 32px + 10px gap + 2 × 20px padding = 114px). */
+@media (max-width: 480px) {
+  .wl-card__body {
+    padding-bottom: 124px;
+  }
+  .wl-steps {
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: 10px;
+    padding: 20px 16px;
+  }
+  .wl-step {
+    flex: 0 0 auto;
+  }
+  .wl-step__track {
+    flex: 0 0 28px;
+    min-width: 28px;
+    margin: 0 8px;
+  }
+}
+
+/* ---------- Reduced motion: static on the last step, line fully drawn, no fades. */
+@media (prefers-reduced-motion: reduce) {
+  .wl-steps {
+    animation: none;
+    --wl-p: calc((var(--wl-n, 4) - 0.5) / var(--wl-n, 4));
+  }
+  .wl-step__fill {
+    transform: none;
+  }
+  .wl-confirm {
+    animation: none;
+  }
+}
+
+/* Submission error under the form row (copy: form.submitFailed in content.ts). */
+.wl-error {
+  flex-basis: 100%;
+  text-align: center;
+  color: rgba(var(--fg-rgb), 0.85);
+  margin-top: 4px;
+}

@@ -1,0 +1,209 @@
+/* =============================================================================
+   ModelsCTA — reference CTACard
+   Full-width AnimatedBorder card, translucent fill, three huge soft colour orbs
+   rotating + pulsing behind the copy. The only colourful moment on the page.
+   The orbs are painted as radial gradients (no per-frame `filter: blur()` — a 70px
+   blur at DPR 2 re-ran a 140 device-px two-pass blur on three layers every frame and
+   cost ~7 fps on an integrated GPU); the animations only touch `scale` / `rotate`.
+   ========================================================================== */
+
+.ctacard {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 40px;
+  border-radius: var(--radius-cards);
+  background: var(--card-fill);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 48px;
+  color: var(--fg);
+}
+
+/* ---------- Copy (left) */
+.ctacard__content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 500px;
+  min-width: 0;
+  /* copy over vivid orbs: the JOURNEY-SPEC contrast glow (not a drop shadow) keeps it crisp
+     where the lime / pink cores rotate under it. With the veil thinned to .22 the glow does
+     more of the legibility work, so it is a touch denser than elsewhere on the page. */
+  text-shadow:
+    0 2px 24px rgba(6, 18, 58, 0.55),
+    0 0 2px rgba(6, 18, 58, 0.25);
+}
+/* Reference "One plan. Every model." is fully cursive: bump to the u-h3 size scale
+   (cursive class sets 1.18em relative to its parent; parent here is body 16px). */
+.ctacard__content .u-h3.cursive {
+  font-size: clamp(30px, 2.7vw, 38px);
+  line-height: 1;
+  margin-right: 0;
+}
+/* Body copy stays a touch under the headline but close to solid: at .85 the 16px text on the
+   lime orb's edge computes to ~3.4:1; .92 (+ the glow) clears 4.5:1. The orb cores themselves
+   are now spread to the card's corners so no core sits under the copy. */
+.ctacard__content .u-body-1 {
+  color: rgba(var(--fg-rgb), 0.92);
+}
+
+/* ---------- Button (right, vertically centred) */
+.ctacard__action {
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  align-self: center;
+}
+/* The ghost button can land on the lime / pink orbs: a quiet navy fill keeps its white
+   label and 1px stroke at >= 4.5:1 there. The secondary hover swaps to the white ::after
+   sweep exactly as elsewhere. */
+.ctacard__action .btn--secondary {
+  background-color: rgba(6, 18, 58, 0.28);
+}
+.ctacard__action .btn--secondary:hover {
+  background-color: transparent;
+}
+
+/* ---------- Orbs (behind the copy, clipped by the card) */
+.ctacard__orbs {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: inherit;
+}
+.ctacard__orbs-inner {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 140%;
+  aspect-ratio: 1 / 1;
+  translate: -50% -50%;
+  animation: ctacard-orbs-rotate 26s linear infinite;
+  will-change: transform;
+}
+.orb {
+  --orb-rgb: 43 127 255;
+  position: absolute;
+  display: block;
+  width: 55%;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  /* Soft-edged disc: a saturated core that fades out in a gaussian-ish curve. Same look as
+     the old blur(70px) but a static paint — zero per-frame filter cost. */
+  background: radial-gradient(
+    closest-side,
+    rgb(var(--orb-rgb) / 1) 0%,
+    rgb(var(--orb-rgb) / 1) 28%,
+    rgb(var(--orb-rgb) / 0.62) 50%,
+    rgb(var(--orb-rgb) / 0.24) 72%,
+    rgb(var(--orb-rgb) / 0.06) 88%,
+    rgb(var(--orb-rgb) / 0) 100%
+  );
+  filter: none;
+  /* Near-solid: the orbs are the one saturated moment on the page; at .8 under the old veil
+     they averaged into a single olive smear. Separation now comes from placement, not opacity. */
+  opacity: 0.95;
+  will-change: transform;
+  animation: ctacard-orb-pulse var(--orb-duration, 12s) ease-in-out infinite alternate;
+}
+/* Three distinct cores pushed to the corners of the 140% rotating square (as in the reference:
+   blue and lime on one side, pink on the other, navy ground showing between them). Their cores
+   never overlap — only the soft skirts meet — so each reads as its own colour instead of the
+   three multiplying into a muddy olive. */
+.orb--blue {
+  left: -5%;
+  top: -15%;
+  --orb-rgb: 43 127 255; /* #2b7fff */
+  --orb-duration: 9s;
+}
+.orb--lime {
+  right: -12%;
+  top: -5%;
+  --orb-rgb: 190 235 80; /* #beeb50 */
+  --orb-duration: 12s;
+  animation-delay: -4s;
+}
+.orb--pink {
+  left: 45%;
+  bottom: -25%;
+  --orb-rgb: 255 120 210; /* #ff78d2 */
+  --orb-duration: 15s;
+  animation-delay: -8s;
+}
+
+/* Deep-blue veil above the orbs: keeps the reference's navy ground showing between the
+   orbs and lifts white copy to a readable contrast where it crosses the lime / pink.
+   It is a quiet left→right ramp rather than a flat wash: .22 under the copy (where 16px body
+   text can meet an orb skirt), easing to .14 by the centre and .10 at the button end so the
+   orbs keep their saturation where nothing has to be read over them (the ghost button carries
+   its own navy fill). Any heavier and the three colours desaturate into one olive wash — the
+   copy's text-shadow glow carries the rest of the legibility. */
+.ctacard__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(6, 18, 58, 0.22) 0%,
+    rgba(6, 18, 58, 0.14) 50%,
+    rgba(6, 18, 58, 0.1) 100%
+  );
+}
+
+@keyframes ctacard-orbs-rotate {
+  to {
+    rotate: 1turn;
+  }
+}
+@keyframes ctacard-orb-pulse {
+  from {
+    scale: 0.55;
+  }
+  to {
+    scale: 1.45;
+  }
+}
+
+/* ---------- Static fallback (reduced motion via matchMedia class + media query) */
+.ctacard--static .ctacard__orbs-inner,
+.ctacard--static .orb {
+  animation: none !important;
+  rotate: 0deg;
+  scale: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ctacard__orbs-inner,
+  .orb {
+    animation: none !important;
+    rotate: 0deg;
+    scale: 1;
+  }
+}
+
+/* ---------- Responsive */
+@media (max-width: 768px) {
+  .ctacard {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 24px;
+    padding: 24px;
+  }
+  .ctacard__content {
+    max-width: 100%;
+  }
+  .ctacard__content .u-h3.cursive {
+    font-size: 30px;
+  }
+  .ctacard__action {
+    align-self: flex-start;
+  }
+}

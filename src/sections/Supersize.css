@@ -1,0 +1,64 @@
+/* =============================================================================
+   Supersize — one uppercase compressed sentence filling the viewport width, filled in
+   word-by-word as it scrolls through the viewport (styles written from a rAF loop).
+   Lines are tight (.85, from .u-h1), both side paddings are the 24px row margin, and
+   the words carry the .on-sky glow because they sit directly on the moving sky.
+   ========================================================================== */
+
+.supersize {
+  /* Nothing may extend past the viewport (no page-level x-scroll); vertical stays visible. */
+  overflow-x: clip;
+  overflow-y: visible;
+  align-items: flex-start;
+}
+
+.supersize > .supersize__text {
+  box-sizing: border-box;
+  /* Full viewport width with the row margin on both sides: as in the reference, every line
+     ends inside the viewport — a word is never cut mid-glyph at the right edge. `balance`
+     evens the line lengths so no single word is orphaned on its own line. */
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding-left: var(--row-margin);
+  padding-right: var(--row-margin);
+  text-wrap: balance;
+  /* A touch under .u-h1's 18vw so "over talkers." / "Ship every" share lines instead of
+     orphaning "over" once the bleed is gone. Measured with Anton metrics: a balanced 4-line
+     stack from 360 to 1536 (≥15px right margin on phones), 3 lines from ~1700 up. */
+  font-size: clamp(60px, 16.5vw, 240px);
+  line-height: 0.85;
+  text-align: left;
+  color: var(--fg);
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: normal;
+  hyphens: none;
+}
+
+.supersize__word {
+  display: inline-block;
+  opacity: 0.15;
+  transform: translate3d(0, 12px, 0);
+  will-change: opacity, transform;
+  backface-visibility: hidden;
+  text-shadow:
+    0 2px 24px rgba(6, 18, 58, 0.45),
+    0 0 2px rgba(6, 18, 58, 0.25);
+}
+
+@media (max-width: 768px) {
+  .supersize > .supersize__text {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+/* Static fallback: every word fully visible, no lift. */
+@media (prefers-reduced-motion: reduce) {
+  .supersize__word {
+    opacity: 1 !important;
+    transform: none !important;
+    will-change: auto;
+  }
+}

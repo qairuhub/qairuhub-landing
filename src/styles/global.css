@@ -1,0 +1,899 @@
+@import "tailwindcss";
+
+/* =============================================================================
+   QairuHub landing — global styles
+   Design language: "Air" style reference (dark atmospheric sky, glass forms,
+   one sans at weight 500, compressed uppercase display, cursive accent word,
+   ghost/haze buttons, flat cards, small radii, no shadows, no gradients in UI).
+   Tokens are the single source of truth. Components use tokens, never raw hex.
+   ========================================================================== */
+
+/* ---------- Fonts (self-hosted substitutes for the proprietary Control family) */
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/Inter-Variable.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Anton";
+  src: url("/fonts/Anton-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Caveat";
+  src: url("/fonts/Caveat-Variable.ttf") format("truetype");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+/* DOM wordmark (header / footer / mobile menu) — JOURNEY-SPEC v2.1 checklist #2: Courgette, a
+   medium-weight friendly script that stays legible at 28px over clouds; Dancing Script is the
+   declared fallback. The 3D sculpture loads its own TTF via src/lib/ttf.ts (see GlassWordmark). */
+@font-face {
+  font-family: "Courgette";
+  src: url("/fonts/Courgette-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Dancing Script";
+  src: url("/fonts/DancingScript-Variable.ttf") format("truetype");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ---------- Tailwind v4 theme tokens (generate utilities: bg-haze, font-control, ease-air, rounded-cards …)
+   `static` so every token is always emitted on :root regardless of utility usage — the `:root`
+   aliases below (`--white`, `--haze`, `--black`, `--signal-blue`, `--ease`) read them with var(),
+   and no TSX references a `--color-*` token inline today. The DESIGN-SPEC §1 palette is complete
+   here (Black Void / Twilight Blue exist as utilities even though no section uses them yet).
+   The sky itself is NOT tokenised in CSS: the WebGL dome reads `PALETTE` in
+   src/sections/sky/journey.ts (space #03040c→#070c24 · descent · day #05285d→#045387 · dusk ·
+   night), and `--color-page` below MUST equal `PALETTE.space.top` so the html ground, the
+   theme-color meta and the canvas placeholder are one colour before the first frame. */
+@theme static {
+  --color-whiteout: #ffffff;
+  --color-haze: #f5f5f5;
+  --color-ink: #1b1b1b;
+  --color-black-void: #000000;
+  --color-twilight-blue: #426188;
+  --color-signal-blue: #2b7fff;
+  --color-page: #03040c; /* = PALETTE.space.top (src/sections/sky/journey.ts) */
+
+  --font-control: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-compressed: "Anton", Impact, "Arial Narrow Bold", sans-serif;
+  --font-cursive: "Caveat", "Segoe Script", "Bradley Hand", cursive;
+  --font-script: "Courgette", "Dancing Script", cursive;
+
+  --ease-air: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --radius-inputs: 4px;
+  --radius-buttons: 8px;
+  --radius-images: 11px;
+  --radius-cards: 12px;
+  --radius-bar: 10px;
+}
+
+/* ---------- Layout + theme variables (mirrors the reference's :root) */
+:root {
+  --column-gutter: 24px;
+  --page-width: 1600px;
+  --content-width: 1150px;
+  --row-margin: 24px;
+  --header-height: 72px;
+  --total-columns: 12;
+
+  /* Colour + easing aliases → the Tailwind @theme tokens above are the single
+     source of truth. Retheme there and both utilities and components follow. */
+  --white: var(--color-whiteout);
+  --black: var(--color-ink);
+  --haze: var(--color-haze);
+  --signal-blue: var(--color-signal-blue);
+
+  /* RGB triplets for rgba(var(--x-rgb), a) — CSS cannot derive these from a
+     hex var, so they MUST be kept in sync with --color-whiteout / --color-ink /
+     --color-haze in @theme whenever those change. */
+  --white-rgb: 255, 255, 255; /* = --color-whiteout #ffffff */
+  --black-rgb: 27, 27, 27;    /* = --color-ink #1b1b1b */
+  --haze-rgb: 245, 245, 245;  /* = --color-haze #f5f5f5 */
+
+  --ease: var(--ease-air);
+
+  /* Contrast glow for free-standing text on the moving sky (JOURNEY-SPEC "Readability"): a soft
+     deep-navy halo, never a drop shadow. ONE recipe for the whole page — sections use
+     `text-shadow: var(--text-glow)` (or the `.on-sky` class) and never the literal, so the halo
+     colour / strength is retuned here alone. `--text-glow-soft` is the lighter halo for elements
+     that carry their own weight (the script wordmark, ghost-input placeholders). */
+  --glow-rgb: 6, 18, 58;
+  --text-glow:
+    0 2px 24px rgba(var(--glow-rgb), 0.45),
+    0 0 2px rgba(var(--glow-rgb), 0.25);
+  --text-glow-soft: 0 2px 16px rgba(var(--glow-rgb), 0.35);
+
+  /* Shared surface recipe for translucent cards on the sky (JOURNEY-SPEC "Readability"):
+     .08 fill, .18 hairline. Every card / tile / tab bar on the sky uses these two. */
+  --card-fill: rgba(var(--white-rgb), 0.08);
+  --card-fill-hover: rgba(var(--white-rgb), 0.12);
+  --card-line: rgba(var(--white-rgb), 0.18);
+
+  /* Section theme — dark by default. Sections/cards can flip with [data-theme="light"]. */
+  --fg: var(--white);
+  --fg-rgb: var(--white-rgb);
+  --bg: var(--black);
+  --bg-rgb: var(--black-rgb);
+  --accent: var(--white);
+  --accent-rgb: var(--white-rgb);
+  --text: var(--white);
+}
+[data-theme="dark"] {
+  --fg: var(--white);
+  --fg-rgb: var(--white-rgb);
+  --bg: var(--black);
+  --bg-rgb: var(--black-rgb);
+  --accent: var(--white);
+  --accent-rgb: var(--white-rgb);
+  --text: var(--white);
+}
+[data-theme="light"] {
+  --fg: var(--black);
+  --fg-rgb: var(--black-rgb);
+  --bg: var(--white);
+  --bg-rgb: var(--white-rgb);
+  --accent: var(--black);
+  --accent-rgb: var(--black-rgb);
+  --text: var(--black);
+}
+
+/* ---------- Base */
+html {
+  background-color: var(--color-page);
+  color: var(--white);
+}
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+html,
+body {
+  overscroll-behavior-y: none;
+  max-width: 100vw;
+}
+body {
+  margin: 0;
+  font-family: var(--font-control);
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--fg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: clip;
+}
+::selection {
+  background: rgba(255, 255, 255, 0.25);
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+img,
+video,
+canvas {
+  max-width: 100%;
+  display: block;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  margin: 0;
+}
+:focus-visible {
+  outline: 2px solid rgba(var(--fg-rgb), 0.8);
+  outline-offset: 2px;
+}
+
+/* ---------- Type scale (reference: u-h1 259/0.85 compressed · u-h1-small 200 ·
+   u-h2-large 56/1 · u-h2 40/1 · u-h3 32/1.1 · u-h4 20/1.5 · u-h5 20/1.4 ·
+   body 16/1.5 · body-2 14 · body-3 12 · caption 13) */
+.u-h1 {
+  font-family: var(--font-compressed);
+  font-weight: 400;
+  font-size: clamp(84px, 18vw, 259.2px);
+  line-height: 0.85;
+  text-transform: uppercase;
+  letter-spacing: -0.005em;
+}
+.u-h1-small {
+  font-family: var(--font-compressed);
+  font-weight: 400;
+  font-size: clamp(64px, 13.9vw, 200px);
+  line-height: 0.85;
+  text-transform: uppercase;
+  letter-spacing: -0.005em;
+}
+.u-h2-large {
+  font-family: var(--font-control);
+  font-weight: 400;
+  font-size: clamp(36px, 3.9vw, 56px);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.u-h2 {
+  font-family: var(--font-control);
+  font-weight: 400;
+  font-size: clamp(30px, 2.8vw, 40px);
+  line-height: 1;
+  letter-spacing: -0.015em;
+}
+.u-h3 {
+  font-weight: 500;
+  font-size: clamp(26px, 2.25vw, 32px);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+.u-h4 {
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 1.5;
+}
+.u-h5 {
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 1.4;
+}
+.u-body-1 {
+  font-size: 16px;
+  line-height: 1.5;
+}
+.u-body-1-alt {
+  font-size: 16px;
+  line-height: 1.5;
+  color: rgba(var(--fg-rgb), 0.8);
+}
+.u-body-2 {
+  font-size: 14px;
+  line-height: 1.5;
+}
+.u-body-3 {
+  font-size: 12px;
+  line-height: 1.5;
+}
+.u-caption {
+  font-size: 13px;
+  line-height: 1.5;
+}
+/* One italic cursive word inside a headline = the brand's signature move. */
+.cursive,
+.u-h1 i,
+.u-h1-small i,
+.u-h2-large i,
+.u-h2 i,
+.u-h3 i,
+.u-h4 i,
+.u-h5 i {
+  font-family: var(--font-cursive);
+  font-style: italic;
+  font-weight: 600;
+  font-size: 1.18em;
+  line-height: 0.9;
+  letter-spacing: -0.01em;
+  /* Caveat italic overhangs its advance width: give the cursive word the same optical gap on
+     the right as the space before it (reference: "whole ecosystem" never touch). */
+  margin-right: 0.12em;
+}
+.wordmark {
+  font-family: var(--font-script);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  /* Courgette carries its own weight, so no edge glow is needed — only the soft contrast halo
+     every free-standing element on the moving sky gets (JOURNEY-SPEC "Readability"). */
+  text-shadow: var(--text-glow-soft);
+}
+
+/* Free-standing text placed directly on the moving sky gets a soft contrast glow (not a drop
+   shadow) — docs/JOURNEY-SPEC.md "Readability". Cards with a fill do not need it. */
+.on-sky {
+  text-shadow: var(--text-glow);
+}
+[data-theme="light"] .on-sky,
+.on-sky[data-theme="light"],
+.on-sky .btn,
+.on-sky .btn span,
+.on-sky [data-theme="light"] {
+  text-shadow: none;
+}
+
+/* ---------- Reveal (reference: opacity 0 + translate 0 20px → 1000ms ease, 150ms stagger) */
+.reveal {
+  opacity: 0;
+  translate: 0 20px;
+  transition:
+    opacity 1000ms var(--ease),
+    translate 1000ms var(--ease);
+  transition-delay: calc(var(--reveal-delay, 0ms) + var(--i, 0) * var(--reveal-stagger, 150ms));
+  will-change: opacity, translate;
+}
+.reveal.is-visible {
+  opacity: 1;
+  translate: 0 0;
+}
+/* `*` does not reach pseudo-elements, and .ab__stroke::before carries the border animation. */
+.u-animation-paused,
+.u-animation-paused *,
+.u-animation-paused ::before,
+.u-animation-paused ::after {
+  animation-play-state: paused !important;
+}
+
+/* ---------- Section (reference: padding row-margin*5, gap row-margin*2, z-2, children z-3) */
+.section-air {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  color: var(--fg);
+  padding: calc(var(--row-margin) * 5) 0;
+  gap: calc(var(--row-margin) * 2);
+}
+.section-air > * {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+}
+.section-air--small {
+  gap: var(--row-margin);
+}
+.section-air--large {
+  gap: calc(var(--row-margin) * 5);
+}
+.section-air--none {
+  gap: 0;
+}
+.section-air--flush {
+  padding: 0;
+}
+.section-air--header-padding {
+  padding-top: calc(var(--header-height) * 2) !important;
+}
+@media (max-width: 768px) {
+  .section-air {
+    padding: calc(var(--row-margin) * 2.5) 0;
+  }
+  .section-air--large {
+    gap: calc(var(--row-margin) * 2);
+  }
+  .section-air--header-padding {
+    padding-top: calc(var(--header-height) + 32px) !important;
+  }
+}
+
+/* ---------- Grid (12 col, 24px gutter, 1150 content / 1600 hero, 24px page margin) */
+.grid-air {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--column-gutter);
+  max-width: var(--content-width);
+  width: 100%;
+  padding: 0 var(--row-margin);
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+.grid-air--hero {
+  max-width: var(--page-width);
+}
+@media (max-width: 768px) {
+  .grid-air {
+    padding: 0 16px;
+  }
+}
+.col-air {
+  --cols: var(--cols-large, 12);
+  --offset: var(--cols-large-offset, 0);
+  position: relative;
+  box-sizing: border-box;
+  width: calc((100% + var(--column-gutter)) / var(--total-columns) * var(--cols) - var(--column-gutter));
+  margin-left: calc((100% + var(--column-gutter)) / var(--total-columns) * var(--offset));
+}
+@media (max-width: 1024px) {
+  .col-air {
+    --cols: var(--cols-medium, var(--cols-large, 12));
+    --offset: var(--cols-medium-offset, var(--cols-large-offset, 0));
+  }
+}
+@media (max-width: 768px) {
+  .col-air {
+    --cols: var(--cols-small, 12);
+    --offset: var(--cols-small-offset, 0);
+  }
+}
+
+/* Centered text block used at the top of most sections */
+.text-air {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+}
+.text-air--left {
+  align-items: flex-start;
+  text-align: left;
+}
+.text-air__ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* ---------- Buttons (reference Button_root: 38px, radius 8, padding 0 16, 14px/500 label,
+   primary = filled with --button-color, hover fill rotates/scales away leaving a ghost;
+   secondary = ghost, hover radial fill rotates in; white = haze gradient; tertiary = underline) */
+.btn {
+  --button-color: var(--accent);
+  --button-color-rgb: var(--accent-rgb);
+  appearance: none;
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2px;
+  position: relative;
+  height: 38px;
+  padding: 0 16px;
+  border-radius: var(--radius-buttons);
+  overflow: hidden;
+  flex-shrink: 0;
+  white-space: nowrap;
+  transition: translate 0.5s;
+  color: var(--fg);
+}
+.btn > * {
+  position: relative;
+  z-index: 2;
+}
+.btn svg {
+  width: 16px;
+  height: 16px;
+  transition: 0.3s;
+}
+.btn span {
+  color: var(--fg);
+  white-space: nowrap;
+  transition: all 1s var(--ease);
+}
+
+.btn--primary {
+  border: 1px solid var(--button-color);
+}
+.btn--primary::after {
+  content: "";
+  position: absolute;
+  left: -10px;
+  top: -10px;
+  width: calc(100% + 20px);
+  height: calc(100% + 20px);
+  z-index: 1;
+  background-color: var(--button-color);
+  transition:
+    all 1s var(--ease),
+    background-color 0.2s;
+  will-change: transform;
+}
+.btn--primary::before {
+  content: "";
+  position: absolute;
+  left: -10%;
+  top: 50%;
+  translate: 0 -50%;
+  width: 120%;
+  aspect-ratio: 1 / 1;
+  background: radial-gradient(rgba(var(--white-rgb), 0.3) 0, rgba(var(--button-color-rgb), 1) 50%);
+  transform: skewX(45deg);
+  transition:
+    all 2s var(--ease),
+    background-color 0s;
+  z-index: 1;
+  will-change: transform;
+}
+.btn--primary span {
+  color: var(--bg);
+}
+.btn--primary:hover {
+  background-color: transparent;
+}
+.btn--primary:hover::after {
+  opacity: 0;
+}
+.btn--primary:hover::before {
+  rotate: 180deg;
+  scale: 3;
+  opacity: 0;
+}
+.btn--primary:hover span {
+  scale: 1.05;
+  color: var(--fg);
+}
+.btn--primary:hover svg {
+  filter: invert(1);
+}
+
+.btn--secondary {
+  border: 1px solid var(--fg);
+  transition:
+    all 1s var(--ease),
+    background-color 0.2s;
+}
+/* Hover fill: a skewed disc that rotates/scales in over 2s (the sweep) while its opacity — and the
+   label colour below — settle in 0.5s so the two always track each other. The disc is opaque out
+   to 60% of its radius, which covers every corner of the button at scale 1 (min 250px on a 38px
+   bar, even after the skew), so the settled state is a solid --fg fill with a --bg label
+   (reference state-hover-secondary); the soft 60→100% edge is what reads during the sweep. */
+.btn--secondary::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  width: 150%;
+  min-width: 250px;
+  aspect-ratio: 1 / 1;
+  background: radial-gradient(
+    rgba(var(--fg-rgb), 1) 0,
+    rgba(var(--fg-rgb), 1) 60%,
+    rgba(var(--fg-rgb), 0) 100%
+  );
+  transform: skewX(45deg);
+  transition:
+    all 2s var(--ease),
+    opacity 0.5s var(--ease);
+  scale: 3;
+  opacity: 0;
+  z-index: 1;
+}
+.btn--secondary span {
+  transition:
+    all 1s var(--ease),
+    color 0.5s var(--ease);
+}
+.btn--secondary:hover {
+  background-color: transparent;
+}
+.btn--secondary:hover::after {
+  rotate: 180deg;
+  scale: 1;
+  opacity: 1;
+}
+.btn--secondary:hover span {
+  scale: 1.05;
+  color: var(--bg);
+}
+.btn--secondary:hover svg {
+  filter: invert(1);
+}
+
+.btn--white {
+  border: 1px solid #fff;
+  background: radial-gradient(53.52% 100% at 53.81% 0, #ffffff 0, #f5f5f5 100%);
+  transition: all 1s var(--ease);
+}
+.btn--white span {
+  color: var(--black);
+}
+.btn--white:hover {
+  opacity: 0.85;
+}
+.btn--white:hover span {
+  scale: 1.05;
+}
+
+.btn--tertiary {
+  padding: 0;
+  height: auto;
+  overflow: visible;
+}
+.btn--tertiary span {
+  transition:
+    all 0.5s,
+    color 0.3s;
+}
+.btn--tertiary span::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: calc(100% + 8px);
+  width: 100%;
+  height: 1px;
+  background-color: var(--fg);
+  transition: all 0.3s;
+  scale: 0 1;
+  transform-origin: left;
+}
+.btn--tertiary:hover span,
+.btn--tertiary:hover svg {
+  opacity: 0.5;
+}
+.btn--tertiary:hover span::after {
+  scale: 1 1;
+}
+.btn--tertiary.is-active span::after {
+  scale: 1 1;
+}
+
+.btn--icon {
+  padding: 0;
+  width: 38px;
+  height: 38px;
+  transition: opacity 0.3s;
+}
+.btn--icon:hover {
+  opacity: 0.5;
+}
+.btn--icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  filter: grayscale(1);
+  background-color: var(--haze);
+  border-color: var(--fg);
+}
+.btn:disabled::after,
+.btn:disabled::before {
+  display: none;
+}
+.btn:disabled span,
+.btn:disabled:hover span {
+  color: var(--fg);
+  scale: 1;
+}
+
+/* ---------- Pill (reference: rounded-full, 40px, padding 0 20, white/10 bg) */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 20px;
+  border-radius: 9999px;
+  background: rgba(var(--fg-rgb), 0.14);
+  color: var(--fg);
+  font-size: 16px;
+  line-height: 1;
+  white-space: nowrap;
+}
+.pill--sm {
+  height: 32px;
+  padding: 0 12px;
+  font-size: 14px;
+}
+.pill--outline {
+  background: transparent;
+  border: 1px solid rgba(var(--fg-rgb), 0.3);
+}
+
+/* ---------- Animated border (reference AnimatedBorder: 1px stroke with a bright segment
+   travelling around the card, radius 12)
+   Performance (JOURNEY-SPEC budget): the stroke element only holds the 1px ring mask and clips;
+   the conic gradient lives on a ::before square that ROTATES as a transform. Animating the
+   gradient angle itself (the v1 `@property --ab-angle` approach) re-rasterised every card
+   border in view each frame (2.6 Mpx per card at DPR 2, ~6 ms/frame with six cards) — a
+   transform on a `will-change: transform` layer is composited and costs nothing per frame. */
+.ab {
+  position: relative;
+  border-radius: var(--ab-radius, 12px);
+}
+.ab__stroke {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  overflow: hidden;
+  /* size container so ::before can be sized to the card's diagonal (see below) */
+  container-type: size;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  z-index: 5;
+}
+.ab__stroke::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  /* A rotating square must be at least the card's diagonal to keep every corner covered. 200%
+     is the safe fallback; where hypot() is supported the square is exactly diagonal-sized, which
+     keeps the composited texture small on integrated GPUs at DPR 2. */
+  width: 200%;
+  width: calc(hypot(100cqw, 100cqh) + 2px);
+  aspect-ratio: 1 / 1;
+  translate: -50% -50%;
+  background: conic-gradient(
+    from 0deg,
+    rgba(var(--fg-rgb), 0.18) 0%,
+    rgba(var(--fg-rgb), 0.18) 58%,
+    rgba(var(--fg-rgb), 0.75) 70%,
+    rgba(var(--fg-rgb), 0.18) 82%,
+    rgba(var(--fg-rgb), 0.18) 100%
+  );
+  will-change: transform;
+  animation: ab-rotate var(--ab-duration, 7s) linear infinite var(--ab-direction, normal);
+}
+@keyframes ab-rotate {
+  to {
+    rotate: 1turn;
+  }
+}
+
+/* ---------- Auto carousel (reference AutoCarousel: linear infinite translateX loop,
+   80px gap, edge mask transparent→black 20%→black 80%→transparent) */
+.carousel {
+  width: 100%;
+  overflow: hidden;
+  color: var(--fg);
+}
+.carousel--mask {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 20%, #000 80%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 20%, #000 80%, transparent);
+}
+.carousel--tint-white {
+  filter: saturate(0) brightness(100%);
+}
+.carousel--tint-black {
+  filter: brightness(0);
+}
+.carousel__track {
+  display: flex;
+  width: max-content;
+  animation: carousel-loop var(--speed, 40s) linear infinite var(--dir, normal);
+  will-change: transform;
+}
+.carousel__set {
+  display: flex;
+  gap: var(--h-gap, 80px);
+  padding-right: var(--h-gap, 80px);
+  flex-shrink: 0;
+}
+.carousel__item {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--item-h, 80px);
+}
+@keyframes carousel-loop {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* ---------- Form controls (reference: haze bg, 1px rgba(0,0,0,.1), radius 4, 48px, padding 10) */
+.input-air {
+  font: inherit;
+  margin: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 48px;
+  padding: 10px;
+  box-sizing: border-box;
+  background-color: var(--haze);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-inputs);
+  color: var(--black);
+  outline: none;
+  transition: border-color 0.3s var(--ease);
+}
+/* Placeholders are the only visible field labels (reference form), so they must clear the
+   4.5:1 body-text floor: ink at .62 over the haze fill ≈ #6e6e6e on #f5f5f5 = 4.7:1. */
+.input-air::placeholder {
+  color: rgba(var(--black-rgb), 0.62);
+}
+.input-air:focus {
+  border-color: rgba(0, 0, 0, 0.35);
+}
+select.input-air {
+  background-image: url("data:image/svg+xml;utf8,<svg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'><path d='M13 6L8 11L3 6' stroke='black' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+select.input-air:invalid,
+select.input-air[data-empty="true"] {
+  color: rgba(var(--black-rgb), 0.62);
+}
+/* Dark ghost input (reference waitlist: transparent, white/30 border) */
+.input-air--ghost {
+  background: rgba(var(--fg-rgb), 0.08);
+  border: 1px solid rgba(var(--fg-rgb), 0.3);
+  color: var(--fg);
+}
+.input-air--ghost::placeholder {
+  color: rgba(var(--fg-rgb), 0.75);
+  text-shadow: var(--text-glow-soft);
+}
+.input-air--ghost:focus {
+  border-color: rgba(var(--fg-rgb), 0.7);
+}
+
+/* ---------- Helpers */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ---------- Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    transition: none;
+    opacity: 1;
+    translate: 0 0;
+  }
+  .ab__stroke::before,
+  .carousel__track {
+    animation: none !important;
+  }
+  .btn,
+  .btn span,
+  .btn::before,
+  .btn::after {
+    transition: none !important;
+  }
+}

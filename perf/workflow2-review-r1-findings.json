@@ -1,0 +1,890 @@
+[
+ {
+  "file": "src/sections/sky/GlassWordmark.tsx",
+  "line": 17,
+  "severity": "high",
+  "summary": "v2.1 checklist item 2 unmet: the 3D typeface source is still Mr Dafoe with Sacramento as fallback (`FONTS = ['/fonts/MrDafoe-Regular.ttf', '/fonts/Sacramento-Regular.ttf']`), and the docblock at lines 12-16 describes Mr Dafoe stroke widths, while Courgette-Regular.ttf / DancingScript-Variable.ttf sit unused in public/fonts (0 references).",
+  "fix": "Change to `const FONTS = ['/fonts/Courgette-Regular.ttf', '/fonts/DancingScript-Variable.ttf'] as const`, rewrite the docblock (lines 12-16) for Courgette, and re-derive `GLASS_BEVEL` in GlassText.tsx from Courgette's stroke half-width (its comment at lines 44-51 also cites Mr Dafoe measurements).",
+  "lens": ""
+ },
+ {
+  "file": "src/styles/global.css",
+  "line": 34,
+  "severity": "high",
+  "summary": "v2.1 checklist item 2 unmet: the DOM wordmark `@font-face` is \"Mr Dafoe\" (lines 34-40) and `--font-script: \"Mr Dafoe\", \"Sacramento\", cursive` (line 60) — Sacramento is not even declared with an @font-face so the fallback silently resolves to generic cursive; the comment at line 295 (\"Mr Dafoe is a thin brush script…\") will lie once switched.",
+  "fix": "Replace the @font-face with `font-family: \"Courgette\"; src: url(\"/fonts/Courgette-Regular.ttf\")` plus a second `@font-face \"Dancing Script\"` for `/fonts/DancingScript-Variable.ttf` (font-weight 400 700), set `--font-script: \"Courgette\", \"Dancing Script\", cursive`, and update the `.wordmark` comment at line 295 (the 1px glow may no longer be needed for a medium-weight face).",
+  "lens": ""
+ },
+ {
+  "file": "index.html",
+  "line": 18,
+  "severity": "high",
+  "summary": "v2.1 checklist item 2 unmet: the page preloads MrDafoe-Regular.ttf and Sacramento-Regular.ttf (lines 18-19) and the comment at line 13-14 claims Sacramento is \"the 3D wordmark typeface source\" (it is only the parse fallback) — two ~100 KB script fonts on the critical path that the design no longer uses.",
+  "fix": "Preload `/fonts/Courgette-Regular.ttf` only (DancingScript is a rarely-hit fallback and need not be preloaded), delete the two stale preloads, and rewrite the comment to: UI (Inter), display (Anton), cursive accent (Caveat), wordmark DOM + 3D (Courgette).",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/sky/GlassWordmark.tsx",
+  "line": 29,
+  "severity": "high",
+  "summary": "v2.1 checklist item 3 unmet: the hero run spans 0.86 × the visible width (`fit: 0.86`, `fitMobile: 0.92`) and the footer 0.55 / 0.8 (lines 43-44), versus the mandated ≈0.70 (≤0.78 mobile) and ≈0.42 (0.7 mobile); the oversized hero run is what lets the letters reach the header buttons.",
+  "fix": "Set `HERO.fit = 0.70`, `HERO.fitMobile = 0.78`, `FOOTER.fit = 0.42`, `FOOTER.fitMobile = 0.7` and re-check `FOOTER.yEnd` (1.15) against the smaller run so it still hovers above the ridge (terrain.ts header maths assumes y ≈ 1.15 at z 0.5).",
+  "lens": ""
+ },
+ {
+  "file": "src/components/three/GlassText.tsx",
+  "line": 42,
+  "severity": "high",
+  "summary": "v2.1 checklist item 3 unmet: extrusion depth is `GLASS_HEIGHT = 0.16` × size while the checklist mandates ≈ 0.14 × size (and the prop docs at lines 35 and 180 repeat the 0.16 figure).",
+  "fix": "Set `export const GLASS_HEIGHT = 0.14` and update the two \"default 0.16 × size\" doc strings (lines 35, 180) to 0.14.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/sky/GlassWordmark.tsx",
+  "line": 130,
+  "severity": "high",
+  "summary": "v2.1 checklist item 4 unmet: there is no scroll-driven 360° turn — in the hero `rotation.y` is only the lerped pointer yaw (lines 130-133) and in the footer only the slow sine float (line 146); `(1 − journey.wordmarkHero) × 2π` / `(1 − journey.wordmarkFooter) × 2π` are never applied.",
+  "fix": "Keep the pointer/float yaw in a ref (`yaw.current += (targetY - yaw.current) * HERO.rotLerp`) and compose: hero `g.rotation.y = (reduced ? 0 : (1 - wh) * TAU) + yaw.current`; footer `g.rotation.y = (reduced ? 0 : (1 - wf) * TAU) + (reduced ? 0 : Math.sin(t * TAU / FOOTER.yawPeriod) * FOOTER.yawAmp)`; keep `rotation.x` as the ±0.03 pitch. Also update the component docblock (lines 59-65) to mention the full turn.",
+  "lens": ""
+ },
+ {
+  "file": "src/lib/SmoothScroll.tsx",
+  "line": 114,
+  "severity": "high",
+  "summary": "v2.1 checklist item 5 unmet: Lenis is constructed with `lerp: 0.1` and no `wheelMultiplier` / `touchMultiplier` (lines 114-118), so a single wheel tick still moves the full default distance and sections fly past; the docblock at line 101 also still says \"lerp ≈ 0.1\".",
+  "fix": "`new Lenis({ lerp: 0.09, wheelMultiplier: 0.65, touchMultiplier: 1.3, autoRaf: false, respectReducedMotion: true })` and update the docblock (line 101) to name the three values and why (lower scroll sensitivity).",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/Header.tsx",
+  "line": 316,
+  "severity": "medium",
+  "summary": "v2.1 checklist item 2 says the header wordmark is ≈ 28 px, but both `<Wordmark size={30} />` calls (lines 316, 356) override the component's own 28 px default (Wordmark.tsx:14), and Header.css:415 still reasons about a \"~109px\" mark sized for the old thin face.",
+  "fix": "Drop the `size={30}` props (or pass 28) so the 28 px default is the single source, and re-measure the Header.css tablet/mobile logo-width comments (lines 415, 451) for Courgette.",
+  "lens": ""
+ },
+ {
+  "file": "public/fonts/Pacifico-Regular.ttf",
+  "line": 1,
+  "severity": "medium",
+  "summary": "Dead asset the brief says must be gone: Pacifico-Regular.ttf has zero references in src/ or index.html (and MrDafoe-Regular.ttf / Sacramento-Regular.ttf will join it once the Courgette switch lands), yet all ship in the public bundle.",
+  "fix": "Delete public/fonts/Pacifico-Regular.ttf now, and delete MrDafoe-Regular.ttf + Sacramento-Regular.ttf in the same change that switches the wordmark to Courgette; leave only Inter, Anton, Caveat, Courgette, DancingScript.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/ProductDemo.tsx",
+  "line": 47,
+  "severity": "medium",
+  "summary": "Duplicated helpers (flagged last round, still present): `useReducedMotion` (lines 47-57) and `useDocumentVisible` (lines 59-67) re-implement the hooks exported from src/lib/media.ts, and this copy never re-syncs the initial value on mount.",
+  "fix": "Delete both local hooks and `import { useReducedMotion, useDocumentVisible } from '../lib/media'`.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/ModelsCTA.tsx",
+  "line": 12,
+  "severity": "medium",
+  "summary": "Duplicated helper (flagged last round, still present): a local `useReducedMotion` whose initial state is `false` (line 13), so under prefers-reduced-motion the orbs render one animated frame before the effect flips it; lib/media.ts already provides the correct hook.",
+  "fix": "Delete lines 11-22 and `import { useReducedMotion } from '../lib/media'`.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/SkyScene.tsx",
+  "line": 57,
+  "severity": "medium",
+  "summary": "`usePreference` (lines 57-74) is a third re-implementation of `useReducedMotion` + `useDocumentVisible` from src/lib/media.ts, with an unguarded `window.matchMedia` in the useState initialiser (line 58) that media.ts already SSR-guards.",
+  "fix": "Replace with `const reduced = useReducedMotion(); const hidden = !useDocumentVisible();` and a small `useEffect(() => attachPointer(), [])` for the pointer listener; delete `usePreference`.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/Storytelling.tsx",
+  "line": 13,
+  "severity": "medium",
+  "summary": "Three more private copies of shared utilities: `REDUCE_MQ` + `prefersReducedMotion` + the change listener (lines 13-23, 39-44) duplicate `useReducedMotion` from lib/media.ts, and the local `smoothstep` (lines 16-19) duplicates the exported `smoothstep` in src/sections/sky/journey.ts (terrain.ts:62 `smooth` is a fourth copy).",
+  "fix": "`const reduced = useReducedMotion()` from '../lib/media'; move `smoothstep` into src/lib/ease.ts next to `clamp`/`lerp`/`progress` and import it in Storytelling.tsx, journey.ts and terrain.ts.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/Features.tsx",
+  "line": 127,
+  "severity": "medium",
+  "summary": "`seen` is seeded with a raw `window.matchMedia('(prefers-reduced-motion: reduce)').matches` (lines 127-129) instead of the shared `useReducedMotion`, so a live change of the OS setting is ignored here while every other section follows it.",
+  "fix": "`const reduced = useReducedMotion()` from '../lib/media' and `const [seen, setSeen] = useState(reduced)`; add `if (reduced) setSeen(true)` to the effect.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/DemoForm.tsx",
+  "line": 44,
+  "severity": "medium",
+  "summary": "User-visible copy lives outside content.ts (flagged last round, still present): `MSG.required/choose/email/sendAnother` (lines 44-50) are hardcoded, and `MSG.submitFailed` duplicates `form.submitFailed` that content.ts:398 already defines (Waitlist.tsx correctly reads the content.ts one).",
+  "fix": "Add to `form` in content.ts: `errors: { required: 'This field is required', choose: 'Please choose an option', email: 'Enter a valid email address' }` and `sendAnother: 'Send another'`; delete `MSG` and read `form.errors.*`, `form.submitFailed`, `form.sendAnother`.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/ProductDemo.tsx",
+  "line": 33,
+  "severity": "medium",
+  "summary": "Rendered strings hardcoded outside content.ts (flagged last round, still present): `CHROME` ('Search or ask…', 'Upload', 'Create'), `SECTION_HEADING` ('Product demo') and the tablist `aria-label=\"Product demo screens\"` (line 457) cannot be edited or localised from content.ts.",
+  "fix": "Move them into content.ts as `productDemo.heading`, `productDemo.tablistLabel` and `productDemo.app.chrome = { search, upload, create }`, and read those in the component.",
+  "lens": ""
+ },
+ {
+  "file": "src/content.ts",
+  "line": 210,
+  "severity": "medium",
+  "summary": "Customisation friction the LogoMark docblock itself warns about (LogoMark.tsx:37-38): `logos.items` (line 210) and `integrations.items` (line 350) are cast `as { name; style }[]`, which strips any `src` field a user adds, so the documented \"swap in real logos\" path requires editing a type cast in content.ts.",
+  "fix": "Move `LogoStyle`/`LogoItem` into content.ts (`export interface LogoItem { name: string; style?: LogoStyle; src?: string }`), type both arrays `LogoItem[]` (drop the casts), have LogoMark.tsx `import type { LogoItem, LogoStyle } from '../../content'`, and shorten the LogoMark docblock step 2 accordingly.",
+  "lens": ""
+ },
+ {
+  "file": "src/App.tsx",
+  "line": 30,
+  "severity": "medium",
+  "summary": "`SPACE_FALLBACK.background` hardcodes '#03040c' / '#070c24', a second copy of `PALETTE.space` (journey.ts:77) that SkyScene.tsx:15 already derives as `FALLBACK_GRADIENT`; retuning the space palette silently desyncs the first-paint placeholder from the canvas, and `className=\"sky-fallback\"` (line 42) matches no CSS rule.",
+  "fix": "Export `FALLBACK_GRADIENT` from src/sections/sky/journey.ts (it imports only lib/scroll, no three, so App can use it without pulling the WebGL chunk), use it in both App.tsx and SkyScene.tsx, and delete the dead `sky-fallback` class.",
+  "lens": ""
+ },
+ {
+  "file": "src/lib/ticker.ts",
+  "line": 82,
+  "severity": "medium",
+  "summary": "Dead exports: `tickerRunning` (line 82) and `useTick` (line 90) have no importers; likewise `EASE` and `EASE_CSS` in src/lib/ease.ts (lines 2-3), and of `DUR` (ease.ts:6-16) only `.typewriter` is read — the other eight durations duplicate literals in global.css/Header.css and content.ts (`tabAutoAdvance: 9000` vs `productDemo.autoAdvanceMs`), so they drift.",
+  "fix": "Delete `tickerRunning`, `useTick`, `EASE`, `EASE_CSS`; reduce `DUR` to the values actually read (`typewriter`) or wire the CSS to it via `--dur-*` custom properties — do not keep two sources of truth.",
+  "lens": ""
+ },
+ {
+  "file": "README.md",
+  "line": 15,
+  "severity": "medium",
+  "summary": "README is stale: line 15 says motion runs on \"rAF loops (`lib/scroll.ts`)\" (it is src/lib/ticker.ts), line 34 lists only three lib modules (ticker, ttf, media, submit are missing), line 36 names Pacifico as the 3D wordmark font, and nothing mentions src/sections/sky, src/components/three, docs/JOURNEY-SPEC.md, the quality tiers or the `?q=high|medium|low` override (quality.ts:70).",
+  "fix": "Rewrite lines 15/34/36: ticker.ts for the shared rAF, list lib/{SmoothScroll,scroll,ticker,ease,media,ttf,submit}, add `src/sections/sky` (journey/quality/layers) and `src/components/three/GlassText`, replace Pacifico with Courgette (+ Dancing Script fallback), link docs/JOURNEY-SPEC.md, and document `?q=` and `lib/submit.ts` as the backend seam.",
+  "lens": ""
+ },
+ {
+  "file": "docs/DESIGN-SPEC.md",
+  "line": 9,
+  "severity": "medium",
+  "summary": "DESIGN-SPEC §1 (line 9-17) still describes a page that starts directly in the day sky, §2 line 40 names Pacifico for the wordmark, and §4.13 line 122 says the footer field is drawn on its \"own canvas, mounted only when near\" — all superseded by the one-canvas space→night journey that ships.",
+  "fix": "Update §1 to point at docs/JOURNEY-SPEC.md for the backdrop (space start, single canvas), change the wordmark row to Courgette / Dancing Script, and rewrite §4.13 as \"150vh DOM spacer over the night phase of the single SkyScene canvas\".",
+  "lens": ""
+ },
+ {
+  "file": "docs/JOURNEY-SPEC.md",
+  "line": 14,
+  "severity": "medium",
+  "summary": "The \"STATUS: proposal, not implemented\" banner (lines 14-28) is now false — it claims two canvases, a `src/sections/footer/GrassScene.tsx`, no space/descent phases and an unwired journey.ts, while the build has one canvas, Footer is the spacer and journey.ts drives every layer; line 76 also still says the geometry comes from Pacifico.",
+  "fix": "Delete the banner (or replace it with \"STATUS: implemented — SkyScene.tsx + sky/journey.ts\"), and change line 76 to \"Text3D from the runtime-parsed Courgette TTF (src/lib/ttf.ts)\".",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/sky/Stars.tsx",
+  "line": 24,
+  "severity": "low",
+  "summary": "The mulberry32 PRNG is copy-pasted three times: Stars.tsx `rng` (lines 24-33), CloudSprites.tsx `prng` (lines 126-134) and field/terrain.ts `createRng` (lines 90-99) — identical bodies under three names.",
+  "fix": "Keep one `createRng(seed)` in a shared module (e.g. src/lib/rng.ts or sky/rng.ts), import it in Stars.tsx, CloudSprites.tsx and terrain.ts, and delete the two copies.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/sky/journey.ts",
+  "line": 93,
+  "severity": "low",
+  "summary": "Small helpers are re-declared per file instead of shared: `hexToRgb` (journey.ts:93, SkyDome.tsx:13 `srgb`, terrain.ts:118 inline), `lerp` (journey.ts:109, SceneLights.tsx:16, CloudSprites.tsx:136 vs lib/ease.ts `lerp`), and the clip-space screen triangle geometry (SkyDome.tsx:25-30, cloudBake.ts:52-57).",
+  "fix": "Export `hexToRgb` from journey.ts and reuse it in SkyDome/terrain; import `lerp` from '../../lib/ease' in the three scene files; export `screenTriangle()` from cloudBake.ts (or a sky/geometry.ts) and use it in SkyDome.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/sky/cloudBake.ts",
+  "line": 112,
+  "severity": "low",
+  "summary": "Comment lies: `@param texSize cell width in px (QUALITY[tier].cloudTexSize)` — the QualitySettings field is `cloudTexture` (quality.ts:14), so a reader grepping for `cloudTexSize` finds nothing.",
+  "fix": "Change the JSDoc to `QUALITY[tier].cloudTexture`.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/Waitlist.css",
+  "line": 4,
+  "severity": "low",
+  "summary": "Header comment says the media card's surface colour is `#cfd4db` \"named in the brief\", but `.wl-card` at line 79 uses `#8893a4` (and the block comment at line 67 documents that value) — the file contradicts itself.",
+  "fix": "Fix line 4 to `#8893a4` (or drop the colour from the header comment) and consider exposing it as `--wl-card-bg` on `.wl-card` so it is retunable in one place.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/ModelsCTA.css",
+  "line": 91,
+  "severity": "low",
+  "summary": "Raw hexes outside tokens (flagged last round, still present): orb colours `#4c96f7` / `#d8d36a` / `#e5aad8` (lines 91, 97, 104) are buried in per-orb rules, ProductDemo.css:137 uses `#fafafa`, and `rgba(27, 27, 27, …)` (ProductDemo.css:36,148,311,319; global.css:777,790) and `.btn--white` `#fff/#ffffff/#f5f5f5` (global.css:573-574) bypass `--black-rgb` / `--white` / `--haze`.",
+  "fix": "Declare `--orb-blue/--orb-lime/--orb-pink` on `.ctacard` and reference them in the three rules; use `var(--haze)`/`var(--white)` in `.btn--white`; replace `rgba(27,27,27,a)` with `rgba(var(--black-rgb), a)` and `#fafafa` with `rgba(var(--black-rgb), 0.02)` on the light surface; hoist `--color-error` (DemoForm.css:8-9) into `:root` as its own comment already suggests.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/Footer.css",
+  "line": 64,
+  "severity": "low",
+  "summary": "The `.on-sky` contrast-glow recipe from global.css:303-307 is copy-pasted literally on `.footer__link` (lines 64-66) and `.footer__copy` (lines 97-99) instead of using the utility, so a retune of the glow must be made in three places.",
+  "fix": "Remove both `text-shadow` blocks and add `className=\"on-sky\"` to `.footer__row` in Footer.tsx (the utility already cascades and is cancelled on `.btn`).",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/Header.tsx",
+  "line": 333,
+  "severity": "low",
+  "summary": "Accessibility strings are hardcoded across sections: 'Open menu'/'Close menu' (Header.tsx:333, 358), 'Integrations and partners' (Integrations.tsx:50), 'How QairuHub works' (Storytelling.tsx:166), 'Product demo screens' (ProductDemo.tsx:457) and the sr-only bento labels `BENTO_LABELS` (AgenticCards.tsx:25) — none editable from content.ts.",
+  "fix": "Add an `a11y` block to content.ts (`openMenu`, `closeMenu`, `integrationsRow`, `storyRegion`, `demoTabs`) and `agentic.bentoLabels`, and read them in the components.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/Waitlist.tsx",
+  "line": 14,
+  "severity": "low",
+  "summary": "`EMAIL_RE` is duplicated verbatim in Waitlist.tsx:14 and DemoForm.tsx:31; the two forms can diverge on what counts as a valid email.",
+  "fix": "Export `isValidEmail(value: string)` from src/lib/submit.ts (the shared form seam) and use it in both sections.",
+  "lens": ""
+ },
+ {
+  "file": "src/content.ts",
+  "line": 38,
+  "severity": "low",
+  "summary": "`sectionIds.hero: '#Hero'` (Hero.tsx:9 `id=\"Hero\"`) is the only capitalised id and is referenced by nothing — the header/mobile wordmarks link to a literal `href=\"#\"` (Header.tsx:313, 356) instead of a content.ts value, and JOURNEY-SPEC's id list omits it.",
+  "fix": "Rename to `hero: '#hero'` / `id=\"hero\"` for consistency, or drop it and add `sectionIds.top: '#'` that Header.tsx reads for the wordmark links.",
+  "lens": ""
+ },
+ {
+  "file": "src/content.ts",
+  "line": 404,
+  "severity": "low",
+  "summary": "`footer.links` mixes entries with and without `external`, so the inferred type is a union and Footer.tsx:41 has to write `'external' in link && link.external === true` instead of `link.external`.",
+  "fix": "Declare `export interface FooterLink { label: string; href: string; external?: boolean }` and type the array `links: FooterLink[]`; then Footer.tsx can use `link.external === true` (or the shared `isExternal(href)` it already defines at line 23).",
+  "lens": ""
+ },
+ {
+  "file": "src/components/ui/Reveal.tsx",
+  "line": 62,
+  "severity": "low",
+  "summary": "`[key: string]: unknown` index signatures on `RevealProps` (line 62) and `RevealGroupProps` (line 108) accept any prop name, so a typo like `classname` or an invalid DOM attribute passes typecheck and lands on the element.",
+  "fix": "Replace the index signatures with `extends Omit<HTMLAttributes<HTMLElement>, 'className' | 'style'>` (as Section/Grid already do) so unknown props are rejected.",
+  "lens": ""
+ },
+ {
+  "file": "src/components/ui/icons.tsx",
+  "line": 1,
+  "severity": "low",
+  "summary": "Dead exports: `ChevronRight`, `Play` and `SocialYouTube` are exported but imported nowhere (noUnusedLocals does not catch exports).",
+  "fix": "Delete the three unused icon components, or add `youtube` to `brand.links`/`footer.socials` if a YouTube channel is intended.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/SkyScene.tsx",
+  "line": 113,
+  "severity": "low",
+  "summary": "Redundant `<Suspense fallback={null}>` around `<GlassWordmark>` (lines 113-116): GlassWordmark already wraps its suspending `<Letters>` in its own Suspense (GlassWordmark.tsx:84-86), so the outer one never catches anything.",
+  "fix": "Remove the outer Suspense in SkyScene.tsx (keep the Boundary), or remove the inner one in GlassWordmark.tsx — one is enough.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/Header.tsx",
+  "line": 199,
+  "severity": "low",
+  "summary": "Raw `window.matchMedia('(min-width: 769px)')` with a hand-rolled listener instead of the shared `useMediaQuery` from lib/media.ts, and the 768/769 breakpoint literal is repeated here, in GlassWordmark.tsx:24 `MOBILE_MAX` and throughout the CSS with no shared constant.",
+  "fix": "`const desktop = useMediaQuery('(min-width: 769px)')` + `useEffect(() => { if (desktop) closeMobile() }, [desktop, closeMobile])`; export a `BREAKPOINT_MOBILE = 768` from lib/media.ts and reuse it in GlassWordmark.tsx.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/AgenticCards.tsx",
+  "line": 27,
+  "severity": "low",
+  "summary": "Comment lies: \"Named card visuals (mirrors `features.items[].visual`)\" — the Features visual keys are 'schedule' | 'chart' | 'links' | 'timeline', not 'learn' | 'build' | 'launch', so the two systems are unrelated.",
+  "fix": "Change the comment to \"Named card visuals; content.ts may set `visual` explicitly, otherwise the title is matched\" and drop the reference to features.",
+  "lens": ""
+ },
+ {
+  "file": "src/lib/SmoothScroll.tsx",
+  "line": 15,
+  "severity": "low",
+  "summary": "`ANCHOR_OFFSET = -72` is a hand-copied mirror of `--header-height: 72px` (global.css:77); the comment admits it, and a header-height retune in CSS silently breaks anchor landing.",
+  "fix": "Read it once at mount: `const offset = -parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-height')) || -72`, or keep a single `HEADER_HEIGHT` constant in a tokens module that both global.css (via a Tailwind `@theme` value) and SmoothScroll import.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/Supersize.css",
+  "line": 20,
+  "severity": "high",
+  "summary": "The 18vw bleed box lets the last word run off the viewport and be cut mid-glyph: at 768 the line reads 'EVERY SEMEST' (tablet-04) and at 1440 'EVERY SEMESTE' (desktop-04), while the reference (reference/air/desktop-04, mobile-05) never clips a word — every line of 'AIR DOES THE TASKS. YOU DO THE WORK.' ends inside the viewport with a right margin.",
+  "fix": "Replace `width: calc(100% + 18vw);` with `width: 100%; padding-right: var(--row-margin); text-wrap: balance;` (keep `max-width: none`), and in the `@media (max-width: 768px)` block add `padding-right: 16px;` next to the existing `padding-left: 16px`. `text-wrap: balance` also removes the 'EVERY' orphan line that appears at 1024 (measured: every 16–428 alone, semester. on its own line). If 3 lines at 1440 are wanted, additionally set `.supersize__text { font-size: clamp(72px, 16.5vw, 240px); }`.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/Header.tsx",
+  "line": 399,
+  "severity": "medium",
+  "summary": "The 'Members' login link (`nav.login`) is hidden at ≤768 (`.hdr__login { display:none }`, Header.css line 439) and is not rendered anywhere inside the mobile panel, so it is unreachable on phones and 768px tablets (verified: the open panel's link list at 375 contains only nav items + Join + Partner).",
+  "fix": "Inside `.hdr__m-footer` (line 399) add the login as a full-width tertiary row above the two buttons, e.g. wrap the footer in a column: `<div className=\"hdr__m-footer\"><Button variant=\"tertiary\" href={nav.login.href} onClick={closeMobile} className=\"hdr__m-login\">{nav.login.label}</Button>…</div>` and in Header.css add `.hdr__m-footer { flex-wrap: wrap; } .hdr__m-login { flex: 0 0 100%; justify-content: flex-start; min-height: 38px; }`.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/Footer.css",
+  "line": 56,
+  "severity": "medium",
+  "summary": "Footer links are 24px tall touch targets (16px/1.5 line-height, 8px row gap) — below the 38px minimum; at 375 they wrap into three rows 8px apart (mobile-16), so adjacent rows are easy to mis-tap.",
+  "fix": "Add `min-height: 38px; padding: 0 4px; margin: 0 -4px;` to `.footer__link` and change `.footer__nav` gap to `gap: 0 24px` (mobile block line 113: `gap: 0 12px`) so the row rhythm stays visually the same while each link is a 38px hit area.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/ProductDemo.css",
+  "line": 584,
+  "severity": "low",
+  "summary": "The tab bar is 36px tall and each `.pd-tab` is only 30px (measured at 375 and 768), under the 38px touch-target floor on the one control mobile users actually tap.",
+  "fix": "Add `@media (pointer: coarse) { .pd-tabbar { height: 44px; } .pd-indicator { height: calc(100% - 4px); } }` so touch devices get a 40px tab while mouse users keep the reference 36px bar.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/Header.css",
+  "line": 418,
+  "severity": "low",
+  "summary": "Between 769px and 1240px the header wordmark is `display:none` (the absolutely-centred logo cannot clear the nav), so on every portrait tablet (iPad 820/834/1024) the header carries no brand at all once the hero wordmark has scrolled away (verified: `.hdr__logo` has 0×0 at 1024; tablet shots at 768 do show it because 768 takes the mobile layout).",
+  "fix": "Keep it hidden only where it cannot fit and put it in flow before the nav elsewhere: change the block to `@media (min-width: 769px) and (max-width: 899px) { .hdr__logo { display: none; } }` and add `@media (min-width: 900px) and (max-width: 1240px) { .hdr__logo { position: static; translate: none; order: -1; margin-right: 8px; } .hdr__inner { justify-content: flex-start; } }` (nav 461 + logo 108 + gaps 32 + actions 201 + margins 48 = 850px fits from 900px up).",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/Header.css",
+  "line": 434,
+  "severity": "low",
+  "summary": "From 769px to 1024px `.hdr__secondary` ('Partner with us') is hidden and there is no mobile panel at that range, so the secondary CTA is unreachable on landscape tablets / small laptops.",
+  "fix": "Either narrow the hide range to where it truly does not fit (`@media (min-width: 769px) and (max-width: 869px) { .hdr__secondary { display: none; } }` — nav 461 + 16 + Members 63 + 8 + Join 130 + 8 + Partner 134 + 48 = 868px) or, simpler, at ≤1024 keep it and drop the tertiary 'Members' label instead (`.hdr__login { display:none }`), since Members is also the less important action.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/Features.css",
+  "line": 351,
+  "severity": "low",
+  "summary": "At 375 the timeline milestone labels 'Traction' (207–250) and 'Demo Day' (256–310) sit 6px apart and read as one phrase 'Traction Demo Day' (mobile-08).",
+  "fix": "In the existing `@media (max-width: 420px)` block (line 132) add `.fm-tl__labels { height: 32px; } .fm-tl__label:nth-child(even) { top: 16px; }` so labels alternate between two rows on narrow phones.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/sky/journey.ts",
+  "line": 164,
+  "severity": "low",
+  "summary": "On tall/narrow viewports the footer wordmark starts descending while the white form card is still on screen: at 768 (tablet-13, y=13312) `wordmarkFooter` is ≈0.7 and the glass letters are visible poking out from under the card; the 150lvh footer spacer is shorter relative to the 1.4vh lead-in than on desktop.",
+  "fix": "Start the descent later and shorten it so it begins only once the form card has left: `journey.wordmarkFooter = smoothstep(end - 1.15, end - 0.3, y)` (matches the 1.2vh NIGHT window documented at line 15), or alternatively bump `.footer { height: 170lvh }` in Footer.css so the run stays fully inside the footer spacer.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/sky/GlassWordmark.tsx",
+  "line": 17,
+  "severity": "high",
+  "summary": "The 3D wordmark still parses Mr Dafoe / Sacramento (v2.1 checklist item 2 unmet): in every desktop/tablet/mobile shot the thin script q reads as a 'g' ('gairuhub') and the strokes are too thin to read as legible tube lettering.",
+  "fix": "Replace FONTS with ['/fonts/Courgette-Regular.ttf', '/fonts/DancingScript-Variable.ttf'] (both already exist in public/fonts) and re-measure the stroke half-width for GLASS_BEVEL (Courgette strokes are ≈ 0.14 × size, so bevel size/thickness ≈ 0.04).",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/sky/GlassWordmark.tsx",
+  "line": 29,
+  "severity": "high",
+  "summary": "Hero run spans 0.88 of the viewport width at 1440 (x 85→1355) and 0.92 on mobile (checklist item 3 asks ≈ 0.70 desktop / ≤ 0.78 mobile); it dwarfs the frame and its descender loop nearly touches the left edge.",
+  "fix": "Set HERO.fit = 0.70 and HERO.fitMobile = 0.78; set FOOTER.fit = 0.42 and FOOTER.fitMobile = 0.70 (footer run currently spans 0.56 at 1440: x 315→1120).",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/sky/GlassWordmark.tsx",
+  "line": 130,
+  "severity": "high",
+  "summary": "No 360° scroll rotation (checklist item 4 unmet): hero rotation.y is only the ±0.06 mouse lerp and the footer only a ±0.03 sine yaw, so the wordmark never turns as it leaves/arrives.",
+  "fix": "In the hero branch set g.rotation.y = (reduced ? 0 : (1 - wh) * TAU) + pointerY (keep the pointer lerp in a separate variable and add it), and in the footer branch g.rotation.y = (reduced ? 0 : (1 - wf) * TAU) + yawSine; add rotation.x pointer term on top.",
+  "lens": ""
+ },
+ {
+  "file": "src/components/three/GlassText.tsx",
+  "line": 240,
+  "severity": "high",
+  "summary": "The wordmark renders as opaque matte lavender-grey plastic (desktop-00, desktop-14/15, mobile-00/16): no refraction of the stars/limb, no rim highlights, no translucency — the user's 'glass looks like plastic' complaint is not fixed. transmission 0.7 + emissive 0.12 + envMapIntensity 1.8 + sheen 0.6 turns the body into a lit diffuse surface.",
+  "fix": "Use transmission: 1, roughness: 0.45, thickness: 0.35, attenuationDistance: 3, envMapIntensity: 1.2, sheen: 0.25, emissiveIntensity: 0.05, and keep the letters bright over space by adding a fourth Lightformer behind the camera (form 'ring', color '#dfe9ff', intensity 1.5, position [0, 0, 8]) in SceneLights so the transmitted backdrop is the lit environment rather than the near-black sky; verify at y=0 and in the footer that stars/limb show through and edges catch a rim.",
+  "lens": ""
+ },
+ {
+  "file": "src/styles/global.css",
+  "line": 60,
+  "severity": "high",
+  "summary": "DOM wordmark font is still Mr Dafoe (computed --font-script = \"Mr Dafoe\", \"Sacramento\"): checklist item 2 requires Courgette for the header/footer/mobile-menu wordmark.",
+  "fix": "Change the @font-face at line 34 to font-family \"Courgette\" with src url(\"/fonts/Courgette-Regular.ttf\") (plus a \"Dancing Script\" face for DancingScript-Variable.ttf), set --font-script: \"Courgette\", \"Dancing Script\", cursive, and drop the Mr Dafoe glow comment/rule at line 295.",
+  "lens": ""
+ },
+ {
+  "file": "index.html",
+  "line": 18,
+  "severity": "high",
+  "summary": "Font preloads still point at MrDafoe-Regular.ttf and Sacramento-Regular.ttf, so the Courgette faces the checklist mandates would load late (FOUT on the header wordmark) once the CSS/3D sources are switched.",
+  "fix": "Preload /fonts/Courgette-Regular.ttf (and DancingScript-Variable.ttf as the fallback) instead of Mr Dafoe / Sacramento, and update the comment on line 14.",
+  "lens": ""
+ },
+ {
+  "file": "src/lib/SmoothScroll.tsx",
+  "line": 139,
+  "severity": "high",
+  "summary": "Lenis is constructed with lerp 0.1 and default wheel/touch multipliers — checklist item 5 (wheelMultiplier 0.65, touchMultiplier 1.3, lerp 0.09) is unmet, so one wheel tick still flies past sections.",
+  "fix": "new Lenis({ lerp: 0.09, wheelMultiplier: 0.65, touchMultiplier: 1.3, autoRaf: false, respectReducedMotion: true }).",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/sky/shaders.ts",
+  "line": 141,
+  "severity": "high",
+  "summary": "Cloud sprites show straight clipped edges: the bake's border mask is a linear band (smoothstep(1.0, 0.74, |s.y|)), so any cloud whose mass reaches the cell top/bottom is sliced flat — visible as a ruler-straight bottom on the top-left cloud in desktop-02, a flat top on the top-right cloud in desktop-09/12 and the cloud at 0..300×690 in desktop-13. Nothing cheapens a sky faster than rectangular clouds.",
+  "fix": "Shape the density field instead of the alpha: multiply `d` (before the threshold) by an elliptical falloff `1.0 - smoothstep(0.45, 0.95, length(s * vec2(0.5, 1.0)))` so silhouettes fade to zero well inside the cell, and keep the border mask only as a safety with a wider ramp (smoothstep(1.0, 0.55, |s.y|)).",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/sky/journey.ts",
+  "line": 80,
+  "severity": "medium",
+  "summary": "Day sky is far brighter and more cyan than the reference: sampled at y=9000 ours reads #083783 top / #0147a1 mid / #1874d8 / #299ffc bottom vs the reference #05285d / #003879 / #005090 / #045387 — the reference stays a deep navy-blue the whole way down, ours turns cartoon cyan in the bottom third (and hurts the ≥4.5:1 white-text rule there).",
+  "fix": "Darken PALETTE.day to { top: '#082a64', mid: '#0a48a6', bottom: '#1875d0' } (bottom ≈ reference + the spec's #2ea3ff only as a 5 % lift in the last 8 % of the viewport) and raise MID_STOP in SkyDome.tsx from 0.55 to 0.62.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/sky/cloudBake.ts",
+  "line": 453,
+  "severity": "medium",
+  "summary": "Baked clouds read as blurry lilac-grey smears rather than the reference's cumulus (crisp cauliflower edges, bright white tops, cool grey undersides) — softness 0.42 blurs every silhouette and the day palette dims the lit side to #dae3f0, so clouds in desktop-02/06/07/09 look like smoke.",
+  "fix": "Set BAKE.softness 0.42 → 0.22, detail 0.75 → 1.1, shadow 0.36 → 0.5; in CloudSprites.tsx PAL.day use lit 0xf4f8fe / shade 0x8aa0c4 (keep the alpha ≤ .9 cap for readability instead of dimming the colour).",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/Header.tsx",
+  "line": 55,
+  "severity": "medium",
+  "summary": "The DOM header wordmark is visible at the same time as the 3D one: it fades in at 0.8vh while the 3D run is still on screen (desktop-01 shows both, the 3D blob peeking above 'Community'), and it stays visible over the footer 3D wordmark (desktop-14/15, mobile-16) — the reference hides the centre logo whenever the 3D lettering is on screen (desktop-14 reference has no 'Air' in the header).",
+  "fix": "Drive showLogo from the journey instead of a scroll threshold: subscribe on the shared ticker and set visible = journey.wordmarkHero < 0.05 && journey.wordmarkFooter < 0.05 (flip state only on change); keep the tabIndex/aria-hidden coupling.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/Header.css",
+  "line": 104,
+  "severity": "medium",
+  "summary": "The mega-menu panel opens at y=58 (measured), overlapping the 72px header bar and hugging the trigger label, because top: calc(100% + 16px) resolves against the 32px-tall .hdr__nav; the reference panel sits 16px below the header (y≈88).",
+  "fix": "Make .hdr__inner the containing block (position: relative on .hdr__inner, position: static on .hdr__nav) so top: calc(100% + 16px) yields 88px, and keep left: 0 aligned to the 24px grid padding.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/Storytelling.css",
+  "line": 63,
+  "severity": "medium",
+  "summary": "The triptych paragraph sits directly under the 200px headline (8px margin, 0.85 line-height) so its first line touches the letters' baseline (desktop-08/09/10/11, mobile-10); the reference keeps ~40px of air between headline and body.",
+  "fix": "Set .triptych__body margin-top: 40px (24px at ≤768) and give .triptych__title a padding-bottom of 0.06em so descender-free caps still clear the glow.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/ModelsCTA.css",
+  "line": 88,
+  "severity": "medium",
+  "summary": "The CTA card reads as a washed pastel pink/olive haze (desktop-07) whereas the reference card keeps a deep-blue base with three saturated orbs (blue, green, pink) — ours loses the 'one colourful moment' punch and the copy sits on muddy grey-pink.",
+  "fix": "Use more saturated orbs (.orb--blue #2b7fff, .orb--lime #b8e05a, .orb--pink #ff8fd8) at opacity .8, raise .ctacard__overlay to rgba(6, 18, 58, .32) and keep var(--card-fill) as the base so the blue ground shows between orbs.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/Waitlist.css",
+  "line": 79,
+  "severity": "medium",
+  "summary": "The accelerator media card is a flat #8893a4 slate with visible vertical grid lines (desktop-03, mobile-04) — the reference's stand-in surface is a light haze gradient (#cfd4db → #b8bec6) that reads as a glassy screen, not a grey slab.",
+  "fix": "background: radial-gradient(120% 90% at 50% 0%, #d6dbe2 0%, #b9bfc8 100%); drop the grid overlay opacity from .12 to .05; keep the caption glow.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/sky/CloudSprites.tsx",
+  "line": 84,
+  "severity": "low",
+  "summary": "At night the far layer (night: true, lit 0x6f7fa8) leaves a grey cloud blob floating in the valley between the hills (desktop-14 at 480..760×680..770, mobile-16 above the grass), which reads as a smudge rather than a distant cloud.",
+  "fix": "Lower the far layer's night palette to lit 0x3d4a70 / shade 0x22305a and clamp its sprites above the ridge at night (offY += 2.5 * night) so no sprite sits below the horizon line.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/sky/skyShaders.ts",
+  "line": 147,
+  "severity": "low",
+  "summary": "The space-phase planet limb is a thick neon-blue band filling the bottom ~14 % of the viewport (desktop-00, tablet-00); the spec calls for a razor-thin limb plus a soft haze, and the reference hero has no saturated band competing with the wordmark.",
+  "fix": "Tighten the haze (glowOut = exp(-max(d,0.0) * 16.0)), scale LIMB contribution to 0.55 and keep glowIn as the thin rim; a subtle nebula tint should dominate the lower third instead.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/Header.tsx",
+  "line": 316,
+  "severity": "low",
+  "summary": "Header/mobile-menu wordmark is 30px; the checklist specifies ≈ 28px (and the reference nav logo is ~24–28px tall).",
+  "fix": "Use <Wordmark size={28} /> in both places (lines 316 and 356).",
+  "lens": ""
+ },
+ {
+  "file": "src/components/three/GlassText.tsx",
+  "line": 215,
+  "severity": "low",
+  "summary": "Extrusion depth is 0.16 × size; the checklist asks ≈ 0.14 × size (the thicker slab is part of why the letters read as chunky plastic on the tilted hero view).",
+  "fix": "GLASS_HEIGHT = 0.14.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/Waitlist.css",
+  "line": 40,
+  "severity": "low",
+  "summary": "On mobile the 'Notify me' button is a small centred pill under a full-width input (mobile-04) whereas the reference stacks a full-width button under the input (reference mobile-04).",
+  "fix": "Inside the ≤640px media query add `.wl-form__row .btn { width: 100%; }`.",
+  "lens": ""
+ },
+ {
+  "file": "src/styles/global.css",
+  "line": 540,
+  "severity": "low",
+  "summary": "Secondary button hover (headless capture at 0.8s) shows a mottled grey radial smear with the white label still on top and barely legible; the reference secondary hover ends as a solid white fill with a black label.",
+  "fix": "Shorten the ::after transition to 1s var(--ease), make the gradient reach full opacity earlier (rgba(var(--fg-rgb),1) 35%), and transition the span colour over 0.3s so the label flips to var(--bg) as soon as the sweep covers it; verify on a real GPU.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/sky/field/Flora.tsx",
+  "line": 1,
+  "severity": "low",
+  "summary": "A mushroom is placed at the bottom-right of the field where it sits under the social icon buttons and the copyright line (desktop-15: 'All rights reserved' over a red cap), reducing legibility of the footer row.",
+  "fix": "Keep flora x within ±0.55 of the half-width and z behind the footer content band (or push the bottom-right instance left/up) so the link row and socials sit on plain grass.",
+  "lens": ""
+ },
+ {
+  "file": "docs/JOURNEY-SPEC.md",
+  "line": 17,
+  "severity": "low",
+  "summary": "The document still carries the 'STATUS: proposal, not implemented' banner describing the old two-canvas build, contradicting the live single-canvas journey (journey.ts wired, Footer as 150vh spacer).",
+  "fix": "Replace the banner with a short 'STATUS: implemented (v2.1)' note listing the live files (SkyScene.tsx, journey.ts, GlassWordmark.tsx, Field.tsx) and delete the GrassScene reference.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/sky/GlassWordmark.tsx",
+  "line": 17,
+  "severity": "high",
+  "summary": "v2.1 checklist #2 unmet: the 3D wordmark still parses Mr Dafoe/Sacramento (the thin script whose capital reads as 'gairuhub' in desktop-00/14), not Courgette.",
+  "fix": "const FONTS = ['/fonts/Courgette-Regular.ttf', '/fonts/DancingScript-Variable.ttf'] as const (both files already exist in public/fonts); keep preloadTTFFont(FONTS, hero.wordmark).",
+  "lens": ""
+ },
+ {
+  "file": "src/styles/global.css",
+  "line": 34,
+  "severity": "high",
+  "summary": "v2.1 checklist #2 unmet: the DOM wordmark @font-face is still Mr Dafoe and --font-script (line 60) is \"Mr Dafoe\", \"Sacramento\".",
+  "fix": "Replace the @font-face block with font-family \"Courgette\" src url(/fonts/Courgette-Regular.ttf) plus a second @font-face \"Dancing Script\" src url(/fonts/DancingScript-Variable.ttf) font-weight 400 700; set --font-script: \"Courgette\", \"Dancing Script\", cursive; update the .wordmark comment on line 295 (the 1px glow can stay).",
+  "lens": ""
+ },
+ {
+  "file": "index.html",
+  "line": 18,
+  "severity": "high",
+  "summary": "v2.1 checklist #2 unmet: lines 18-19 preload MrDafoe-Regular.ttf and Sacramento-Regular.ttf instead of Courgette.",
+  "fix": "Preload /fonts/Courgette-Regular.ttf (and optionally /fonts/DancingScript-Variable.ttf); remove the Mr Dafoe and Sacramento preloads.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/sky/GlassWordmark.tsx",
+  "line": 29,
+  "severity": "high",
+  "summary": "v2.1 checklist #3 unmet: HERO.fit 0.86 / fitMobile 0.92 and FOOTER.fit 0.55 / fitMobile 0.8 — desktop-00 shows the run spanning x 85→1355 (≈0.88 of the width) and desktop-14 ≈0.55, both above the spec 0.70/0.78 and 0.42/0.7.",
+  "fix": "HERO: fit 0.70, fitMobile 0.78; FOOTER: fit 0.42, fitMobile 0.7 (lines 29-30 and 43-44); verify the run never touches the header buttons at 375px.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/sky/GlassWordmark.tsx",
+  "line": 131,
+  "severity": "high",
+  "summary": "v2.1 checklist #4 unmet: rotation.y is only the ±0.06 mouse lerp in the hero (line 133) and a ±0.03 sine yaw in the footer (line 146); there is no scroll-driven 360° turn.",
+  "fix": "Hero: const scrollTurn = reduced ? 0 : (1 - wh) * TAU; g.rotation.y += ((targetY + scrollTurn) - g.rotation.y) * HERO.rotLerp (or set g.rotation.y = scrollTurn + mouseY directly). Footer: g.rotation.y = reduced ? 0 : (1 - wf) * TAU + Math.sin(t*TAU/FOOTER.yawPeriod) * FOOTER.yawAmp.",
+  "lens": ""
+ },
+ {
+  "file": "src/lib/SmoothScroll.tsx",
+  "line": 115,
+  "severity": "high",
+  "summary": "v2.1 checklist #5 unmet: Lenis is created with lerp 0.1 and default wheel/touch multipliers, so a small wheel tick still flies past sections.",
+  "fix": "new Lenis({ lerp: 0.09, wheelMultiplier: 0.65, touchMultiplier: 1.3, autoRaf: false, respectReducedMotion: true }).",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/ModelsCTA.css",
+  "line": 113,
+  "severity": "medium",
+  "summary": "CTA card copy and the ghost 'Read the charter' button sit on the lime/pink orbs (#d8d36a / #e5aad8 at opacity .95) with only an .18 black veil — the 2× clip shows white 14px label + 1px white border on lime at roughly 1.6:1 (desktop-07, mobile-09).",
+  "fix": "Raise the veil to rgba(6, 18, 58, 0.34) and lower .orb opacity to 0.75 (line 84); if the orbs must stay vivid, give .ctacard__action .btn a solid fill: background rgba(6,18,58,.28) so the label keeps ≥ 4.5:1.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/Waitlist.css",
+  "line": 165,
+  "severity": "medium",
+  "summary": "Inactive step pills (Idea / MVP / Demo Day / Astana Hub) are white 14px (12px on mobile) on rgba(255,255,255,.35) over the #8893a4 card ≈ 1.9:1 — the 2× clips (desktop/mobile waitlist-steps) show grey-on-grey labels.",
+  "fix": "Use a dark inactive fill instead of a lighter one: background-color: color-mix(in srgb, var(--white) calc(var(--on) * 100%), rgba(var(--black-rgb), 0.28)); keep the label colour rule (white when off, ink when on). Optionally darken the card to #6f7b8e so the caption stays ≥ 4.5:1 too.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/AgenticCards.css",
+  "line": 135,
+  "severity": "medium",
+  "summary": "Inactive .ac-card opacity .55 multiplies the .75 body colour to ≈ .41 white; on the stacked mobile/tablet layout the user reads the dim cards over clouds (mobile-02/03, tablet-03: the 'Launch' card body is nearly invisible).",
+  "fix": "@media (max-width: 1024px) { .ac-card { opacity: 1 } .ac-card:not(.is-active) { opacity: 0.85 } .ac-card__body p { color: rgba(var(--fg-rgb), 0.85) } } — the prompt pill is off-screen there, so the cross-fade carries no meaning.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/sky/CloudSprites.tsx",
+  "line": 366,
+  "severity": "medium",
+  "summary": "Lane sprites start at 0.5·hW so clouds pass behind the outer ~15 % of the 1150px content grid; white body copy in the .08-fill feature/agentic cards then sits on #dae3f0 cloud at ≈ 1.3:1 (desktop-06 right card 'documented so the next team…', desktop-07 'Open Playbooks', mobile-07/08, tablet-06). Total coverage is fine (pixel estimate 3–13 % per shot, ≤ 16 % in the column) — the problem is placement, not amount.",
+  "fix": "Keep the lane edge outside the content width: const clear = Math.min(0.82, (1150 + 48) / state.size.width); x = sign * (hW * (clear + (1 - clear) * r) + inner * (1 - 0.4 * r)); on portrait viewports (aspect < 1) the sprites are wider than the frame, so multiply dayAlpha by 0.65 there (line 393) or bias band positions away from card rows.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/sky/field/Flora.tsx",
+  "line": 25,
+  "severity": "medium",
+  "summary": "The mushroom at [2.5, 5.0] projects into the footer's bottom-right corner, behind the social buttons and the 12px copyright (desktop-15: red cap under 'All rights reserved' and the LinkedIn button).",
+  "fix": "Move it out of the content row band, e.g. [2.0, 3.6] (or any x ≤ 1.8 / z ≤ 3.8), and re-check desktop-15 so no flora lands inside the bottom 140px × right 320px region where .footer__content is pinned.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/ProductDemo.css",
+  "line": 606,
+  "severity": "low",
+  "summary": "Inactive tab labels are 12px white at opacity .7 on a .14 bar over the bright lower sky (desktop-05 tab bar sits on ≈#3b8ff0 → ≈2.4:1); the 2× clips read but look disabled.",
+  "fix": "opacity: 0.88 for .pd-tab (keep 1 on the selected tab) and strengthen the glow to 0 1px 10px rgba(6,18,58,.5); optionally .pd-tabbar background rgba(6,18,58,.16) behind the .14 white.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/DemoForm.css",
+  "line": 77,
+  "severity": "low",
+  "summary": "12px Signal Blue (#2b7fff) links on the white card are 3.6:1 (2× clip form-legal) — below 4.5:1 for small text.",
+  "fix": "color: color-mix(in srgb, var(--signal-blue) 82%, var(--black)) (≈#2469d1, 4.6:1) or bump .formcard__legal to 14px (u-body-2) while keeping the token.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/DemoForm.css",
+  "line": 74,
+  "severity": "low",
+  "summary": "Legal copy at rgba(ink,.6) on white is 4.48:1 (just under AA) and below the spec's .75 floor for secondary text.",
+  "fix": "color: rgba(var(--fg-rgb), 0.72) (≈#585858, 7:1).",
+  "lens": ""
+ },
+ {
+  "file": "src/styles/global.css",
+  "line": 777,
+  "severity": "low",
+  "summary": "Input placeholders are rgba(27,27,27,.5) on #f5f5f5 ≈ 3.9:1 and the required-field asterisk lives only in the placeholder (desktop-13, mobile-13).",
+  "fix": ".input-air::placeholder { color: rgba(27, 27, 27, 0.62) } and the same for select.input-air[data-empty=\"true\"] on line 791.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/Features.css",
+  "line": 284,
+  "severity": "low",
+  "summary": "Mock labels are 11px (timeline labels line 284, chips line 91, chart values line 186) — under the 12px floor — and the timeline labels 'Traction' / 'Demo Day' collide at 375px (mobile-08).",
+  "fix": "font-size: 12px on all three; at ≤ 480px hide the intermediate labels (.fm-tl__label:not([data-edge]):not(.is-current) { display: none }) so only start / current / end remain.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/AgenticCards.css",
+  "line": 64,
+  "severity": "low",
+  "summary": "The typewriter pill truncates its prompt with an ellipsis at 375px ('Find me a team for the October ...', mobile-01).",
+  "fix": "@media (max-width: 480px) { .ac-pill { max-width: calc(100vw - 32px); padding: 0 14px } .ac-pill__text { font-size: 14px } } and/or shorten the prompts in content.ts to ≤ 30 characters.",
+  "lens": ""
+ },
+ {
+  "file": "src/styles/global.css",
+  "line": 636,
+  "severity": "low",
+  "summary": "The disabled Submit button (opacity .5 + grayscale on the haze fill) shows a ≈2:1 grey label (desktop-13, mobile-14) and reads as broken rather than 'not yet valid'.",
+  "fix": ".btn:disabled { opacity: 0.7 } and keep the grayscale; label stays var(--fg).",
+  "lens": ""
+ },
+ {
+  "file": "vite.config.ts",
+  "line": 33,
+  "severity": "high",
+  "summary": "The lazy-loading of SkyScene is defeated in the production build: the entry chunk statically imports the r3f chunk (dist/assets/index-*.js line 1: `import{c as n,l as r,s as i}from\"./r3f-Bndd1n9T.js\"`, where `l` is React — the `r3f` codeSplitting group captured the shared `react` module), r3f statically imports the three chunk, and dist/index.html emits `<link rel=\"modulepreload\">` for three-*.js (738 kB / 187 kB gz) and r3f-*.js (236 kB / 76 kB gz), so ~975 kB of WebGL vendor JS sits on the critical path before React can render the first paint (spec: 'three.js loaded lazily after first paint').",
+  "fix": "Add a higher-priority group that owns React so it is not swallowed by the r3f group: `{ name: 'react', test: /node_modules[\\\\/](react|react-dom|scheduler)[\\\\/]/, priority: 3 }` before the `three` entry in `codeSplitting.groups`; rebuild and verify `head -c 300 dist/assets/index-*.js` contains no `from \"./r3f-` import and that dist/index.html no longer modulepreloads three-*.js / r3f-*.js (only the react chunk).",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/sky/GlassWordmark.tsx",
+  "line": 164,
+  "severity": "high",
+  "summary": "Measured on the user's Intel UHD at 1440×900 (DPR 2, tier medium, backing store 1781×1125): at0 45 fps / at95 45 / at100 41 (target ≥ 55) while every day-phase position runs 58–66; toggling `scene.visible=false` gives 63/63 fps at both ends, so the scene itself costs ~7 ms at the hero and ~9 ms at the footer (day phase ≈ 0 ms extra), and the only layers present at both ends are the glass wordmark (transmission FBO pass = a second full-scene render via drei MeshTransmissionMaterial.js:388 + a 4-sample rough-transmission fragment loop over the 69,556-triangle run), the stars and the dome's space/night branches; setting `material.transmission = 0` (skips only the FBO pass) recovered +3 / +8 / +12 fps in three runs, the largest single-toggle gain measured.",
+  "fix": "Cheapest first: (1) in quality.ts:29 set medium `glassSamples: 3` and `glassResolution: 256` (the FBO only feeds a roughness-0.42 blur — 256² is indistinguishable); (2) keep the Field, clouds and stars out of the transmission FBO pass with camera layers: give the Field group, cloud meshes and points `layers.set(1)`, in SkyScene's JourneyDriver call `state.camera.layers.disable(1)` (priority -100 already runs before drei's useFrame) and set `scene.onAfterRender = () => camera.layers.enable(1)` so the main pass that follows the FBO render sees them again (drei renders the FBO with the same `state.camera`); (3) pass `backsideResolution: 32` in the material props (drei's useFBO allocates a second 384² HalfFloat target for the unused backside pass). Re-measure with the brief's script; if still < 55 at the ends only, apply the DPR lever from the quality.ts finding.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/ModelsCTA.css",
+  "line": 83,
+  "severity": "high",
+  "summary": "The three CTA orbs are `filter: blur(70px)` elements with infinite `scale` + parent `rotate` animations; with the card in view (y≈6908, the position headless measured as the 12-fps outlier the integrator attributed to Features) the page measures 51 fps on the GPU versus 58 with the orb animations paused and 56 with `filter:none` — the compositor re-runs a 70 px (140 device-px at DPR 2) two-pass blur on three large layers every frame.",
+  "fix": "Drop the filter and paint each orb as a soft radial gradient instead: `.orb { background: radial-gradient(closest-side, var(--orb) 0%, var(--orb) 30%, transparent 100%); filter: none; }` with `--orb: #4c96f7` / `#d8d36a` / `#e5aad8` on `.orb--blue/--lime/--pink` (keep the size/animation rules) — same look, zero per-frame filter cost. If a blur is kept, cap it at `blur(24px)` and keep the existing `u-animation-paused` gating.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/sky/GlassWordmark.tsx",
+  "line": 78,
+  "severity": "medium",
+  "summary": "The mount/unmount hysteresis unmounts <Letters> after the hero and remounts it at the footer, which creates a new MeshTransmissionMaterial: three releases the program when the old material is disposed (usedTimes → 0), so the footer mount re-links the large transmission shader on the main thread in the middle of the dusk→night scroll (a forced recompile of that program measured 51 ms via `material.needsUpdate = true` + one render) and allocates two fresh 384² HalfFloat FBOs.",
+  "fix": "Keep <Letters> mounted for the life of the scene and drop the `mounted` state/`wanted()`/`MOUNT_ON/OFF` logic (lines 20-22, 57, 66-88): the visibility flags Letters already sets every frame (`mesh.visible` and `material.visible`, line 152-153) are exactly what three and drei key off, so an invisible run costs no draw and no FBO pass. If unmounting is kept for memory reasons, hoist the material instance to module scope (create once, reuse across mounts) so the program is never released.",
+  "lens": ""
+ },
+ {
+  "file": "src/components/three/GlassText.tsx",
+  "line": 43,
+  "severity": "medium",
+  "summary": "Building the wordmark geometry (TextGeometry, curveSegments 10, bevelSegments 5 → 69,556 triangles) is a synchronous 100 ms task on the main thread when the font resolves (measured by re-running `new ExtrudeGeometry(parameters.shapes, parameters.options)` in the live page), violating the spec's 'no long tasks > 50 ms after load'; it also doubles the vertex work of the transmission FBO pass, which draws the run's backdrop with the same camera.",
+  "fix": "Set `GLASS_CURVE_SEGMENTS = 6` and `GLASS_BEVEL.segments = 3` (a 0.024-unit quarter-round on strokes 0.08 wide cannot show more than 3 steps at hero scale) — roughly halves the triangle count and the earcut time; then verify with `performance.measure` around `getGlassGeometry` that the build is < 50 ms, or split the run per glyph across `requestIdleCallback` slots if it still is not.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/sky/quality.ts",
+  "line": 94,
+  "severity": "medium",
+  "summary": "At DPR 1.25 the medium tier still pays fill rate for a 1781×1125 backing store; forcing `state.setDpr(1)` in the live page gains +5 fps at both the hero and the footer (42→47, 40→45), i.e. ≈ 2.5 ms of the ~7–9 ms scene cost at the two ends, while the day phase is already free.",
+  "fix": "For the `medium` tier only, cap desktop DPR at 1.0 in `getDpr` (`const cap = window.innerWidth >= 1280 ? Math.min(tier === 'medium' ? 1 : 1.25, QUALITY[tier].dprCap) : …`) and, because `antialias: false` (SkyScene.tsx:98) will expose jaggies on the glass edges at 1×, either enable `antialias: true` when the resolved DPR is 1 or keep 1.25 only while `journey.day > 0.5` (space/night phases are soft gradients + blurred glass) by calling `state.setDpr` from JourneyDriver with hysteresis.",
+  "lens": ""
+ },
+ {
+  "file": "src/styles/global.css",
+  "line": 324,
+  "severity": "low",
+  "summary": "`.reveal { will-change: opacity, translate }` is permanent (never reset after `.is-visible`), so every revealed element stays a promoted compositor layer for the life of the page — 34 `.reveal` elements and 54 will-change layers in total at load (reveals 19 in the first screens, 6 `.supersize__word`, 3 `.carousel__track`, 3 `.triptych__item`, orbs) at DPR 2 on an integrated GPU.",
+  "fix": "Delete the `will-change` line from `.reveal` (Chrome promotes a running opacity/translate transition on its own) or reset it after the transition: add `.reveal.is-visible { will-change: auto }` applied from a `transitionend` handler in Reveal.tsx (so the promotion covers the 1000 ms transition and then drops). Same for `.supersize__word` (Supersize.css:37): set `will-change` only while the Supersize tick is registered (toggle a class in start()/stop()).",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/sky/cloudBake.ts",
+  "line": 214,
+  "severity": "low",
+  "summary": "The first bake cell is verified with a synchronous `readRenderTargetPixels`, a GPU→CPU pipeline stall executed during the very first frames of the canvas, exactly when the transmission shader link and the Environment PMREM bake already make those frames long.",
+  "fix": "Use `gl.readRenderTargetPixelsAsync(...)` (three r186, fence-based) and swap to the fallback atlas when the promise resolves empty, or defer the probe to the frame after the last cell is baked; the sprites stay invisible either way until the atlas is done.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/SkyScene.tsx",
+  "line": 95,
+  "severity": "low",
+  "summary": "Unattributed 1471 ms long task at ~1.9 s after navigation on the user's machine (PerformanceObserver 'longtask', buffered) followed by 277 / 245 ms tasks around 4.1–4.4 s while the three/drei modules evaluate; measured on the Vite dev server with the React development build, so the absolute numbers are inflated, but the spec's 'no long tasks > 50 ms after load' is unverified for production.",
+  "fix": "After the vite.config.ts chunk fix, run `pnpm build && pnpm preview` and record longtask entries on the real GPU; if the SkyScene mount still exceeds 50 ms, stagger the one-time work already identified (TextGeometry build, transmission shader link, Environment PMREM) across separate frames with `setTimeout(0)` / idle callbacks instead of the first r3f frame.",
+  "lens": ""
+ },
+ {
+  "file": "src/styles/global.css",
+  "line": 549,
+  "severity": "high",
+  "summary": "Secondary (ghost) button hover end-state is unreadable: `.btn--secondary::after` is `radial-gradient(rgba(fg,0) 0, rgba(fg,1) 50%)` on a 250px-min element that settles at `scale:1`, so its transparent centre (~62px radius) sits exactly under the label while `:hover span` turns the label to `var(--bg)` — verified live on the header 'Partner with us' at 1440 (hover-secondary-late: label reads as a dark blotch 'Partne…with us' on the sky; same class on mega-menu 'Learn more', CTA 'Read the charter', mobile panel), whereas reference/air/state-hover-secondary.png shows a solid white fill with a dark label.",
+  "fix": "Make the fill opaque where the label sits and keep the sweep: change line 549 to `background: radial-gradient(rgba(var(--fg-rgb), 1) 0, rgba(var(--fg-rgb), 1) 55%, rgba(var(--fg-rgb), 0) 100%);` (keep skewX/rotate/scale/opacity transitions), or alternatively keep the gradient and add `.btn--secondary:hover { background-color: var(--fg); transition-delay: 0s, .6s }` so the base fills after the sweep; re-check hover-secondary at 150/600/2000 ms.",
+  "lens": ""
+ },
+ {
+  "file": "src/lib/SmoothScroll.tsx",
+  "line": 167,
+  "severity": "medium",
+  "summary": "Deep links do not work: loading `http://localhost:5173/#features` leaves the page at scrollY 0 for the whole 3 s timeline (features top stays 5404px) — the section mounts after the browser's fragment-scroll attempt, and the onLoadHash nudge only acts `if (|top| < 2)`, i.e. only when the browser already jumped, so with no native jump nothing scrolls and the URL hash is silently ignored.",
+  "fix": "In the onLoadHash rAF (and again on `document.fonts.ready` / window `load` if the first attempt found no element) resolve `location.hash` and always call `instance.scrollTo(el, { offset: ANCHOR_OFFSET, immediate: true })` when `el` exists and the navigation is not a reload/back-forward with a restored position (`performance.getEntriesByType('navigation')[0]?.type === 'navigate'`); additionally add `html { scroll-padding-top: var(--header-height); }` in global.css so any native fragment jump also clears the fixed header.",
+  "lens": ""
+ },
+ {
+  "file": "src/lib/SmoothScroll.tsx",
+  "line": 115,
+  "severity": "high",
+  "summary": "JOURNEY-SPEC v2.1 checklist item 5 (lower scroll sensitivity) is not implemented: live `window.__lenis.options` = { lerp: 0.1, wheelMultiplier: 1, touchMultiplier: 1 } and one 100px wheel tick moves the page exactly 100px, while the spec mandates `wheelMultiplier: 0.65`, `touchMultiplier: 1.3`, `lerp: 0.09`.",
+  "fix": "In `new Lenis({...})` set `lerp: 0.09, wheelMultiplier: 0.65, touchMultiplier: 1.3` (keep `autoRaf: false, respectReducedMotion: true`); leave `scrollToAnchor` untouched so keyboard/anchor scrolling is unchanged, and update the docblock's 'lerp ≈ 0.1'.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/sky/GlassWordmark.tsx",
+  "line": 133,
+  "severity": "high",
+  "summary": "JOURNEY-SPEC v2.1 checklist item 4 (360° rotation tied to scroll) is not implemented: in the hero `g.rotation.y` only lerps toward the ±0.06 pointer parallax and in the footer it is a ±0.03 sine yaw — there is no `(1 − journey.wordmarkHero) × 2π` / `(1 − journey.wordmarkFooter) × 2π` term, so the wordmark never turns as it scrolls away / descends.",
+  "fix": "Hero branch: `const spin = reduced ? 0 : (1 - wh) * TAU; g.rotation.y = spin + parallaxY` where `parallaxY` is the lerped pointer term kept in a ref (lerp the parallax separately, then add), and footer branch: `g.rotation.y = (reduced ? 0 : (1 - wf) * TAU) + yaw`; keep rotation.x as is; under reduced motion both spins are 0.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/Supersize.tsx",
+  "line": 45,
+  "severity": "low",
+  "summary": "The word wipe never starts from 0.15 for the first word: `t = clamp(p*n − i + 0.5)` gives t = 0.5 at p = 0, so 'BUILDERS' is already at opacity 0.57 while the section is still a full viewport below the fold (measured ops before entry: 0.57/0.15/0.15/0.15/0.15/0.15) and every word begins filling half a slot before its own slice.",
+  "fix": "Use a ramp that is 0 at p = 0 and ≥ 1 for every word at p = 1, e.g. `const t = clamp((p * (n + 1) - i) / 1.5)` (word i fills over its slice with a 50% overlap into the next), and keep `MIN_OPACITY` unchanged.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/Waitlist.tsx",
+  "line": 38,
+  "severity": "low",
+  "summary": "An invalid waitlist email gives no visible message: submit only sets `aria-invalid` (border rgba(255,255,255,.85)) and refocuses the input; sighted users get no explanation, and the `.wl-error` line is only rendered for a rejected request (`failed`).",
+  "fix": "Add `{invalid && <p className=\"wl-error u-body-3\" role=\"alert\">Enter a valid email address</p>}` after the button (reuse the same string as DemoForm's `MSG.email`, or add `form.emailInvalid` to content.ts and use it in both places); clear it in the onChange handler as `invalid` already is.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/Header.tsx",
+  "line": 321,
+  "severity": "low",
+  "summary": "'Members' (href https://t.me/qairuhub) is rendered without `target=\"_blank\"`/`rel`, so it navigates the landing away in the same tab, while every other external link on the page (mega-menu GitHub/Telegram, CTA card, footer, socials) opens a new tab; the same inconsistency exists in DemoForm.tsx:333 where the second legal link (Privacy Policy) lacks `target=\"_blank\"` and leaves a half-filled form.",
+  "fix": "Pass `target=\"_blank\"` on the Members `<Button>` (Button already adds `rel=\"noreferrer\"` for `_blank`), and add `target=\"_blank\" rel=\"noreferrer\"` to the `legalLink2` anchor in DemoForm.tsx:333 to match `legalLink1`.",
+  "lens": ""
+ },
+ {
+  "file": "index.html",
+  "line": 19,
+  "severity": "low",
+  "summary": "Every page load logs the browser warning 'The resource /fonts/Sacramento-Regular.ttf was preloaded using link preload but not used' (desktop, mobile and reduced-motion contexts): Sacramento is only the parse fallback for the 3D typeface (`FONTS[1]` in GlassWordmark.tsx) and is never requested, so the preload is a wasted ~60 KB request plus a console warning (JOURNEY-SPEC 'no console errors or warnings').",
+  "fix": "Remove the Sacramento `<link rel=\"preload\">` (line 19) and fix the comment on line 14; if the v2.1 checklist item 2 (Courgette wordmark) is implemented, preload `/fonts/Courgette-Regular.ttf` instead.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/ProductDemo.css",
+  "line": 25,
+  "severity": "low",
+  "summary": "App-window screens still cross-fade over 0.8 s (measured 1.00/0.00 → 0.03/0.97 in ~450 ms with computed `transition: opacity 0.8s`), while DESIGN-SPEC §4.7 specifies a 500 ms cross-fade (unfixed from round 1).",
+  "fix": "Change `.pd-stage__item { transition: opacity 0.5s var(--ease); }`.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/AgenticCards.tsx",
+  "line": 107,
+  "severity": "low",
+  "summary": "The typewriter caret is only shown during the 800 ms typing phase (measured on/off per 100 ms: `1111110000000000000000000000111111110000`), so it disappears for the whole 2.2 s hold and the fully typed prompt sits caret-less (unfixed from round 1).",
+  "fix": "`const typing = !reduced && (phase === 'typing' || phase === 'holding')` so the caret keeps blinking while the prompt is on screen and only hides for 'collapsing'/'idle'.",
+  "lens": ""
+ },
+ {
+  "file": "src/content.ts",
+  "line": 173,
+  "severity": "low",
+  "summary": "`agentic.prompts` has 4 entries mapped onto 3 cards with `idx % 3`, so prompt 3 ('Match me with a mentor…') and prompt 0 ('Find me a team…') both highlight the Learn card back-to-back — measured active-card sequence 0,0,1 over 8 s: the Learn card stays active for 6.8 s while Build/Launch get 3.4 s each and the 'cards cross-fade in sync with the typing' rhythm breaks every cycle.",
+  "fix": "Use a prompt count that is a multiple of the card count (drop one prompt or add two more, e.g. 'Register my project in the registry' → Build, 'Book Qairu Space for a build sprint' → Build/Launch), or add an explicit `card: 0|1|2` per prompt and use it instead of `idx % cardCount` in AgenticCards.tsx:322.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/Header.css",
+  "line": 318,
+  "severity": "low",
+  "summary": "The mobile panel only fades in with a 10px nudge (`translate: 0 -10px → 0`, measured opacity 0.90 / translate −0.95px at 120 ms), not the 'white panel dropping from the top over 350 ms' described in DESIGN-SPEC §4.1 (unfixed from round 1).",
+  "fix": "Use `translate: 0 -100%` (or `clip-path: inset(0 0 100% 0)`) in the closed `.hdr__mobile` state and `translate: 0 0` / `inset(0)` in `.is-open`, keeping `transition: all .35s var(--ease)` and the opacity fade.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/Header.css",
+  "line": 381,
+  "severity": "low",
+  "summary": "Mobile accordion sub-menus animate `max-height: 0 → 2000px` in 0.3 s: measured 1922px max-height 100 ms after tapping (content is 392px, so the open completes in ~60 ms with no visible motion) and the close sits still for ~240 ms before collapsing (unfixed from round 1).",
+  "fix": "Replace the max-height hack with a grid-rows transition: `.hdr__m-sub { display:grid; grid-template-rows:0fr; transition: grid-template-rows .35s var(--ease) } .hdr__m-sub.is-open { grid-template-rows:1fr } .hdr__m-sub-inner { min-height:0; overflow:hidden }` (keep the `inert` toggling).",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/Header.tsx",
+  "line": 93,
+  "severity": "low",
+  "summary": "Mega-menu item stagger restarts at 0 for each column (`index={i}` per column): measured transition-delays in the Community panel are 0/.08/.16/.24/.32 s and then 0/.08/.16/.24/.32 s again, so both columns animate in parallel instead of each item following the previous by 80 ms (unfixed from round 1).",
+  "fix": "In `Columns`, keep a running counter across columns (`let n = 0` before the map; pass `index={n++}` to each `SubItem`) so `--i` increases through the whole panel.",
+  "lens": ""
+ },
+ {
+  "file": "src/sections/Storytelling.tsx",
+  "line": 84,
+  "severity": "low",
+  "summary": "Progress math uses `window.innerHeight` while the runway/stage are sized with `100lvh`; on mobile browsers with a collapsing URL bar the JS range (`rect.height − innerH`) and the CSS-centred stage disagree, shifting the enter/exit timing and vertical centre of each item (code-verified; desktop timeline itself is correct: sticky top 0 at every probe, items 0/1/2 at opacity 1 at P .05/.5/.95).",
+  "fix": "Read the stage height instead: keep a ref to `.triptych__inner` and use `const innerH = inner.getBoundingClientRect().height` for `range` and the near-viewport skip test.",
+  "lens": ""
+ }
+]

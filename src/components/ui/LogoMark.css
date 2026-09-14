@@ -1,0 +1,165 @@
+/* =============================================================================
+   LogoMark — the ONE logo placeholder used by the logo bar (Logos) and the
+   integrations row (Integrations). Two variants:
+     .logo-mark--bar   bare monochrome wordmark, 18–30px, centred in the 80px item
+     .logo-mark--tile  80×80 box (translucent fill, 1px translucent border, radius 12,
+                       padding 8) with a 12px/600 wordmark clamped to two lines
+   Type is set on the inner .logo-mark__text so the `style` hints (caps / sans /
+   mono / serif / script) are scoped per variant. Colours come from tokens only.
+   ========================================================================== */
+
+.logo-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  color: var(--fg);
+  line-height: 1;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.logo-mark__text {
+  display: block;
+  color: inherit;
+}
+
+/* ---------- Bar variant (Logos): text wordmark, vertically centred, 90% white */
+.logo-mark.logo-mark--bar {
+  height: 100%;
+  opacity: 0.9;
+  white-space: nowrap;
+}
+
+.logo-mark--bar.logo-mark--caps .logo-mark__text {
+  font-family: var(--font-control);
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.logo-mark--bar.logo-mark--sans .logo-mark__text {
+  font-family: var(--font-control);
+  font-weight: 600;
+  font-size: 22px;
+  letter-spacing: -0.01em;
+}
+
+.logo-mark--bar.logo-mark--mono .logo-mark__text {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-weight: 500;
+  font-size: 18px;
+  letter-spacing: 0;
+}
+
+.logo-mark--bar.logo-mark--serif .logo-mark__text {
+  font-family: Georgia, "Times New Roman", Times, serif;
+  font-weight: 400;
+  font-size: 22px;
+  letter-spacing: 0;
+}
+
+.logo-mark--bar.logo-mark--script .logo-mark__text {
+  font-family: var(--font-cursive);
+  font-weight: 600;
+  font-size: 28px;
+  letter-spacing: -0.01em;
+}
+
+/* Real logo swap-in (bar): white monochrome SVG, height clamped to the 32–40px band. */
+.logo-mark--bar .logo-mark__img {
+  display: block;
+  height: 36px;
+  width: auto;
+  max-width: none;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+/* ---------- Tile variant (Integrations): 80×80 flat card */
+.logo-mark.logo-mark--tile {
+  width: 80px;
+  height: 80px;
+  padding: 8px;
+  border-radius: var(--radius-cards, 12px);
+  background: var(--card-fill, rgba(var(--fg-rgb), 0.08));
+  border: 1px solid var(--card-line, rgba(var(--fg-rgb), 0.18));
+  opacity: 1;
+  text-align: center;
+  white-space: normal;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+/* Wordmark placeholder: 12px/600, wraps to at most two lines, never widens the tile. */
+.logo-mark--tile .logo-mark__text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  max-width: 100%;
+  font-family: var(--font-control);
+  font-size: 12px;
+  font-weight: 600;
+  font-style: normal;
+  line-height: 1.25;
+  letter-spacing: 0;
+  text-transform: none;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+.logo-mark--tile.logo-mark--caps .logo-mark__text {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.logo-mark--tile.logo-mark--mono .logo-mark__text {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  letter-spacing: -0.01em;
+}
+
+.logo-mark--tile.logo-mark--serif .logo-mark__text {
+  font-family: Georgia, "Times New Roman", Times, serif;
+  font-weight: 600;
+}
+
+.logo-mark--tile.logo-mark--script .logo-mark__text {
+  font-family: var(--font-cursive);
+  font-style: italic;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+/* Real logo (tile): fill the padded box, keep aspect, monochrome white. */
+.logo-mark--tile .logo-mark__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+/* ---------- Responsive: keep the 80px row height and gap, ease the bar type down a step */
+@media (max-width: 768px) {
+  .logo-mark--bar.logo-mark--caps .logo-mark__text {
+    font-size: 16px;
+  }
+  .logo-mark--bar.logo-mark--sans .logo-mark__text,
+  .logo-mark--bar.logo-mark--serif .logo-mark__text {
+    font-size: 20px;
+  }
+  .logo-mark--bar.logo-mark--mono .logo-mark__text {
+    font-size: 16px;
+  }
+  .logo-mark--bar.logo-mark--script .logo-mark__text {
+    font-size: 27px;
+  }
+  .logo-mark--bar .logo-mark__img {
+    height: 32px;
+  }
+}

@@ -1,0 +1,44 @@
+/* =============================================================================
+   Logos section — two edge-to-edge marquee rows of monochrome wordmarks.
+   Sizes/spacing follow the reference: rows of 80px items with an 80px gap,
+   8px vertical gap between rows (reference --v-gap), 1600px hero grid width.
+   The wordmark itself (type hints, 90% white, real-logo swap) is the shared
+   src/components/ui/LogoMark.css `.logo-mark--bar`; this file is layout only.
+   ========================================================================== */
+
+.logos {
+  --v-gap: 8px;
+  /* keep the masked rows from ever widening the page */
+  overflow-x: clip;
+}
+
+/* The carousel runs edge to edge inside the 1600px hero grid: drop the grid's
+   24px side padding so the built-in edge mask starts at the page/viewport edge. */
+.logos__grid.grid-air {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.logos__rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--v-gap);
+  width: 100%;
+  min-width: 0;
+}
+
+.logos__row {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Wordmarks sit on the raw sky: the same soft contrast glow as .on-sky */
+.logos .logo-mark--bar {
+  text-shadow:
+    0 2px 20px rgba(6, 18, 58, 0.45),
+    0 0 2px rgba(6, 18, 58, 0.25);
+}
+
+/* Reduced motion: global.css already sets `.carousel__track { animation: none }`.
+   Static rows still read fine: the first copy of the set fills the row from the left
+   under the edge mask, so nothing extra is needed here. */

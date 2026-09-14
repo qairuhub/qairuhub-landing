@@ -1,0 +1,597 @@
+/* =============================================================================
+   AgenticCards — typewriter pill + three synced cards (reference "Air" agentic cards).
+   Uses only tokens from global.css: rgba(var(--fg-rgb), .x), var(--bg), var(--ease), radii.
+   ========================================================================== */
+
+/* ---------- Typewriter pill ------------------------------------------------ */
+.ac-pill-row {
+  position: relative;
+  width: 100%;
+  height: 48px;
+}
+.ac-pill {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  height: 48px;
+  max-width: 100%;
+  padding: 0 20px;
+  border-radius: 9999px;
+  background: rgba(var(--fg-rgb), 0.14);
+  border: 1px solid rgba(var(--fg-rgb), 0.18);
+  color: var(--fg);
+  white-space: nowrap;
+  text-shadow: 0 1px 12px rgba(6, 18, 58, 0.35);
+  transition: transform 800ms ease-out;
+  will-change: transform;
+}
+.ac-pill__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 28px;
+  height: 21px;
+  margin-right: 8px;
+  color: var(--fg);
+}
+.ac-pill__icon svg {
+  width: 14px;
+  height: 14px;
+  transform: scale(1.5);
+  transform-origin: center;
+}
+.ac-pill__text {
+  position: relative;
+  display: block;
+  flex: 0 1 auto;
+  min-width: 0;
+  width: var(--w, 0px);
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: 16px;
+  line-height: 1.5;
+  transition: width 800ms ease-out;
+}
+.ac-pill__text.is-collapsing {
+  transition-duration: 400ms;
+}
+.ac-pill__text.is-capped {
+  text-overflow: ellipsis;
+}
+.ac-pill__label {
+  display: inline;
+}
+.ac-pill__twin {
+  position: absolute;
+  left: 0;
+  top: 0;
+  visibility: hidden;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.ac-pill__caret {
+  flex: none;
+  width: 0;
+  height: 24px;
+  margin-left: 0;
+  border-radius: 1px;
+  background: currentColor;
+  opacity: 0;
+  transform-origin: center;
+  transition:
+    opacity 200ms var(--ease),
+    width 200ms var(--ease),
+    margin-left 200ms var(--ease);
+}
+.ac-pill__caret.is-on {
+  width: 2px;
+  margin-left: 8px;
+  opacity: 1;
+  animation: ac-blink 760ms ease-in-out infinite;
+}
+@keyframes ac-blink {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(0);
+  }
+}
+
+/* Reduced motion: full prompt, crossfade between prompts. */
+.ac-pill.is-reduced {
+  transition: none;
+}
+.ac-pill.is-reduced .ac-pill__text {
+  width: auto;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  transition: opacity 400ms var(--ease);
+}
+.ac-pill.is-reduced .ac-pill__text.is-fading {
+  opacity: 0;
+}
+.ac-pill.is-reduced .ac-pill__caret {
+  display: none;
+}
+
+/* ---------- Cards ---------------------------------------------------------- */
+.ac-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  border-radius: var(--radius-cards);
+  border: 1px solid var(--card-line);
+  /* translucent fill, no backdrop blur (JOURNEY-SPEC perf budget: blur only on menus + tab bar) */
+  background: var(--card-fill);
+  color: var(--fg);
+  /* The card itself never dims: the active/inactive emphasis lives on the media (below) and a
+     whisper on the body so the copy stays ≥ .75 effective white (JOURNEY-SPEC readability). */
+  opacity: 1;
+  transition:
+    border-color 600ms var(--ease),
+    background-color 600ms var(--ease);
+}
+.ac-card.is-active {
+  border-color: rgba(var(--fg-rgb), 0.32);
+  background: var(--card-fill-hover);
+}
+.ac-card:focus-visible {
+  outline: 2px solid rgba(var(--fg-rgb), 0.8);
+  outline-offset: 2px;
+}
+.ac-card__media {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: rgba(var(--fg-rgb), 0.04);
+  border-bottom: 1px solid rgba(var(--fg-rgb), 0.12);
+  transition: opacity 600ms var(--ease);
+}
+.ac-card__body {
+  flex: 1 1 auto;
+  padding: 24px;
+  gap: 12px;
+  transition: opacity 600ms var(--ease);
+}
+/* Inactive cards: dim the decorative mock, barely touch the copy (.85 × .9 ≈ .77 effective). */
+.ac-card:not(.is-active) .ac-card__media {
+  opacity: 0.55;
+}
+.ac-card:not(.is-active) .ac-card__body {
+  opacity: 0.85;
+}
+.ac-card__title {
+  /* reference u-h2: 40px / 1 / 400 */
+  letter-spacing: -0.015em;
+}
+.ac-card__text {
+  color: rgba(var(--fg-rgb), 0.9);
+  max-width: 34ch;
+}
+
+/* ---------- Shared mock primitives ---------------------------------------- */
+.ac-vis {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  box-sizing: border-box;
+}
+.ac-bar {
+  display: block;
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(var(--fg-rgb), 0.16);
+  flex: none;
+  max-width: 100%;
+}
+.ac-bar--strong {
+  background: rgba(var(--fg-rgb), 0.28);
+}
+.ac-dot {
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(var(--fg-rgb), 0.18);
+  flex: none;
+}
+.ac-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 8px;
+  border-radius: 9999px;
+  background: rgba(var(--fg-rgb), 0.1);
+  border: 1px solid rgba(var(--fg-rgb), 0.18);
+  box-sizing: border-box;
+}
+.ac-chip .ac-bar {
+  height: 6px;
+}
+
+/* ---------- Learn: fanned session stack ----------------------------------- */
+.ac-stack {
+  position: relative;
+  width: 64%;
+  aspect-ratio: 5 / 4;
+}
+.ac-stack__card {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  box-sizing: border-box;
+  border-radius: 12px;
+  border: 1px solid rgba(var(--fg-rgb), 0.18);
+  background: rgba(var(--fg-rgb), 0.08);
+  transform-origin: 50% 115%;
+  transition:
+    rotate 900ms var(--ease),
+    translate 900ms var(--ease),
+    opacity 600ms var(--ease);
+}
+.ac-stack__card:nth-child(1) {
+  rotate: -7deg;
+  translate: -8% 3%;
+  opacity: 0.55;
+}
+.ac-stack__card:nth-child(2) {
+  rotate: 4deg;
+  translate: 7% 1%;
+  opacity: 0.75;
+}
+.ac-stack__card:nth-child(3) {
+  background: rgba(var(--fg-rgb), 0.16);
+  border-color: rgba(var(--fg-rgb), 0.28);
+}
+.ac-card.is-active .ac-stack__card:nth-child(1) {
+  rotate: -10deg;
+  translate: -13% 5%;
+}
+.ac-card.is-active .ac-stack__card:nth-child(2) {
+  rotate: 6deg;
+  translate: 11% 2%;
+}
+.ac-stack__head,
+.ac-stack__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.ac-stack__foot {
+  justify-content: flex-start;
+  gap: 8px;
+  margin-top: auto;
+}
+.ac-avatars {
+  display: inline-flex;
+}
+.ac-avatars > span {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgba(var(--fg-rgb), 0.28);
+  border: 1px solid rgba(var(--bg-rgb), 0.35);
+  box-sizing: border-box;
+}
+.ac-avatars > span + span {
+  margin-left: -5px;
+}
+
+/* ---------- Build: 2×2 bento -------------------------------------------------- */
+.ac-bento {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: 100%;
+  height: 100%;
+}
+.ac-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 16px;
+  box-sizing: border-box;
+  border-radius: 12px;
+  border: 1px solid rgba(var(--fg-rgb), 0.18);
+  background: rgba(var(--fg-rgb), 0.06);
+  min-height: 0;
+  transition: background-color 600ms var(--ease);
+}
+.ac-tile--0 {
+  background: rgba(var(--fg-rgb), 0.1);
+}
+.ac-tile--3 {
+  background: rgba(var(--fg-rgb), 0.1);
+}
+.ac-card.is-active .ac-tile {
+  background: rgba(var(--fg-rgb), 0.12);
+}
+.ac-card.is-active .ac-tile--0,
+.ac-card.is-active .ac-tile--3 {
+  background: rgba(var(--fg-rgb), 0.16);
+}
+.ac-tile__art {
+  display: flex;
+  align-items: flex-start;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.ac-tile__label {
+  color: rgba(var(--fg-rgb), 0.9);
+  line-height: 1;
+}
+.ac-team {
+  display: inline-flex;
+}
+.ac-team > span {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(var(--fg-rgb), 0.28);
+  border: 1px solid rgba(var(--bg-rgb), 0.35);
+  box-sizing: border-box;
+}
+.ac-team > span + span {
+  margin-left: -7px;
+}
+.ac-repo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+.ac-play {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(var(--fg-rgb), 0.28);
+  background: rgba(var(--fg-rgb), 0.1);
+  box-sizing: border-box;
+}
+.ac-play > span {
+  width: 12px;
+  height: 12px;
+  margin-left: 2px;
+  background: rgba(var(--fg-rgb), 0.7);
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+}
+.ac-sprint {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 100%;
+  max-height: 48px;
+  align-self: flex-end;
+}
+.ac-sprint > span {
+  width: 8px;
+  border-radius: 3px;
+  background: rgba(var(--fg-rgb), 0.22);
+  transition: height 900ms var(--ease);
+}
+.ac-sprint > span:nth-child(1) {
+  height: 40%;
+}
+.ac-sprint > span:nth-child(2) {
+  height: 65%;
+}
+.ac-sprint > span:nth-child(3) {
+  height: 50%;
+}
+.ac-sprint > span:nth-child(4) {
+  height: 85%;
+  background: rgba(var(--fg-rgb), 0.5);
+}
+.ac-card.is-active .ac-sprint > span:nth-child(2) {
+  height: 75%;
+}
+.ac-card.is-active .ac-sprint > span:nth-child(4) {
+  height: 100%;
+}
+
+/* ---------- Launch: silhouette + floating panel ---------------------------- */
+.ac-silhouette {
+  position: absolute;
+  right: 14%;
+  bottom: -12%;
+  width: 36%;
+  height: 82%;
+  box-sizing: border-box;
+  border-radius: 999px 999px 24px 24px;
+  border: 1px solid rgba(var(--fg-rgb), 0.18);
+  background: rgba(var(--fg-rgb), 0.06);
+  transition: translate 900ms var(--ease);
+}
+.ac-silhouette__screen {
+  position: absolute;
+  left: 14%;
+  right: 14%;
+  top: 22%;
+  bottom: 18%;
+  border-radius: 12px;
+  background: rgba(var(--fg-rgb), 0.08);
+  border: 1px solid rgba(var(--fg-rgb), 0.14);
+}
+.ac-silhouette__notch {
+  position: absolute;
+  left: 50%;
+  top: 10%;
+  width: 28%;
+  height: 6px;
+  border-radius: 3px;
+  translate: -50% 0;
+  background: rgba(var(--fg-rgb), 0.14);
+}
+.ac-card.is-active .ac-silhouette {
+  translate: 0 -3%;
+}
+.ac-panel {
+  position: absolute;
+  left: 9%;
+  top: 14%;
+  width: 60%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  box-sizing: border-box;
+  border-radius: 12px;
+  border: 1px solid rgba(var(--fg-rgb), 0.28);
+  background: rgba(var(--fg-rgb), 0.16);
+  transition: translate 900ms var(--ease);
+}
+.ac-card.is-active .ac-panel {
+  translate: 0 -4%;
+}
+.ac-panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(var(--fg-rgb), 0.14);
+}
+.ac-panel__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 20px;
+}
+.ac-toggle {
+  position: relative;
+  flex: none;
+  width: 28px;
+  height: 16px;
+  border-radius: 9999px;
+  background: rgba(var(--fg-rgb), 0.24);
+  transition: background-color 600ms var(--ease);
+}
+.ac-toggle__knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(var(--fg-rgb), 0.8);
+  transition:
+    translate 600ms var(--ease),
+    background-color 600ms var(--ease);
+}
+.ac-card.is-active .ac-toggle {
+  background: rgba(var(--fg-rgb), 0.9);
+}
+.ac-card.is-active .ac-toggle__knob {
+  translate: 12px 0;
+  background: var(--bg);
+}
+.ac-card.is-active .ac-toggle--late,
+.ac-card.is-active .ac-toggle--late .ac-toggle__knob {
+  transition-delay: 150ms;
+}
+.ac-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  box-sizing: border-box;
+  border-radius: 4px;
+  border: 1px solid rgba(var(--fg-rgb), 0.4);
+  background: transparent;
+  color: var(--bg);
+  transition:
+    background-color 600ms var(--ease),
+    border-color 600ms var(--ease);
+}
+.ac-check svg {
+  opacity: 0;
+  transition: opacity 400ms var(--ease);
+}
+.ac-card.is-active .ac-check {
+  background: rgba(var(--fg-rgb), 0.9);
+  border-color: rgba(var(--fg-rgb), 0.9);
+}
+.ac-card.is-active .ac-check svg {
+  opacity: 1;
+}
+.ac-card.is-active .ac-check--late,
+.ac-card.is-active .ac-check--late svg {
+  transition-delay: 200ms;
+}
+
+/* ---------- Responsive -------------------------------------------------------- */
+/* ≤768 is the `small` breakpoint: the three cards stack to full width (12 cols).
+   A 1/1 media square would then be ~720px tall per card, so cap it to a landscape
+   ratio while the card is full-width; the 1/1 square returns below 480px where the
+   media is only ~343px wide. The mocks inside are percentage-positioned and adapt. */
+@media (max-width: 768px) and (min-width: 481px) {
+  .ac-card__media {
+    aspect-ratio: 16 / 10;
+  }
+  .ac-stack {
+    width: 44%;
+  }
+  .ac-silhouette {
+    right: 18%;
+    width: 22%;
+  }
+  .ac-panel {
+    left: 12%;
+    width: 44%;
+  }
+}
+/* ≤1024 (medium/small): the cards wrap to 2+1 or stack full-width, so the prompt pill
+   that drives the active-card cross-fade is off-screen while the user reads them —
+   keep only a whisper of emphasis on the mock and none on the copy (body 1 × text .9). */
+@media (max-width: 1024px) {
+  .ac-card:not(.is-active) .ac-card__media {
+    opacity: 0.75;
+  }
+  .ac-card:not(.is-active) .ac-card__body {
+    opacity: 1;
+  }
+}
+@media (max-width: 768px) {
+  .ac-card__body {
+    padding: 20px;
+  }
+}
+@media (max-width: 375px) {
+  .ac-vis {
+    padding: 20px;
+  }
+}
+
+/* ---------- Reduced motion ------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .ac-pill,
+  .ac-pill__caret,
+  .ac-card,
+  .ac-card * {
+    transition-duration: 0ms !important;
+    animation: none !important;
+  }
+  .ac-pill__text {
+    transition: opacity 400ms var(--ease) !important;
+  }
+}

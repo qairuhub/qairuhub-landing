@@ -1,0 +1,406 @@
+{
+ "buildReport": [
+  {
+   "role": "architect",
+   "result": {
+    "files": [
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\SkyScene.tsx",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\sky\\SkyDome.tsx",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\sky\\skyShaders.ts",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\sky\\Stars.tsx",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\sky\\SceneLights.tsx",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\sky\\journey.ts",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\sky\\quality.ts",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\sky\\pointer.ts",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\sky\\Sky.tsx (DELETED)",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\sky\\palette.ts (DELETED)"
+    ],
+    "summary": "Rebuilt SkyScene.tsx as the one fixed full-viewport canvas of the journey. Structure: CSS fallback div (fixed inset-0 z-0, linear-gradient(180deg, PALETTE.space.top → PALETTE.space.bottom) = #03040c → #070c24) under a <Canvas> (absolute inset-0, pointer-events-none via the wrapper; dpr=getDpr(tier); gl {antialias:false, alpha:false, powerPreference:'high-performance', stencil:false, depth:true}; camera fov 40 at (0,0,10) near .1 far 120; flat={false} so ACES stays on; onCreated sets clearColor to PALETTE.space.top so the opaque canvas never flashes black; frameloop 'never' while document.hidden, 'demand' under prefers-reduced-motion (DemandInvalidator invalidates on onScroll + 3 settle timeouts), else 'always'). Error Boundary pattern kept (outer around Canvas, inner around the wordmark). tier detected once via useState(detectQuality); reduced via matchMedia listener. Children in order: <JourneyDriver/> → <SkyDome/> → <Stars/> → <SceneLights/> → <CloudSprites/> → <Boundary><Suspense><GlassWordmark/></Suspense></Boundary> → <Field/>, each given {tier, reduced}.\n\nCONVENTIONS for the integrator:\n• useFrame priorities: JourneyDriver = -100 (calls updateJourney(state.size.height, reduced ? 0 : clock.elapsedTime) then stepPointer(0.06)); every layer uses the default priority 0 (never > 0, which would disable r3f auto-render). r3f's state.size.height is used instead of caching innerHeight — it is the canvas height (== viewport) and r3f refreshes it on resize.\n• renderOrder: SkyDome -10 (depthTest/depthWrite off, clip-space z 0.9999), Stars -9 (additive, depthTest/depthWrite off, frustumCulled false). Specialists should use ≥ -5 for clouds, 0 for glass, and let Field write depth; nothing in my layers writes depth so opaque hills simply paint over the stars.\n• journey.ts (created, see deviations) exports: `journey` {vh, end, progress, time, space, descent, whiteout, day, dusk, night, ground, stars, clouds, wordmarkHero, wordmarkFooter}, `updateJourney(viewportHeightPx, timeSeconds)`, `PALETTE` {space, descent, day, dusk(+glow), night} as sRGB hex strings, `blendPalette('top'|'mid'|'bottom', out)` writing raw sRGB 0..1 floats into any {r,g,b} (THREE.Color works) with no allocation, `smoothstep(a,b,x)`, type `Journey`, `PaletteKey`. Keyframes (vh): space=1−ss(0.9,1.7); descent bell 0.9→2.4; whiteout bell peaks 1.6 (0..1, the sky applies ×0.35); day=ss(1.7,2.3)·(1−ss(end−2.5,end−1.6)); dusk bell over end−2.5…end−0.7; night=ss(end−1.7,end−0.4); ground=ss(end−1.5,end−0.05); stars=1−ss(1.2,1.8)+ss(end−2.2,end−1.0); clouds=ss(0.9,1.6)·(1−0.6·night); wordmarkHero=1−ss(0,1.4); wordmarkFooter=ss(end−1.4,end−0.3). end = max(4, scrollState.limit/vh). Palette blend is 4 sequential lerps space→descent (0.9–1.5) →day (1.5–2.2) →dusk (end−2.5…end−1.6) →night (end−1.6…end−0.7).\n• quality.ts (created): `QualityTier` 'high'|'medium'|'low'; `QUALITY[tier]` = {stars 1800/900/500, clouds 26/20/14, cloudTexture 512/512/256, blades 14000/8000/3000, transmission true/true/false, glassResolution 512/384/256, glassSamples 6/4/2, dprCap 1.5/1.5/1.25}; `detectQuality()` (low: coarse pointer, <768px, ≤4 cores, saveData, ≤2GB; high: ≥8 cores; else medium); `getDpr(tier)` = clamp(devicePixelRatio, 1, cap) with cap 1.25 at ≥1600px wide.\n• SkyDome.tsx + skyShaders.ts: fullscreen clip-space triangle (domeVertex/domeFragment). Uniforms: uTop, uMid, uBottom (vec3 sRGB from blendPalette, copied into Vector3s), uMidStop (0.55), uAspect, uTime, uSpace, uWhiteout, uDusk, uNight, uDuskGlow (vec3 sRGB PALETTE.dusk.glow). Fragment: 3-stop vertical gradient; SPACE block (branch on uSpace) = 3-octave value fbm violet #2a1d5e / blue #1b3a8a tint at ≤0.22×space + diagonal milky band + planet horizon arc (radius 2.6 vh, apex at y=0.90, dark planet body below, #2b63e8 limb glow outward + razor rim inward); DUSK = bottom third toward uDuskGlow ×0.42×dusk; NIGHT = soft moon glow (#cfe0ff, r≈0.18 vh at (0.74·aspect, 0.20)) + brighter horizon band; WHITEOUT = mix to #eef4ff × whiteout×0.35; then sRGB→linear, hash dither (1.5/255, time-jittered), colorspace_fragment. toneMapped false.\n• Stars.tsx: one <points> in a group at the camera position (0,0,10); QUALITY[tier].stars vertices on a dome R=60 (az ±40°, el −41°…+23°, 38% in a diagonal great-circle band with normal (0.7,−0.7,0.12) running bottom-left→top-right, 4% larger warm glow stars). Attributes position/aSize(1–2.6px, warm 2.2–2.6)/aSeed/aBright/aWarm; uniforms uTime, uDpr, uTwinkle(0|1), uAlpha (= journey.stars·(1−0.1·night)), uNight (warms the tint). Screen-pixel gl_PointSize = aSize·dpr(·2.4 for warm), twinkle 0.75+0.25·sin(t·(1.3+seed)+seed·7) unless reduced; additive, depthWrite/depthTest off, toneMapped false. points.visible=false whenever journey.stars ≤ 0.002 (draw skipped). Parallax: group.rotation.y = pointer.x·0.02, rotation.x = min(journey.vh, 2.2)·0.15 − pointer.y·0.02 (the dome tilts up ~19° over the descent so stars drift up; the elevation range was simulated to keep ~860/1800 stars on screen at both ends). Deterministic PRNG so the sky is identical every load.\n• SceneLights.tsx: the only lighting: <Environment resolution={64} frames={1}> with 3 Lightformers (rect white top intensity 2.5 at y 6; #8fb4ff rim intensity 2 at x −6; #ffe9c9 fill 0.8 at (5,−4,3)); <hemisphereLight #9fc4ff/#1b4a22> intensity lerp(lerp(.35,.9,1−space),.4,night); <directionalLight> colour lerpColors(#fff3e2 → #9fb7ff, night), intensity lerp(lerp(.5,1.2,1−space),.6,night), position lerpVectors((−6,8,6) → (6,7,4), night) — module-level Color/Vector3 constants, zero per-frame allocation. No scene.fog.\n• pointer.ts kept as is (attachPointer in SkyScene's effect, stepPointer in JourneyDriver). Sky.tsx and palette.ts deleted after grepping (nothing else imported them). Clouds.tsx / shaders.ts untouched (clouds specialist).\n• Per-frame budget of my layers: 2 fullscreen-ish draws (dome triangle + points) plus 2 light uniform updates; no setState, no allocations, loop paused on hidden.",
+    "deviations": [
+     "src/sections/sky/journey.ts and src/sections/sky/quality.ts did not exist in the tree (the brief lists them as READ-FIRST inputs and types.ts already imported './quality', so typecheck failed for every agent). I created both with exactly the API named in the brief (journey.space/descent/whiteout/day/dusk/night/ground/stars/clouds/wordmarkHero/wordmarkFooter/time + vh/end/progress, updateJourney, PALETTE, blendPalette, smoothstep; QualityTier, QUALITY[tier], detectQuality, getDpr). If another agent also creates them, reconcile against these field names — every layer I wrote depends on them.",
+     "src/lib/ticker.ts (listed as READ-FIRST) does not exist either; nothing of mine needs it (DOM-perf agent's file).",
+     "JourneyDriver reads r3f's state.size.height instead of caching window.innerHeight on a resize listener — same value (the canvas is fixed inset-0), already cached and refreshed by r3f, one listener fewer.",
+     "blendPalette writes into any {r,g,b} object (THREE.Color or a plain object) rather than a THREE.Vector3; SkyDome copies the result into its Vector3 uniforms. Values are raw sRGB floats — consumers must linearise in-shader (as skyShaders.ts does) or pass them through THREE.Color.setRGB(r,g,b, SRGBColorSpace).",
+     "CSS fallback gradient uses PALETTE.space.top/bottom from journey.ts (the same #03040c → #070c24 hexes the brief gives) instead of new CSS tokens, so the canvas clear colour, the dome's first frame and the fallback stay one source of truth."
+    ],
+    "risks": [
+     "pnpm typecheck currently reports exactly one error, in SkyScene.tsx line 110: the glass specialist's GlassWordmark.tsx is still the pre-rewrite component whose Props are {reduced} only, so passing {tier, reduced} per the LayerProps contract fails until their LayerProps version lands. Everything else typechecks clean.",
+     "Shaders were reviewed by hand and the star distribution was simulated in node, but nothing was rendered (no dev server allowed) — the first real run should eyeball: nebula opacity (≤0.22 cap), limb arc height (apex y=0.90), moon glow strength (MOON × 0.42) and dither. All are single constants in skyShaders.ts.",
+     "Descent palette stop (#071a4a/#0b3f9a/#1a7be0) and dusk glow (#b7707a) are my picks — the spec only gives space, day, dusk top/mid and night. Tune in PALETTE in journey.ts; blendPalette follows automatically.",
+     "Phase keyframes derive `end` from scrollState.limit; on the very first frames Lenis has not reported a limit so end is clamped to ≥ 4 vh — fine for the top of the page, but a page shorter than ~5 vh would overlap dusk with the descent.",
+     "The transmission pass of the glass wordmark re-renders the scene (dome + stars + clouds) into its FBO every frame while mounted; my layers are cheap, but the glass specialist should keep resolution/samples at QUALITY[tier].glassResolution/glassSamples.",
+     "Environment is baked once (frames={1}); if a specialist needs a night-tinted env map it must remount or increase frames — I did not, to keep the budget."
+    ]
+   }
+  },
+  {
+   "role": "clouds",
+   "result": {
+    "files": [
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\sky\\CloudSprites.tsx",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\sky\\cloudBake.ts",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\sky\\shaders.ts",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\sky\\Clouds.tsx (deleted)"
+    ],
+    "summary": "Replaced the per-frame fullscreen fbm cloud passes with BAKED CUMULUS SPRITES. shaders.ts now holds only cloud GLSL: `cloudBakeVertex/Fragment` (isolated cumulus per atlas cell: 7 squashed gaussian lobes over a fuzzy flat base, a small-lobe 'puff' term for cauliflower tops, domain warp, coarse+fine fbm silhouette detail, a 6-step light march towards the sun (up, slightly left) plus belly ambient so tops are white and undersides blue-grey, silver-lining rim, border mask guaranteeing transparent edges; output is a lighting map R=light G=detail B=rim A=alpha, not colour) and `cloudSpriteVertex/Fragment` (instanced camera-facing billboards; colour = mix(uShade, uLit, light) × detail × per-instance tint, dithered, encoded with colorspace_fragment then premultiplied). The old skyFragment/screenVertex/compositeFragment were removed (SkyDome uses skyShaders.ts; nothing else imported them). cloudBake.ts: `createCloudAtlas(texSize, maxTextureSize)` bakes CLOUD_COUNT=8 distinct clouds (seed per cell) into ONE WebGLRenderTarget atlas (4×2 grid of texSize × texSize/2 cells, RGBA8, clamped to the GPU max texture size; 2048×512 on high/medium, 1024×256 on low), one cell per `step(gl)` call via render-target viewport/scissor, atlas cleared to transparent first so unbaked cells are simply invisible; a one-time 8×8 readback probe on cell 0 detects a failed bake and swaps in a procedural CanvasTexture fallback with the same channel layout; `reset()` for StrictMode remounts, `dispose()` releases everything. CloudSprites.tsx: three layers (far z −14 / mid z −6 / near z +3, renderOrder −8/−7/+20 so near passes in front of the wordmark at z 0), each ONE InstancedBufferGeometry draw call (instanced attributes aPos/aSize/aCell/aTint, uv rects mirrored at random, tint white→#e9f1ff, deterministic mulberry32 layout) — 3 draw calls total. Total count = QUALITY[tier].clouds split 27/33/40 %; sizes far 12–20, mid 8–14, near 7–12 world units. Readability layout: every sprite sits in a left/right lane whose visible mass (INNER=0.3×width) never reaches into the central 50 % of the width (only far sprite 0 may sit in the column, at 0.7 size/0.7 alpha); sprites are spread along a vertical conveyor band (height = n×frameH/density) that scrolls up by journey.vh × 0.6/1.2/2.2 and wraps; motion is a lane-bound slow sway (amplitude 0.4–1.6 u, 55–95 s periods → peak 0.06–0.14 u/s) plus a tiny bob, mouse parallax 0.15/0.3/0.5 via a per-layer uniform. Journey: alpha = journey.clouds; layers rise from below (near 12 / mid 9 / far 6 units) as journey.space fades; whiteout scales the near layer ×1.8 (mid 1.36, far 1.1) and blends palette+alpha to pure white; DAY palette #dae3f0 lit / #7a8fb5 shade (~85 % brightness, faint blue), alpha ≤ .9 and a coverage cap (Σ visible-area×alpha×FILL ≤ 30 % of the viewport, enforced by scaling alpha); DUSK #c8b8d8 / #55507e; NIGHT #6f7fa8 / #2f3a5c with mid/near faded out and the far layer at journey.clouds (0.4). Reduced motion: no sway/bob/mouse, static positions that still follow scroll. No per-frame allocations; per-instance positions are re-uploaded only when something moved/scrolled/resized; invisible layers set material.visible=false (zero fill cost in space); bake continues under frameloop=demand via invalidate(). Verified in a standalone Playwright/three r186 harness (no server): bake compiles and completes in 8 steps, all cells non-empty, measured cell fill 0.16–0.21, true alpha coverage 8–13 % in the day phases (est. 0.11–0.14, cap not engaged), 28 % at the whiteout peak, 4 % at night; screenshots show puffy sunlit cumulus with blue-grey bellies cut by the frame edges and a clear reading column. pnpm typecheck clean. TUNING: CloudSprites.tsx top — COVERAGE_MAX (day cap), FILL (measured fill, raise to make the cap bite earlier), INNER (how close lane clouds may come to the column; lower = more intrusion), PAL (per-phase lit/shade), RIM, DAY_ALPHA_MAX, SEED (reshuffle), and per-layer LAYERS entries: size [min,max] (world units), density (sprites visible per frame — the on-screen amount; extra sprites just live further down the conveyor), parallax (units per vh), mouse, alpha range, sway amplitude (drift speed = amp×2π/period, period 55–95 s in buildLayer), whiteout weight, rise distance. cloudBake.ts BAKE — threshold (leaner clouds), softness (edge blur), warp, detail, sun step, shadow (belly darkness); CLOUD_COUNT/ATLAS_COLS/ROWS for the grid.",
+    "deviations": [
+     "quality.ts exposes `QUALITY[tier].clouds` and `.cloudTexture` (not `cloudSprites`/`cloudTexSize` as the brief named them) — used the real names.",
+     "8 distinct cloud textures instead of 7: the atlas is a natural 4×2 grid (2048×512 on high/medium, 1024×256 on low) rather than a 4096-wide strip, which also stays under the 4096 texture cap on older mobile GPUs; bake takes 8 frames.",
+     "No wrap-around horizontal drift: free drift would carry sprites through the reading column, so drift is a slow lane-bound sway (visually indistinguishable at 0.06–0.14 u/s over any viewing window) and the wrap happens only on the vertical scroll conveyor.",
+     "Near layer sized 7–12 world units instead of 10–18: at z +3 the frame is only ~8 units wide, so 10–18 upscaled the 512px cell ~5× into shapeless blurry blobs; 7–12 (and alpha .55–.8) reads as soft foreground clouds while still filling the frame during the whiteout (×1.8).",
+     "Day brightness set to ~85 % (#dae3f0) rather than 82 %: at 82 % the deck read as overcast grey against the reference's sunlit tops; readability is carried by the alpha ≤ .9, the coverage cap and the lane layout.",
+     "Night alpha: journey.clouds already thins clouds to 0.4 at night, so no extra ×0.35 was stacked on the far layer (that would give 0.14 — nearly invisible); mid/near fade out fully as specified.",
+     "The descent rise is driven by (1 − journey.space) rather than journey.descent, because journey.descent is a bell (returns to 0 in the day phase) and would sink the deck back out of frame; near/mid/far rise 12/9/6 units so the near layer arrives first as JOURNEY-SPEC asks.",
+     "The bake stores a lighting map (light/detail/rim/alpha) instead of final colour so the day/dusk/night/whiteout palettes can recolour tops and bellies independently at draw time — no per-phase rebake."
+    ],
+    "risks": [
+     "Verified only in a SwiftShader Playwright harness (running the app/dev server was not allowed): first live look on the Intel UHD laptop may want small taste tweaks — most likely PAL.day brightness, BAKE.shadow (belly darkness) or COVERAGE_MAX; all are single constants.",
+     "Near sprites in front of the glass wordmark also get rendered into drei's transmission FBO (the wordmark hides only itself), so a foreground cloud edge crossing the letters is seen both refracted and on top; cosmetic and only in the hero while a near sprite overlaps the column edge.",
+     "The one-time 8×8 readRenderTargetPixels probe on the first baked cell is a synchronous GPU stall (~1 ms, once at mount); if it ever proves costly on some driver, delete the probe and the fallback would only trigger on thrown errors.",
+     "Coverage cap uses an analytic estimate (bbox ∩ frame × FILL × alpha) that measured within ~10 % of true alpha coverage at 1440×900; at extreme aspect ratios (portrait phones) lanes narrow and more of each cloud is clipped, so the estimate is conservative (over-estimates) there.",
+     "StrictMode dev remount relies on three re-creating disposed render target / material / geometry resources on next use (atlas.reset() restarts the bake); this is standard three behaviour but was not exercised in the harness."
+    ]
+   }
+  },
+  {
+   "role": "glass",
+   "result": {
+    "files": [
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\sky\\GlassWordmark.tsx",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\components\\three\\GlassText.tsx",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\lib\\ttf.ts",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\sky\\ttf.ts (DELETED)"
+    ],
+    "summary": "Frosted glass wordmark rebuilt as ONE mesh in the shared scene, driven by `journey` (LayerProps {tier, reduced}). GlassWordmark.tsx: a gate component whose useFrame flips a boolean state only at the hysteresis thresholds (mount when wordmarkHero > 0.02 || wordmarkFooter > 0.02, unmount when both < 0.005); inside, `Letters` suspends on the font (candidates ['/fonts/MrDafoe-Regular.ttf', '/fonts/Sacramento-Regular.ttf'], preloaded at module evaluation) and every frame sets mesh.visible AND material.visible (drei's transmission FBO pass keys off material.visible) — hidden between phases and as soon as the run has fully drifted above the frustum. HERO: centre (0,0,0), fit = 0.86 × visible width at z 0 (0.92 when size.width <= 768 — inclusive, which fixes the 768px clipping/offset), visible width computed per frame from the camera (2·dist·tan(fov/2)·aspect) so resize needs no React state; geometry is centred from the BEVELLED bounding box; float y ±0.12 over 6 s (journey.time, 0 under reduced motion), rotation.y ±0.06 / rotation.x ±0.03 following the shared pointer with lerp 0.05; exit: y += (1 − wordmarkHero) × 6, scale × (0.9 + 0.1 × wordmarkHero). FOOTER: y = mix(4.5, 1.15, wordmarkFooter), z 0.5, fit 0.55 (0.8 mobile), float ±0.08 over 7 s, yaw ±0.03 over 11 s. GlassText.tsx is now the shared recipe: geometry via three's TextGeometry (examples/jsm — no drei Text3D, no three-stdlib) with size 1, depth 0.16, curveSegments 10, bevelEnabled, bevelSize = bevelThickness = 0.024 (0.6 × the measured 0.040 stroke half-width; Mr Dafoe strokes measured at 0.080 em median by ray-casting the parsed outlines), bevelSegments 5, bevelOffset 0; built once and kept in a module-level Map keyed by font file name + text + shape params, centred, bounding box/sphere computed, disposed only on `pagehide`. `mode` prop: 'frosted' → drei MeshTransmissionMaterial {transmission 0.7, roughness 0.42, thickness 0.6, ior 1.4, color #f3f7ff, attenuationColor #dbe6ff, attenuationDistance 2, chromaticAberration 0.02, anisotropicBlur 0.35, distortion 0.05, distortionScale 0.5, temporalDistortion 0, backside false, clearcoat 1, clearcoatRoughness 0.1, sheen 0.6 #ffffff sheenRoughness 0.45, envMapIntensity 1.8, emissive #9db4ff emissiveIntensity 0.12, toneMapped true, samples/resolution from QUALITY[tier].glassSamples/glassResolution (6/512 high, 4/384 medium)}; 'physical' (tier low, QUALITY.low.transmission false) → MeshPhysicalMaterial {transparent, opacity 0.9, color #eef3ff, roughness 0.5, clearcoat 1, clearcoatRoughness 0.15, sheen 0.4, sheenRoughness 0.6, envMapIntensity 1.3, emissive #9db4ff 0.12}. No Environment added (SceneLights owns it). lib/ttf.ts: parser now emits the full typeface.js/three FontData shape (xMin/xMax bbox, ascender/descender, underlinePosition, per-glyph x_min/x_max, original_font_information) so `new Font(data)` needs no cast; `useTTFFont(url | url[], chars)` tries candidates in order and only accepts a font whose every non-space glyph has a non-empty outline (`assertOutlines`), plus `preloadTTFFont`. sky/ttf.ts deleted; nothing imports it. Verified: node script over lib/ttf.ts — every character of hero.wordmark parses to non-empty outlines in Mr Dafoe (stroke 0.068–0.087 em, median 0.080) and Sacramento (0.037); a temporary Vite-built harness (scripts/tmp-glass, deleted afterwards) rendering the real SkyDome/Stars/SceneLights/GlassWordmark through headless Chromium (SwiftShader) with `updateJourney` driven from pinned scroll positions confirmed: centred 86 % run at 1440×900, 92 % at 768×1024 and 375×812 with no clipping, exit lift at 0.6 vh and gone by 1.0 vh, footer letters hovering above the ridge at end and descending at end−0.8 vh, light milky letters legible on a pure #03040c clear colour, on the night sky and on the current dome; the low-tier physical fallback also legible. pnpm typecheck: clean.",
+    "deviations": [
+     "transmission 0.7 instead of 1 (plus sheen 0.6, envMapIntensity 1.8, clearcoatRoughness 0.1, emissiveIntensity 0.12 instead of 0.08, roughness 0.42 instead of 0.48): with transmission 1 the letters' body colour is the blurred backdrop, so on the near-black space / night sky they rendered as a dark navy silhouette in the harness (attenuation colour can only darken; the 0.08 emissive floor is a dim navy). The 30 % non-transmitted share is diffuse environment light — the milky scatter of frosted glass — which made the letters bright and legible in every verified state.",
+     "Bevel 0.024 × size (0.6 × the measured stroke half-width) rather than 0.45 × (0.018): at hero scale 0.018 read as a flat bar with a chamfer; 0.024 is the first ratio that reads as a rounded tube while keeping the run thin (body ≈ 1.6 × stroke).",
+     "QUALITY keys are `glassSamples` / `glassResolution` / `transmission` in the architect's quality.ts (not `transmissionSamples` / `transmissionRes` as in the brief) — used the real names.",
+     "Mobile fit is 0.92 as the brief specifies for ≤ 768 px, which is the only case above the brief's '0.9 of width' cap; desktop uses 0.86.",
+     "Geometry is built with three's TextGeometry + Font (three/examples/jsm) instead of drei <Text3D>, because Text3D rebuilds its geometry on every mount and cannot use the module-level cache; GlassText's `font` prop therefore takes parsed TypefaceData only (no typeface JSON url), which is all the codebase used."
+    ],
+    "risks": [
+     "The SkyDome's SPACE phase currently renders as a saturated day-blue with a planet limb (verified with a dome-only shot at scroll 0, no wordmark) rather than the #03040c → #070c24 space palette; the wordmark was verified legible on both that and a true near-black clear colour, but the sky owner should check their space block.",
+     "Transmission roughness in drei's MTM is a per-pixel jittered multi-sample (6 on high, 4 on medium), so the frosted body carries a fine static grain; it is subtle at DPR 1.5 and invisible over black, but if the user dislikes it lower `roughness` in GLASS_MATERIAL (the spec floor is 0.42) or raise `glassSamples`.",
+     "Screenshots came from SwiftShader at DPR 1 with a 64 px procedural environment; on the real Intel UHD GPU the clearcoat highlights and Fresnel rims will be sharper and the milky body slightly brighter — the numbers err on the legible side, so if the letters look too bright on the real sky, trim `emissiveIntensity` (0.12 → 0.08) and `envMapIntensity` (1.8 → 1.4) first.",
+     "First geometry build (TextGeometry with bevels, ~8 glyphs) runs on the main thread once when the font resolves (tens of ms); afterwards every mount/unmount is a Map lookup.",
+     "The transmission pass renders the whole scene into a 512²/384² FBO every frame while the wordmark is on screen (hero and footer only; skipped as soon as the run leaves the frustum) — this is the budgeted cost from JOURNEY-SPEC, not measured on hardware here.",
+     "Footer placement (y 1.15 at z 0.5, bottom of the run ≈ y 0.4) assumes the field's ridge tops out near y −1 at ground 1 as briefed; if the field lands higher, raise FOOTER.yEnd in GlassWordmark.tsx."
+    ]
+   }
+  },
+  {
+   "role": "field",
+   "result": {
+    "files": [
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\sky\\Field.tsx",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\sky\\field\\terrain.ts",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\sky\\field\\grassShaders.ts",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\sky\\field\\Hills.tsx",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\sky\\field\\Grass.tsx",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\sky\\field\\Flora.tsx"
+    ],
+    "summary": "Field.tsx is now one <group> layer driven by journey.ground: position.y = -9 + 6.8 * ground (i.e. mix(-9, -2.2, ground)), visible = ground > 0.01, uTime from journey.time, uWind 0 under reduced motion; children Hills (terrain), Grass (InstancedMesh) and Flora (merged flowers+mushrooms) share one uniforms object created in field/terrain.ts (uTime, uWind, uMoonDir = normalize(6,7,4) matching SceneLights' night sun, uFade = PALETTE.night.bottom as raw sRGB, uFadeNear 9 / uFadeFar 25 view distance). Terrain (Hills.tsx): PlaneGeometry 60 x 30, HILL_SEGMENTS[tier] x /2 (128/96/64), rotated flat, translated so local z spans -20 (far) .. +10 (camera plane); hillHeight(x,z) = 1.6*exp(-(x+6.5)^2/18) + 1.8*exp(-(x-7)^2/18) + ripple(0.12 sin(0.8x)cos(0.5z) + 0.05 sin(2.3x+1.1z)) - 0.18*max(0, 2-z) - 1.4*smoothstep((-11-z)/8); vertex colours = soil #143a19 * (0.45+0.55*lift(profile 0.1..1.5)) * (1-0.35*near(z 3..9)), MeshStandardMaterial vertexColors, color #b9f0b9, roughness 1, envMapIntensity 0.2, lit by SceneLights, distance fade injected via onBeforeCompile after colorspace_fragment (no scene.fog). Final-state numbers at ground = 1 (group y -2.2, camera (0,0,10) fov 40): near-ridge silhouette at the frame sides z~2 ground y -0.6 -> screen y ~ -0.21 plus blade fringe -> ~ -0.10 (hills fill the bottom ~43-45%); valley floor at x=0, z~2 ground y -1.9 -> screen y -0.66; far ridge x=0, z~-13 ground y -4.8 -> screen y -0.55 at ~85% fade; plane edge z=-20 -> screen y -0.67, hidden behind the far ridge and fully faded. The centre ridge line therefore sits at screen y -0.5 .. -0.66, far below the wordmark zone (y 1.15 at z 0.5 -> screen y +0.33). Grass (Grass.tsx): QUALITY[tier].blades tapered blades (PlaneGeometry 0.07 x 0.9, 1x4 segs, x *= 1-0.96*t^2), z = 8 - 24*u^1.35 (front-biased), x within +-(0.62*(10-z)+1.2), up to 6 rejection samples for spots whose tallest tip would project below screen y -1.08, random yaw, height 0.6-1.3 (x global bladeScale 0.42, eased -30% for z>5), width 0.8-1.3 (+60% far), per-instance tint (0.72+0.28*lift)*(1-0.25*near)*(0.85..1.1). ShaderMaterial DoubleSide: wind = (sin(t*1.4+x*0.35+z*0.6)*0.35 + gust)*uWind, bend = wind*uv.y^2*bladeHeight; fragment mix(#163d1c, #2e7a34, smoothstep(0,0.8,t)) with a #8fd07a tip highlight scaled by |dot(bladeNormal, moonDir)| (max 0.38), exposure 0.6 with a cool cast, tone mapping + colourspace chunks, then the distance fade. Flora (Flora.tsx): 8 flowers (stalk h 0.34-0.42 #215d29, 5 #e41a2f petals, #f4c542 pistil) at (-3.4,3.6) (-2.4,2.2) (-1.6,0.6) (-2.7,4.3) (1.9,1.4) (2.6,3.9) (3.0,3.2) (3.6,2.0) and 2 mushrooms (cream #efe4cf stem 0.2, red #d81e2b squashed hemisphere cap r 0.15, 4 white dots) at (2.5,5.0) and (-2.2,3.0), all merged into one non-indexed vertex-coloured geometry with aRoot/aSway attributes; MeshStandardMaterial onBeforeCompile sways them with the grass wind (flowers amp 0.05*(y/h)^2, mushrooms 0.012). Draw calls: 3 for the whole field (terrain, grass, flora); no per-frame allocations; every geometry/material/InstancedMesh disposed on unmount. Verified with a headless Playwright build of the real Field.tsx + SceneLights (file://, SwiftShader): shaders compile with no console errors, renderer.info shows 4 calls including the test backdrop, and screenshots at ground 0.4/0.7/0.85/1.0 at 1440x900, 1920x900 and 375x812 show the hills rising from the bottom, the valley centred under the wordmark zone, moonlit (not neon) grass, red flowers and mushrooms on the near slopes, and no visible far edge. pnpm typecheck is clean.",
+    "deviations": [
+     "QUALITY[tier] (quality.ts, architect's file) has no hillSegments field, so the terrain tessellation lives in a local HILL_SEGMENTS map in field/terrain.ts: high 128, medium 96, low 64 (x /2 rows).",
+     "The terrain component is field/Hills.tsx, not Terrain.tsx: on the case-insensitive Windows filesystem Terrain.tsx clashed with terrain.ts (tsc TS1149).",
+     "Blade instance heights are 0.6-1.3 multiplied by a global bladeScale 0.42 (world height 0.23-0.49): with the shared fixed camera (0,0,10) fov 40 the brief's raw 0.6-1.3 heights would have pushed the ridge fringe ~0.4 of the frame above the ground line and covered the wordmark zone.",
+     "Flowers and mushrooms are merged into a single vertex-coloured mesh (1 draw call) instead of separate instanced/merged meshes, so the field is 3 draw calls total, under the 5 allowed.",
+     "Terrain slope: the ground falls away at -0.18/unit behind the ridge (z < 2) and drops a further 1.4 past z = -11, so the far plane edge is hidden and the far hills sit lower on screen than the near ridge; the original v1 h(x,z) had the far terrain rising on screen above the near ridge with this camera.",
+     "Time comes from journey.time (0 under reduced motion) rather than an own clock so the field shares the architect's frame clock; the wind uniform is also zeroed under reduced motion.",
+     "Moon direction for the blade highlight is (6,7,4) normalised — the upper-right night position from SceneLights — not the v1 upper-left light."
+    ],
+    "risks": [
+     "SkyScene's Canvas is created with antialias:false; blades are 1-4 px wide at the capped DPR, so far blades may shimmer/alias on the user's laptop. Far blades are widened up to +60% to mitigate; if shimmer shows, enable MSAA (antialias:true) or raise the width factor in Grass.tsx.",
+     "Grass colours were tuned under ACES tone mapping (Canvas flat={false}); if the architect switches to flat, the field brightens noticeably and the 0.6 exposure factor in grassFragment should drop to ~0.5.",
+     "Terrain and flora brightness depend on SceneLights' night values (hemisphere 0.4, moon 0.6, Environment); if those change, the soil/mushroom exposure changes with them (grass is self-lit and unaffected).",
+     "The footer wordmark's MeshTransmissionMaterial renders the whole scene into its FBO, so the field (up to 14k instances on high) is drawn twice while the wordmark is on screen; the glass specialist may want to exclude the field layer from the transmission pass or rely on QUALITY.glassResolution.",
+     "Verification was software-rendered (SwiftShader, dpr 1) via Playwright on the isolated layer, not on the user's Intel UHD GPU at dpr 2 inside the full page (the dev server page currently fails to load because another agent's Logos.tsx lacks a default export); a first live look on the real page may still want small exposure tweaks.",
+     "A private verification artifact 'Night Field Harness' (https://claude.ai/code/artifact/ae235dec-d7d0-4617-b1c7-1ae830c619a0) was published for a look the Browser pane could not complete (sign-in required); it is harmless and can be deleted."
+    ]
+   }
+  },
+  {
+   "role": "readability",
+   "result": {
+    "files": [
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\styles\\global.css",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\components\\ui\\Section.tsx",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\components\\ui\\LogoMark.css",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\Header.css",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\Header.tsx",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\Hero.tsx",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\AgenticCards.css",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\AgenticCards.tsx",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\Logos.tsx",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\Logos.css",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\Waitlist.css",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\Waitlist.tsx",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\Features.css",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\ModelsCTA.css",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\Integrations.css",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\Integrations.tsx",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\ProductDemo.css",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\ProductDemo.tsx",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\DemoForm.css",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\Footer.css",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\Storytelling.css",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\Supersize.css"
+    ],
+    "summary": "Readability + DOM polish pass. global.css: @font-face \"Mr Dafoe\" + `--font-script: \"Mr Dafoe\",\"Sacramento\",\"Pacifico\",cursive` (Pacifico face kept); `.on-sky` utility (0 2px 24px rgba(6,18,58,.45) + 0 0 2px .25) with resets inside [data-theme=light] and on .btn labels; `.wordmark` 1px glow; global `margin-right:.12em` on cursive `<i>` in every heading utility (fixes \"whole\"/\"ecosystem\"); shared surface tokens `--card-fill` .08 / `--card-fill-hover` .12 / `--card-line` .18; ghost-input placeholder .75 + glow; pill fill .14; AnimatedBorder base stroke .18 with a subtler .75 highlight. Section.tsx: SectionText gets `onSky` (default true → `.on-sky` on the title/body block; pass false inside light cards) — every section title/body (agentic, logos, integrations, features, form) is now glowed. Header: shade rgba(0,0,0,.18)→transparent 60%, nav labels + \"Members\" carry the glow (not inside the mega menu), wordmark 30px Mr Dafoe (header + mobile panel, no glow on the white panel), nav stays 16/500 gap 32 chevron 16, buttons 38/14. Hero spacer 100lvh+80px (first title lands ≈200px below the fold like the reference). AgenticCards: fill .08 / border .18 / inactive .55, no backdrop blur, body 24px padding + 12px gap, title 40/400, body .75 max 34ch; mocks re-tuned to crisp 1px .18 borders, 12px radii, 8/12/16 rhythm, no blur. Logos: now renders the shared <LogoMark variant=\"bar\"> (removed the duplicate LogoMark + CSS in Logos.css, which was also leaking onto integration tiles), 90% white + glow, script size 28. LogoMark tiles: 80×80 r12 fill .08 border .18. Waitlist: `.wl-text` glow on pill/title/body/confirm/error, placeholder glowed, single input+button row kept down to 640px (`.wl-form__row`), grey #cfd4db island with 12% grid, caption absolutely centred and the step row pinned to the bottom edge (≤768: relative body, min-height 320). Features: removed the hard-edged `#features.section-air::before` scrim entirely, cards use `--card-fill` (no blur), hairlines .18, body .8, mock spacing 8/12/16/24. ModelsCTA: fill .08, overlay .18, orbs .95, copy glow + body .85, button vertically centred (gap 48, stacked ≤768). ProductDemo: app window now fills its card — sidebar footer block, main = title + [rows/kanban + second block] + right-hand details panel (216px haze panel: heading/meta/chip reused from the screen's own content strings, avatars, progress, skeleton lines or cohort legend, footer button); schedule gets a month grid with the schedule's dates highlighted (numbers only), leaderboard a mini bar chart labelled with the team names, kanban cards gain avatar/tag feet; panel hidden ≤768, chart hidden ≤480; tab bar 36px, fill .14, hairline .18, inactive tabs .7 (+ small glow), 12px labels. DemoForm: success body .75, legal 12px @ .6 (AA floor) with Signal Blue links, 40px padding / 48px inputs / 16px gap / centred submit unchanged. Footer: links 16 + glow, socials 38px ghost circles with a hover fill, copyright 12px @ .75 + glow, removed dead `.footer__scene/.footer__hills` rules (Footer.tsx no longer renders a scene), 150lvh. Storytelling: title + body glow, body 16 centred ≤560. Supersize: words glow, line-height .85, 24px left padding. Integrations.tsx: swapped its local reduced-motion hook for `useReducedMotion` from src/lib/media (identical behaviour). `pnpm typecheck` is clean for all owned files; the only errors are in src/sections/sky/Clouds.tsx (another agent's file).",
+    "deviations": [
+     "Footer copyright set to .75 opacity instead of the brief's \".6\" — JOURNEY-SPEC's readability floor for secondary text (≥ .75) and the round-1 reviewer both asked for it; .6 would have re-opened that finding.",
+     "Form legal text at rgba(ink,.6) instead of the brief's .5: .5 on white fails WCAG AA for 12px copy (~3.4:1); .6 (#767676) is the lowest AA-passing value.",
+     "Agentic and feature cards dropped their backdrop-filter blur (JOURNEY-SPEC perf budget: blur only on header menus and the tab bar) and use the .08 fill / .18 hairline the brief specifies; the previous round's rgba(black,.28) darkening fills are gone with the scrim, so in-card legibility now relies on the sky agent's cloud dimming/coverage rules.",
+     "ProductDemo's added blocks reuse existing content.ts strings (row titles, dates, chips, team names, cohort columns/counts) plus the pre-existing CHROME 'Create' label — no new content.ts keys were added.",
+     "Logos.tsx now uses the shared src/components/ui/LogoMark (removing its own copy and the duplicated .logo-mark rules from Logos.css); markup/output is equivalent, but the row-1/row-2 wordmarks are now sized by LogoMark.css.",
+     "Cursive `<i>` gap is a global margin-right .12em in global.css (brief) rather than an #integrations-only rule; it also adds ~4px before the trailing '.' in the features and form titles, which reads naturally with Caveat's right overhang.",
+     "Wordmark: Mr Dafoe at 30px with a 1px glow (the brief's fallback) rather than 26px, since Mr Dafoe's strokes are thin at 26px.",
+     "Could not verify visually: no dev server / screenshots allowed by the rules, so layout of the new ProductDemo panel, the waitlist card centring and the Mr Dafoe header mark were checked by reasoning about sizes only."
+    ],
+    "risks": [
+     "Text-shadow on the Supersize words (259px Anton, per-word opacity/translate written every frame) adds a blurred shadow layer to 6 large inline-blocks; if the sky agent's frame budget is tight, drop `.supersize__word` from the glow or reduce the 24px blur to 16px.",
+     "Mr Dafoe is a tall thin script (ascent 981/1000): at 30px in the 72px header the glyph box overflows the 1-line box slightly; verify the mark does not clip against .hdr__m-top on the mobile panel.",
+     "ProductDemo kanban columns use `min-height: 100%` inside a flex-sized grid; if a browser treats the grid height as indefinite the columns simply size to content (no layout breakage, just shorter columns).",
+     "The features scrim removal means feature/agentic card text is only as readable as the sky behind it — depends on the sky agent implementing the ≤30% cloud coverage + reading-column bias + dimmed clouds from JOURNEY-SPEC.",
+     "`.on-sky` is inherited by everything inside SectionText (including the CTA row); button labels are reset, but any future light-filled element placed inside a SectionText needs `onSky={false}` or a local `text-shadow: none`.",
+     "Typecheck currently fails only in src/sections/sky/Clouds.tsx (missing shader exports) — owned by the sky agent, not by this pass."
+    ]
+   }
+  },
+  {
+   "role": "dom-perf",
+   "result": {
+    "files": [
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\App.tsx",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\index.html",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\Footer.tsx",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\Supersize.tsx",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\Storytelling.tsx",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\lib\\ticker.ts",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\lib\\SmoothScroll.tsx",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\vite.config.ts",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\footer\\GrassScene.tsx (deleted)",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\footer\\shaders.ts (deleted)",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\footer\\terrain.ts (deleted)",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\footer\\useMediaQuery.ts (deleted)",
+     "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\footer\\SceneErrorBoundary.tsx (deleted)"
+    ],
+    "summary": "DOM-perf pass. (1) App.tsx: SkyScene is now `lazy(() => import('./sections/SkyScene'))` inside `<Suspense>` whose fallback is a fixed inset-0 z-0 pointer-events-none div with an inline SPACE gradient (#03040c → #070c24), so the three/r3f chunks load after first paint on top of a space-black placeholder; Footer moved out of <main> (contentinfo landmark). (2) index.html: `<html style=\"background:#03040c\">`, `<meta name=\"color-scheme\" content=\"dark\">`, theme-color #03040c, preloads Inter/Anton/Caveat kept and MrDafoe-Regular.ttf + Sacramento-Regular.ttf added (Pacifico never was preloaded). (3) Footer.tsx: GrassScene canvas removed — footer is a pure 150vh DOM spacer (`.footer` CSS untouched, `z-[2]` added so it stacks above the fixed backdrop like <main>) with the pinned RevealGroup link row; src/sections/footer/* deleted entirely (5 files); no remaining importers anywhere in src. (4) New src/lib/ticker.ts: one shared rAF loop (`addTick(fn, priority)` → unsubscribe, `useTick(fn, enabled, priority)`, `tickerRunning()`), self-starting/self-stopping, ticks sorted by priority, dt clamped to 100 ms, registrations snapshotted per frame. Supersize.tsx and Storytelling.tsx migrated from private requestAnimationFrame loops to `addTick`, behaviour identical (same progress maths, same change-detection, same reduced-motion static fallbacks), and each tick is registered only while an IntersectionObserver (rootMargin '100% 0px') reports the section within one viewport; leaving the zone runs one settled frame so words/items rest in the correct end state; observers/listeners cleaned up. (5) SmoothScroll.tsx: Lenis (lerp 0.1, respectReducedMotion) is now stepped from the shared ticker at priority -1 so scrollState is fresh before every DOM tick in the same frame (page-wide: exactly one rAF loop for Lenis + DOM animations); a ResizeObserver on document.body plus a resize listener call `lenis.resize()` and `setScroll({limit, progress})` so `scrollState.limit` follows content growth/viewport changes; anchor handling untouched; dead `useScrollY` removed (no consumers). (6) lib/media.ts is now the single useMediaQuery/useReducedMotion/useDocumentVisible source (duplicate footer hook deleted). (7) vite.config.ts: kept the rolldown codeSplitting groups, added `build.cssMinify: true`. pnpm typecheck clean; `pnpm build` (run once, after the sky agents' quality.ts/journey.ts landed) succeeded: three 736.90 kB (gzip 186.81), r3f 241.03 kB (gzip 78.17), app index 262.86 kB (gzip 80.32), SkyScene lazy chunk 18.08 kB (gzip 7.44), CSS 67.64 kB (gzip 13.99), rolldown runtime 0.71 kB.",
+    "deviations": [
+     "Lenis itself was moved onto the shared ticker (priority -1) rather than keeping its own rAF loop — the brief asked for one loop for the whole page and this guarantees scrollState is updated before DOM ticks read it in the same frame.",
+     "public/fonts/Pacifico-Regular.ttf was NOT deleted: at the end of my work it is still referenced by src/styles/global.css (@font-face lines 34-35 and the --font-script fallback on line 67) and by src/sections/sky/GlassWordmark.tsx (FONT_URL) — per the brief it stays until those owners drop it.",
+     "The Suspense fallback div also carries the class name `sky-fallback` (harmless, unstyled) in case the CSS owner wants to hook it; all its styling is inline as instructed.",
+     "Footer.tsx gained a Tailwind `z-[2]` utility on the <footer> (no CSS file touched) because it now sits outside <main> and must stack above the fixed z-0 canvas."
+    ],
+    "risks": [
+     "index.html sets the very first paint to #03040c, but src/styles/global.css (CSS owner) still sets `body { background-color: var(--color-page) }` (#13396a blue) — once the stylesheet loads the body paints blue underneath until the lazy SkyScene/fallback covers it; the fallback div is rendered on the very first React frame so this is only visible in the CSS-loaded-before-JS window. The CSS owner should switch --color-page (or body background) to the space colour.",
+     "The Footer no longer renders the field; the shared SkyScene (sky agent) must draw the ground/field over the last 150vh via journey.ground, otherwise the footer is an empty night sky. Footer.css still contains the now-unused .footer__scene / .footer__hills rules (CSS owner's file).",
+     "Pacifico is still referenced by global.css and sky/GlassWordmark.tsx (not my files); the font file remains in public/fonts until those are switched to Mr Dafoe / Sacramento, after which the integrator can delete it.",
+     "src/sections/sky/ttf.ts duplicates src/lib/ttf.ts (both export useTTFFont/parseTTF); GlassWordmark.tsx imports the sky copy — not mine to delete, integrator may want to unify on src/lib/ttf.ts.",
+     "Storytelling/Supersize now only tick while within one viewport of the screen; a programmatic scroll that jumps >1 viewport in a single frame is still handled because the IntersectionObserver fires before the next frame and the entry frame repaints unconditionally, but this relies on IO being available (falls back to always-on when it is not).",
+     "Build chunk sizes were measured mid-integration (other agents may still be changing sky files); three/r3f vendor sizes are stable, the app/SkyScene chunk numbers may shift slightly."
+    ]
+   }
+  }
+ ],
+ "integrateR1": {
+  "shotsDir": "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\shots\\v2r1",
+  "buildOk": true,
+  "bundleKb": 1364,
+  "consoleErrors": [],
+  "overflow": {
+   "desktop": false,
+   "tablet": false,
+   "mobile": false,
+   "heightsPx": {
+    "desktop": 13971,
+    "tablet": 15075,
+    "mobile": 13774
+   }
+  },
+  "gpuFps": {
+   "dpr": 2,
+   "canvases": 1,
+   "at0": {
+    "fps": 46,
+    "p95": 48
+   },
+   "at8": {
+    "fps": 63,
+    "p95": 36
+   },
+   "at16": {
+    "fps": 62,
+    "p95": 36
+   },
+   "at30": {
+    "fps": 66,
+    "p95": 30
+   },
+   "at50": {
+    "fps": 61,
+    "p95": 31
+   },
+   "at70": {
+    "fps": 66,
+    "p95": 36
+   },
+   "at85": {
+    "fps": 66,
+    "p95": 31
+   },
+   "at95": {
+    "fps": 48,
+    "p95": 48
+   },
+   "at100": {
+    "fps": 44,
+    "p95": 48
+   },
+   "notes": {
+    "gpu": "ANGLE (Intel, Intel(R) UHD Graphics (0x0000A78B) Direct3D11)",
+    "cores": 20,
+    "tierDetected": "medium (was high before the GPU-string probe)",
+    "backingStore": "1781x1125 (DPR cap 1.25; was 2137x1350 at 1.5)",
+    "displayHz": 120,
+    "beforeFixes": {
+     "at0": 42,
+     "at8": 47,
+     "at16": 61,
+     "at30": 62,
+     "at50": 58,
+     "at70": 62,
+     "at85": 65,
+     "at95": 54,
+     "at100": 51
+    },
+    "measurementCaveat": "in-app browser pane emulating 1440x900 scaled to fit: with EVERY scene layer hidden the same page measures only 60-74 fps (~14-16 ms of pane compositing per frame). Isolated at the new build: y=0 scene cost ~7 ms (glass ~5-6 ms, dome/stars/lights near zero); y=end ~7 ms (dome+clouds+field+glass ~2 ms each). A normal Chrome window does not pay that floor, so the ends should land >=60 there; not verifiable from inside the pane."
+   }
+  },
+  "headlessFps": {
+   "file": "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\perf\\v2r1-headless.json",
+   "softwareGL": true,
+   "relativeOnly": true,
+   "idle": {
+    "at0": 16,
+    "at8": 52,
+    "at16": 54,
+    "at30": 50,
+    "at50": 12,
+    "at70": 57,
+    "at85": 50,
+    "at95": 13,
+    "at100": 11
+   },
+   "scrolling": {
+    "fps": 31,
+    "p95": 66.7,
+    "worst": 150
+   },
+   "beforeFixesIdle": {
+    "at0": 7,
+    "at8": 42,
+    "at16": 43,
+    "at30": 42,
+    "at50": 12,
+    "at70": 40,
+    "at85": 42,
+    "at95": 3,
+    "at100": 3
+   },
+   "beforeFixesScrolling": 24,
+   "errors": [],
+   "longTasks": 244
+  },
+  "fixed": [
+   "src/sections/sky/skyShaders.ts: SPACE phase rendered as a uniform bright blue instead of near-black — the limb term glowIn = exp(-max(-d,0)*26) was 1.0 for every pixel outside the planet (d>0), adding LIMB*0.9 over the whole sky; now exp(-abs(d)*26), a razor rim on the edge only. y=0 is now #03040c-ish space with stars, faint nebula and the blue atmosphere arc.",
+   "src/sections/sky/skyShaders.ts + src/sections/sky/SkyDome.tsx: nebula haze + milky band (two 3-octave fbms per pixel, ~10 ms/frame on the Intel UHD at 2137x1350) are now baked ONCE into a quarter-resolution WebGLRenderTarget (re-baked only when the backing store size changes) and sampled with one texture tap (uNebula); planet limb stays analytic. Bake resources disposed on unmount. sRGB->linear in the dome uses the polynomial approximation instead of three pow() per pixel.",
+   "src/sections/sky/quality.ts: detectQuality() now probes the WebGL renderer string (one throwaway context): software/mobile GPUs -> low, integrated (Intel UHD/Iris, AMD APU) -> medium regardless of core count, discrete + >=8 cores -> high. The user's 20-core Intel UHD laptop was landing on `high` (1800 stars, 512/6 glass, 14k blades). Added the ?q=high|medium|low override the brief refers to. getDpr caps at 1.25 from >=1280 px wide (was 1600): backing store 2137x1350 -> 1781x1125 (-30 % fragments for every layer).",
+   "src/components/three/GlassText.tsx: distortion 0.05 -> 0 — drei's MeshTransmissionMaterial evaluates three snoiseFractal (12 simplex-3D noise) calls per glass fragment whenever distortion > 0, for an invisible wobble under 0.42 roughness; measured ~10 ms/frame at hero scale on the iGPU.",
+   "src/sections/sky/GlassWordmark.tsx: chromaticAberration only on the high tier (0.02), 0 on medium/low — it triples the bicubic transmission taps per sample and is invisible under the frosted blur.",
+   "src/sections/Waitlist.css: the demo 'video' island was #cfd4db with white 48-64px caption (~1.6:1). Now #8893a4 (white large text >=3:1) plus the spec's .on-sky contrast glow on the caption; layout unchanged (still the reference's grey media frame).",
+   "src/styles/global.css: removed the unused Pacifico @font-face and the Pacifico fallback in --font-script (grep for footer/GrassScene, sky/Sky, sky/Clouds, sky/ttf, Pacifico across src + index.html is empty).",
+   "src/sections/SkyScene.tsx: onCreated exposes window.__sky in DEV only (import.meta.env.DEV) for perf profiling (layer toggles, gl.info, setFrameloop); stripped from production.",
+   "Replaced a stale Vite process on :5173 (its HMR graph reported 'Logos.tsx does not provide export default' on every viewport) with a fresh `pnpm dev` (background task bbskbdt22, left running).",
+   "Build: pnpm build OK. Chunks: three 738.63 kB (gzip 187.56), r3f 236.47 kB (76.50), index/app 265.63 kB (80.92), SkyScene lazy 50.66 kB (19.82), css 72.05 kB (14.71), runtime 0.71 kB; total 1364 kB raw / ~380 kB gzip. Typecheck clean.",
+   "Verified: 16 desktop + 17 mobile + 15 tablet shots in shots/v2r1 — space at y=0, hero copy on dark sky, blue day sky with sparse soft cumulus (coverage well under 30 %, reading column clear), dusk with stars returning over the form, night + moon glow + grassy hills + wordmark above the valley; no missing sections, no overflow, zero console errors/React warnings at all three viewports; real-GPU check of space and night phases in the in-app browser."
+  ],
+  "remaining": [
+   "GPU fps inside the in-app browser pane at 1440x900: at0 46 / at95 48 / at100 44 (< 55 target) while the day phase runs 61-66. The pane itself costs ~14-16 ms/frame (60-74 fps with every layer hidden); the scene's own cost at both ends is ~7 ms, so a real Chrome window should hold >=60 — needs confirmation on the user's laptop in a normal browser window. Next cheapest levers if it does not: glassSamples 4->3 on medium, excluding the Field from the transmission FBO pass via camera layers, or a 0.9 fit for the hero wordmark.",
+   "Headless (software GL) idle fps at 50 % (Features area, y~6500) stays a 12-fps outlier while the same position measures 61 fps on the GPU; Features.css has no filters/backdrop-filter — likely a SwiftShader-specific cost, not investigated further.",
+   "Mr Dafoe's capital Q renders as a 'g'-like glyph, so the 3D run reads 'gairuhub' at a glance (font shape, not a rendering bug); the DOM header wordmark shows the same form. A different script face or a swash-Q alternate is a design call.",
+   "docs/JOURNEY-SPEC.md still carries the 'STATUS: proposal, not implemented' banner describing the old two-canvas build; it is now stale (one canvas, Footer is the 150vh spacer, journey.ts is live).",
+   "The pane's viewport emulation was reset to the desktop preset; dev server left running on http://localhost:5173."
+  ]
+ },
+ "firstReview": {
+  "score": null,
+  "count": 0
+ },
+ "rounds": [
+  {
+   "round": 1,
+   "highs": 28,
+   "actionable": 61,
+   "fixReport": [
+    {
+     "file": "C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\index.html",
+     "fixed": [
+      "index.html:18 (fidelity) — replaced Mr Dafoe / Sacramento preloads with /fonts/Courgette-Regular.ttf and updated the font comment; Dancing Script left as on-demand fallback rather than preloaded",
+      "index.html:18 (readability) — v2.1 checklist #2: Courgette is now the preloaded wordmark face; the two stale preloads are removed",
+      "index.html:18 (code) — only Courgette-Regular.ttf is preloaded, both ~100 KB stale script fonts are gone, and the comment now reads: UI (Inter), display (Anton), cursive accent (Caveat), wordmark DOM + 3D (Courgette), Dancing Script = parse fallback"
+     ],
+     "skipped": [],
+     "newFiles": []
+    },
+    {
+     "file": "src/sections/sky/journey.ts",
+     "fixed": [
+      "Darkened PALETTE.day in C:\\Users\\tairc\\Documents\\codespace\\qairuhub-test-landing\\src\\sections\\sky\\journey.ts (line 80) from { top: '#0c2d6e', mid: '#0d59c2', bottom: '#2ea3ff' } to { top: '#082a64', mid: '#0a48a6', bottom: '#1875d0' } exactly as the finding prescribes, so the day dome stays a deep navy-blue the whole way down like the reference instead of turning cyan in the bottom third. Verified white-text contrast on the new stops: top 13.77:1, mid 8.43:1, bottom 4.67:1 (the old bottom #2ea3ff was 2.69:1), so the JOURNEY-SPEC >= 4.5:1 readability rule now holds across the full day gradient. The neighbouring stops still blend cleanly (descent bottom #1a7be0 -> day bottom #1875d0; day top #082a64 -> dusk top #0d2a66). Replaced the now-false 'mirrors --color-sky-* in global.css' doc comment with one explaining that the dome is deliberately deeper than the CSS tokens, citing the reference samples and the readability rule, so the next builder does not 'fix' it back. pnpm typecheck passes (exit 0)."
+     ],
+     "skipped": [
+      "Raising MID_STOP from 0.55 to 0.62 in src/sections/sky/SkyDome.tsx: that is an existing file outside my ownership (another fixer edits it in parallel), so left for its owner. The one-line change is `const MID_STOP = 0.62` at SkyDome.tsx line 9."
+     ],
+     "newFiles": []
+    },
+    {
+     "file": "src/sections/sky/cloudBake.ts",
+     "fixed": [
+      "BAKE.softness 0.42 → 0.22 (tighter edge ramp: crisp cumulus silhouettes instead of blurred smears)",
+      "BAKE.detail 0.75 → 1.1 (stronger fbm breakup on the silhouette → cauliflower lobes)",
+      "BAKE.shadow 0.36 → 0.5 (deeper light-march extinction → cooler grey undersides against bright tops)",
+      "Doc comment on BAKE now references the JOURNEY-SPEC cumulus look and explains each knob"
+     ],
+     "skipped": [
+      "CloudSprites.tsx PAL.day lit 0xdae3f0 → 0xf4f8fe / shade 0x7a8fb5 → 0x8aa0c4 — not my file (src/sections/sky/CloudSprites.tsx, PAL const at lines 45-51); the owner of CloudSprites.tsx should apply it, keeping the alpha ≤ .9 readability cap in place of dimming the colour"
+     ],
+     "newFiles": []
+    },
+    {
+     "file": "src/sections/Storytelling.css",
+     "fixed": [
+      "Storytelling.css:63 — triptych body/headline spacing: .triptych__body margin-top 8px → 40px (24px at ≤768px) and .triptych__title padding-bottom: 0.06em so the caps and their text-shadow glow clear the paragraph, matching the reference's ~40px of air (desktop-09)."
+     ],
+     "skipped": [],
+     "newFiles": []
+    },
+    {
+     "file": "src/sections/AgenticCards.css",
+     "fixed": [
+      "AgenticCards.css:135 — added @media (max-width: 1024px) block: .ac-card { opacity: 1 }, .ac-card:not(.is-active) { opacity: 0.85 }, .ac-card__text { color: rgba(var(--fg-rgb), 0.85) } so stacked/2+1 medium and mobile layouts render readable card bodies over clouds; desktop cross-fade untouched. pnpm typecheck passes."
+     ],
+     "skipped": [],
+     "newFiles": []
+    }
+   ],
+   "integrate": null,
+   "verify": null
+  }
+ ],
+ "lastReview": {
+  "findings": [],
+  "score": null
+ },
+ "finalReport": null
+}

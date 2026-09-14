@@ -1,0 +1,131 @@
+/* =============================================================================
+   Footer — 150vh DOM spacer over the night/field phase of the single SkyScene
+   canvas, with the link row pinned at the bottom (24px margin).
+   Root ignores pointer events (the canvas sits behind everything); the content
+   row re-enables them. Text sits on the raw night sky → .on-sky glow.
+   ========================================================================== */
+
+.footer {
+  position: relative;
+  width: 100%;
+  height: 150vh;
+  height: 150lvh;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  pointer-events: none;
+  color: var(--fg);
+}
+
+/* Content row pinned to the bottom (24px margin) */
+.footer__content {
+  position: absolute;
+  bottom: var(--row-margin);
+  left: 0;
+  width: 100%;
+  z-index: 1;
+  pointer-events: auto;
+}
+.footer__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 32px;
+  width: 100%;
+}
+.footer__col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+.footer__col--right {
+  align-items: flex-end;
+}
+
+/* Link row: 16px/500, external links carry a 14px ↗.
+   Each link is a 38px-tall hit area (min-height + 4px side padding pulled
+   back with a negative margin) so the text keeps its optical position while
+   wrapped rows (mobile) stay tap-safe; row gap is 0 because the 38px boxes
+   already carry the vertical rhythm. */
+.footer__nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.footer__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 38px;
+  padding: 0 4px;
+  margin: 0 -4px;
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 500;
+  color: var(--fg);
+  text-shadow:
+    0 2px 24px rgba(6, 18, 58, 0.45),
+    0 0 2px rgba(6, 18, 58, 0.25);
+  transition: opacity 0.3s var(--ease);
+}
+.footer__link:hover {
+  opacity: 0.6;
+}
+.footer__link svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+/* Social icon buttons: 38×38 ghost circles */
+.footer__socials {
+  display: flex;
+  gap: 8px;
+}
+.btn.footer__social {
+  border: 1px solid rgba(var(--fg-rgb), 0.3);
+  border-radius: 9999px;
+  background: rgba(var(--fg-rgb), 0.06);
+}
+.btn.footer__social:hover {
+  opacity: 1;
+  background: rgba(var(--fg-rgb), 0.16);
+  border-color: rgba(var(--fg-rgb), 0.6);
+}
+
+/* 12px copyright: .75 (readability floor for secondary text on the sky) */
+.footer__copy {
+  color: rgba(var(--fg-rgb), 0.75);
+  text-shadow:
+    0 2px 24px rgba(6, 18, 58, 0.45),
+    0 0 2px rgba(6, 18, 58, 0.25);
+}
+
+@media (max-width: 768px) {
+  .footer__row {
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+  }
+  .footer__col,
+  .footer__col--right {
+    align-items: center;
+  }
+  .footer__nav {
+    justify-content: center;
+    gap: 0 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .footer__link,
+  .btn.footer__social {
+    transition: none;
+  }
+}

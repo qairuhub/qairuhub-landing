@@ -1,0 +1,9 @@
+{
+  "note": "Measured in the Claude desktop in-app browser on the user's PC (real GPU), viewport 1440x900, devicePixelRatio 2, dev server (unminified).",
+  "renderer": "ANGLE (Intel, Intel(R) UHD Graphics (0x0000A78B) Direct3D11)",
+  "dpr": 2,
+  "canvases": 1,
+  "idleFps": { "0%": 12, "10%": 19, "30%": 21, "60%": 21, "85%": 12, "100%": 13 },
+  "p95FrameMs": { "0%": 164, "10%": 85, "30%": 109, "60%": 67, "85%": 248, "100%": 182 },
+  "verdict": "laggy — target is >= 55 fps at every position on this same machine"
+}

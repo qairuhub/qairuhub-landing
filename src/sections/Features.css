@@ -1,0 +1,402 @@
+/* =============================================================================
+   Features — AnimatedBorder cards on a 7/5 · 5/7 · 4/4/4 grid with monochrome mock visuals.
+   Uses only global tokens (rgba(var(--fg-rgb), .x), var(--ease)); no new hex, no shadows.
+   Surfaces follow the shared card recipe (--card-fill .08 / --card-line .18) and there is NO
+   section-wide scrim (a flat scrim produced a hard seam against the continuous sky) — the
+   per-card fill plus the sky agent's dimmed clouds carry legibility.
+   ========================================================================== */
+
+.features {
+  width: 100%;
+}
+
+/* AnimatedBorder wrapper stretches to the column so rows are equal height */
+.feature-ab {
+  display: flex;
+  width: 100%;
+}
+
+.feature {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-cards);
+  overflow: hidden;
+  background: var(--card-fill);
+  transition: background-color 0.6s var(--ease);
+}
+.feature:hover {
+  background: var(--card-fill-hover);
+}
+
+.feature__text {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 32px;
+}
+.feature__text p {
+  max-width: 52ch;
+  color: rgba(var(--fg-rgb), 0.8);
+}
+
+.feature__media {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 0 32px 32px;
+}
+
+@media (max-width: 768px) {
+  .feature__text {
+    padding: 24px;
+  }
+  .feature__media {
+    padding: 0 24px 24px;
+  }
+}
+
+/* ---------- Mock panel (shared) */
+.feature-mock {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  flex: 1 1 auto;
+  box-sizing: border-box;
+  border-radius: var(--radius-images);
+  background: rgba(var(--fg-rgb), 0.06);
+  border: 1px solid var(--card-line);
+  overflow: hidden;
+  color: var(--fg);
+}
+.fm-line {
+  display: block;
+  height: 8px;
+  border-radius: 9999px;
+  background: rgba(var(--fg-rgb), 0.16);
+}
+.fm-line--strong {
+  background: rgba(var(--fg-rgb), 0.34);
+}
+.fm-chip {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 9999px;
+  background: rgba(var(--fg-rgb), 0.1);
+  border: 1px solid var(--card-line);
+  font-size: 11px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* ---------- Schedule */
+.feature-mock--schedule {
+  justify-content: center;
+  padding: 8px 16px;
+}
+.fm-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 6px 0;
+  border-top: 1px solid rgba(var(--fg-rgb), 0.1);
+  opacity: 0;
+  translate: 0 8px;
+  transition:
+    opacity 0.8s var(--ease) var(--d, 0ms),
+    translate 0.8s var(--ease) var(--d, 0ms);
+}
+.fm-row:first-child {
+  border-top: 0;
+}
+.fm-row__time {
+  flex: 0 0 48px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: rgba(var(--fg-rgb), 0.8);
+}
+.fm-row__title {
+  flex: 1 1 0;
+  min-width: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (max-width: 420px) {
+  .fm-row__time {
+    flex-basis: 42px;
+  }
+  .fm-chip {
+    max-width: 96px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    line-height: 22px;
+  }
+}
+
+/* ---------- Chart */
+.feature-mock--chart {
+  flex-direction: row;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 176px;
+  padding: 24px;
+}
+.fm-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  flex: 1 1 0;
+  min-width: 0;
+  width: 24px;
+  max-width: 32px;
+}
+.fm-bar__track {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  width: clamp(12px, 100%, 24px);
+  height: 108px;
+}
+.fm-bar__fill {
+  display: block;
+  width: 100%;
+  height: var(--h, 50%);
+  border-radius: 4px 4px 0 0;
+  background: rgba(var(--fg-rgb), 0.85);
+  transform-origin: bottom;
+  transform: scaleY(0);
+  transition: transform 1s var(--ease) var(--d, 0ms);
+}
+.fm-bar__val {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--h, 50%) + 6px);
+  translate: -50% 0;
+  font-size: 11px;
+  line-height: 1;
+  color: rgba(var(--fg-rgb), 0.8);
+  opacity: 0;
+  transition: opacity 0.6s var(--ease) calc(var(--d, 0ms) + 500ms);
+}
+.fm-bar__tile {
+  display: block;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  background: rgba(var(--fg-rgb), 0.12);
+  border: 1px solid var(--card-line);
+  box-sizing: border-box;
+}
+@media (max-width: 420px) {
+  .feature-mock--chart {
+    gap: 4px;
+    padding: 16px 12px;
+    min-height: 150px;
+  }
+  .fm-bar__track {
+    height: 88px;
+  }
+  .fm-bar__tile {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* ---------- Links */
+.feature-mock--links {
+  justify-content: center;
+  gap: 12px;
+  padding: 16px;
+}
+.fm-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 9999px;
+  background: rgba(var(--fg-rgb), 0.08);
+  border: 1px solid var(--card-line);
+  color: rgba(var(--fg-rgb), 0.8);
+}
+.fm-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: var(--radius-buttons);
+  background: rgba(var(--fg-rgb), 0.08);
+  border: 1px solid var(--card-line);
+  opacity: 0;
+  translate: 0 8px;
+  transition:
+    opacity 0.8s var(--ease) var(--d, 0ms),
+    translate 0.8s var(--ease) var(--d, 0ms);
+}
+.fm-link__thumb {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  background: rgba(var(--fg-rgb), 0.16);
+  border: 1px solid var(--card-line);
+  box-sizing: border-box;
+}
+.fm-link__lines {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.fm-link__arrow {
+  flex-shrink: 0;
+  color: rgba(var(--fg-rgb), 0.8);
+}
+
+/* ---------- Timeline */
+.feature-mock--timeline {
+  justify-content: center;
+  gap: 16px;
+  min-height: 120px;
+  padding: 24px 24px 32px;
+}
+.fm-tl__labels {
+  position: relative;
+  height: 16px;
+}
+.fm-tl__label {
+  position: absolute;
+  left: var(--x, 0%);
+  top: 0;
+  translate: -50% 0;
+  font-size: 11px;
+  line-height: 16px;
+  white-space: nowrap;
+  color: rgba(var(--fg-rgb), 0.8);
+  opacity: 0;
+  transition:
+    opacity 0.8s var(--ease) calc(var(--d, 0ms) + 200ms),
+    color 0.6s var(--ease);
+}
+.fm-tl__label.is-done {
+  color: var(--fg);
+}
+.fm-tl__label[data-edge='start'] {
+  translate: 0 0;
+}
+.fm-tl__label[data-edge='end'] {
+  translate: -100% 0;
+}
+.fm-tl__track {
+  position: relative;
+  height: 2px;
+  border-radius: 9999px;
+  background: rgba(var(--fg-rgb), 0.16);
+}
+.fm-tl__fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: var(--w, 0%);
+  border-radius: inherit;
+  background: rgba(var(--fg-rgb), 0.85);
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 1.4s var(--ease) 100ms;
+}
+.fm-tl__dot {
+  position: absolute;
+  left: var(--x, 0%);
+  top: 50%;
+  translate: -50% -50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: rgba(var(--fg-rgb), 0.3);
+  transition: background-color 0.6s var(--ease) var(--d, 0ms);
+}
+.fm-tl__dot.is-milestone {
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(var(--fg-rgb), 0.3);
+  box-sizing: border-box;
+  background: rgba(var(--fg-rgb), 0.16);
+  transition:
+    background-color 0.6s var(--ease) var(--d, 0ms),
+    border-color 0.6s var(--ease) var(--d, 0ms);
+}
+.fm-tl__dot.is-done {
+  background: rgba(var(--fg-rgb), 0.9);
+}
+.fm-tl__dot.is-milestone.is-done {
+  background: var(--fg);
+  border-color: var(--fg);
+}
+/* keep dots in their initial (unfilled) tint until the grid has been seen */
+.features:not(.is-in) .fm-tl__dot.is-done {
+  background: rgba(var(--fg-rgb), 0.3);
+}
+.features:not(.is-in) .fm-tl__dot.is-milestone.is-done {
+  background: rgba(var(--fg-rgb), 0.16);
+  border-color: rgba(var(--fg-rgb), 0.3);
+}
+.features:not(.is-in) .fm-tl__label.is-done {
+  color: rgba(var(--fg-rgb), 0.8);
+}
+
+/* ---------- Armed state: mocks animate in once the grid is seen */
+.features.is-in .fm-row,
+.features.is-in .fm-link {
+  opacity: 1;
+  translate: 0 0;
+}
+.features.is-in .fm-bar__fill {
+  transform: scaleY(1);
+}
+.features.is-in .fm-bar__val,
+.features.is-in .fm-tl__label {
+  opacity: 1;
+}
+.features.is-in .fm-tl__fill {
+  transform: scaleX(1);
+}
+
+/* ---------- Reduced motion: everything static in its final state */
+@media (prefers-reduced-motion: reduce) {
+  .feature,
+  .fm-row,
+  .fm-link,
+  .fm-bar__fill,
+  .fm-bar__val,
+  .fm-tl__label,
+  .fm-tl__fill,
+  .fm-tl__dot {
+    transition: none !important;
+  }
+  .fm-row,
+  .fm-link,
+  .fm-bar__val,
+  .fm-tl__label {
+    opacity: 1;
+    translate: 0 0;
+  }
+  .fm-bar__fill {
+    transform: scaleY(1);
+  }
+  .fm-tl__fill {
+    transform: scaleX(1);
+  }
+}

@@ -1,0 +1,143 @@
+/* DemoForm — light "join" card on the dark sky.
+   Uses global tokens. The error colour below is the only semantic status colour on the
+   page; it is scoped here as a stop-gap until global.css :root exposes
+   `--color-error` / `--color-error-rgb` (same names, so these two lines can then be
+   deleted without touching the rules that consume them). */
+
+.formcard {
+  --color-error: #ee3238;
+  --color-error-rgb: 238, 50, 56;
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  background: var(--white);
+  color: var(--black);
+  border-radius: var(--radius-cards);
+  padding: 40px;
+  overflow: hidden;
+}
+@media (max-width: 768px) {
+  .formcard {
+    padding: 24px;
+  }
+}
+
+/* ---------- Form layout */
+.formcard__form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+.formcard__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.formcard__row > .formcard__field {
+  flex: 1 1 200px;
+}
+.formcard__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.formcard__field .input-air {
+  min-width: 0;
+}
+
+/* ---------- Validation */
+.formcard .input-air.is-invalid,
+.formcard .input-air.is-invalid:focus {
+  border-color: rgba(var(--color-error-rgb), 0.6);
+}
+.formcard__error {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-error);
+}
+
+/* ---------- Submit + legal */
+.formcard__submit {
+  display: flex;
+  justify-content: center;
+  padding-top: 8px;
+}
+.formcard__legal {
+  max-width: 400px;
+  margin: -4px auto 0;
+  text-align: center;
+  /* Colour (not opacity) so the links below keep full Signal Blue. .6 on the white card
+     is #767676 ≈ 4.5:1 — the lowest the 12px legal copy can go and still pass AA
+     (the reference's .5 would fail). */
+  color: rgba(var(--fg-rgb), 0.6);
+}
+.formcard__legal a {
+  color: var(--signal-blue);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: opacity 0.3s var(--ease);
+}
+.formcard__legal a:hover {
+  opacity: 0.7;
+}
+
+/* ---------- Focus ring inside the light card */
+.formcard :focus-visible {
+  outline: 2px solid rgba(0, 0, 0, 0.5);
+  outline-offset: 2px;
+}
+.formcard .input-air:focus-visible {
+  outline-offset: 1px;
+}
+
+/* ---------- Success overlay (covers the whole card) */
+.formcard__success {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 8px;
+  padding: 24px;
+  box-sizing: border-box;
+  background: var(--white);
+  border-radius: var(--radius-cards);
+  color: var(--black);
+  opacity: 0;
+  translate: 0 12px;
+  animation: formcard-success-in 800ms var(--ease) forwards;
+}
+.formcard__success:focus {
+  outline: none;
+}
+.formcard__success__body {
+  color: rgba(var(--fg-rgb), 0.75);
+  max-width: 40ch;
+}
+.formcard__success .btn {
+  margin-top: 16px;
+}
+@keyframes formcard-success-in {
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+/* ---------- Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .formcard__success {
+    animation: none;
+    opacity: 1;
+    translate: 0 0;
+  }
+  .formcard .input-air,
+  .formcard__legal a {
+    transition: none;
+  }
+}

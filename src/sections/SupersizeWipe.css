@@ -1,0 +1,71 @@
+/* =============================================================================
+   Supersize wipe — the per-LINE reveal from DESIGN-SPEC §4.6, layered over Supersize.css.
+
+   Each word carries a `--fill` custom property (0..1, written by Supersize.tsx from the
+   shared ticker) that drives a top-to-bottom gradient clipped to the glyphs, so a
+   half-revealed line is white at the top fading to 15% at the bottom (reference
+   desktop-04 "THE WORK") — never a uniformly dimmed word. The word itself only lifts;
+   its text is rendered twice: a transparent copy underneath carrying the .on-sky glow
+   and the clipped fill on top.
+
+   Selectors are `.supersize .supersize__word …` (0,2,0) so they win over the flat
+   `.supersize__word` rules in Supersize.css whatever the stylesheet order.
+   ========================================================================== */
+
+.supersize .supersize__word {
+  --fill: 0;
+  position: relative;
+  /* The per-word opacity step is replaced by the fill; the glow moves to .supersize__glow. */
+  opacity: 1;
+  text-shadow: none;
+  will-change: transform;
+}
+
+/* The .on-sky contrast glow. `background-clip: text` paints a text-shadow *over* the clipped
+   fill (the shadow is drawn between the background and the glyphs), which would muddy the
+   white — so the glow is a transparent duplicate of the word sitting underneath instead. */
+.supersize .supersize__glow {
+  position: absolute;
+  inset: 0;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  pointer-events: none;
+  user-select: none;
+  text-shadow:
+    0 2px 24px rgba(6, 18, 58, 0.45),
+    0 0 2px rgba(6, 18, 58, 0.25);
+}
+
+/* The visible glyphs: a vertical wipe from --fg (above the fill line) to 15% --fg (below it).
+   At --fill 0 the white stop sits 18% above the box (all dim); at 1 the dim stop sits 18%
+   below it (all white); in between the 18% band is the soft edge of the wipe. Anton's caps
+   (.86em) overflow the .85 line box by a hair, so the paint box is bled by .1em each way
+   (padding cancelled by margin) — a clipped background never shaves the glyph tops. */
+.supersize .supersize__fill {
+  position: relative;
+  display: inline-block;
+  padding: 0.1em 0;
+  margin: -0.1em 0;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  background-image: linear-gradient(
+    to bottom,
+    var(--fg) calc(var(--fill) * 118% - 18%),
+    rgba(var(--fg-rgb), 0.15) calc(var(--fill) * 118%)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+/* Selected text would otherwise vanish (transparent fill on the selection highlight). */
+.supersize .supersize__fill::selection {
+  -webkit-text-fill-color: var(--bg, #000);
+}
+
+/* Static fallback: every line fully filled (the lift is already disabled by Supersize.css). */
+@media (prefers-reduced-motion: reduce) {
+  .supersize .supersize__word {
+    --fill: 1 !important;
+    will-change: auto;
+  }
+}

@@ -1,0 +1,110 @@
+/* =============================================================================
+   Storytelling triptych (reference StorytellingTriptych)
+   Sticky 100lvh stage inside a 4.5×viewport-tall runway. Three stacked items share
+   grid cell 1/1; a rAF loop (Storytelling.tsx) drives opacity / translate / scale
+   from scroll progress. Reduced motion: normal flow + <Reveal>.
+   Headline 200px (u-h1-small), body 16 centred ≤560px — both sit on the raw sky
+   and carry the .on-sky contrast glow (via these class selectors).
+   ========================================================================== */
+
+.triptych {
+  position: relative;
+  width: 100%;
+  height: calc(100vh * 4.5);
+  height: calc(100lvh * 4.5);
+  margin-top: -50vh;
+}
+
+.triptych__inner {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100lvh;
+  overflow: hidden;
+}
+
+.triptych__content {
+  height: 100%;
+  box-sizing: border-box;
+  padding-top: var(--header-height);
+  display: grid;
+  grid-template: 1fr / 1fr;
+  place-items: center;
+}
+
+.triptych__item {
+  grid-row: 1;
+  grid-column: 1;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0 var(--row-margin);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--fg);
+  will-change: transform, opacity;
+  transform-origin: 50% 50%;
+}
+
+.triptych__title {
+  text-transform: uppercase;
+  display: block;
+  margin: 0;
+  /* 0.85 line-height clips the line box tight to the caps; a little padding keeps the
+     glow (text-shadow) and any descender-free cap from touching the body below. */
+  padding-bottom: 0.06em;
+  text-shadow:
+    0 2px 24px rgba(6, 18, 58, 0.45),
+    0 0 2px rgba(6, 18, 58, 0.25);
+}
+
+.triptych__body {
+  max-width: 560px;
+  /* Reference keeps ~40px of air between the 200px headline and the paragraph. */
+  margin-top: 40px;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--fg);
+  text-shadow:
+    0 2px 24px rgba(6, 18, 58, 0.45),
+    0 0 2px rgba(6, 18, 58, 0.25);
+}
+
+/* ---------- Reduced motion: no sticky/height tricks, items in normal flow */
+.triptych--static {
+  height: auto;
+  margin-top: 0;
+}
+.triptych--static .triptych__inner {
+  position: static;
+  height: auto;
+  overflow: visible;
+}
+.triptych--static .triptych__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 120px;
+  padding-top: 0;
+}
+.triptych--static .triptych__item {
+  will-change: auto;
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+/* ---------- Mobile */
+@media (max-width: 768px) {
+  .triptych__item {
+    padding: 0 16px;
+  }
+  .triptych__body {
+    margin-top: 24px;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+}

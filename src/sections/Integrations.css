@@ -1,0 +1,12 @@
+/* =============================================================================
+   Integrations — a single marquee row of 80×80 wordmark tiles.
+   The tile itself (box, border, type hints, real-logo swap) lives in the shared
+   src/components/ui/LogoMark.css (`.logo-mark--tile`: radius 12, fill .08,
+   hairline .18); this file only guards the section against horizontal bleed
+   from the masked marquee. The cursive "whole" / "ecosystem" gap is handled by
+   the global `<i>` margin in global.css; the title glow comes from SectionText.
+   ========================================================================== */
+
+.integrations {
+  overflow-x: clip;
+}

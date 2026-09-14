@@ -1,0 +1,506 @@
+/* =============================================================================
+   Header — fixed 72px transparent bar over the sky (docs/DESIGN-SPEC.md §3 mega
+   menu, §4.1). Left nav with mega menus, centered wordmark that fades in after
+   the hero, right-hand actions, mobile hamburger + white drop-down panel.
+   Root is pointer-events:none so the strip never blocks the hero; only the
+   interactive children re-enable pointer events.
+   ========================================================================== */
+
+.hdr {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--header-height);
+  z-index: 100;
+  background: transparent;
+  color: var(--fg);
+  pointer-events: none;
+  transition: all 0.85s var(--ease);
+}
+
+/* Subtle legibility overlay: dark-to-transparent at the top, masked out downwards */
+.hdr__shade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* .18 → 0 over the top 60%: enough for white nav text on bright clouds, invisible on space/night */
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.18), transparent 60%);
+  -webkit-mask-image: linear-gradient(to bottom, #000, transparent);
+  mask-image: linear-gradient(to bottom, #000, transparent);
+}
+
+/* The 72px inner row is the containing block for the mega menus and the centred
+   wordmark: the panels hang from the bar's bottom edge, not from the 32px nav */
+.hdr__inner {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  pointer-events: none;
+}
+
+/* ---------- Left nav ------------------------------------------------------ */
+/* static on purpose: a positioned nav would become the panels' containing block
+   and pull them up into the bar (top: 100% of 32px instead of 72px) */
+.hdr__nav {
+  position: static;
+  pointer-events: auto;
+  flex: 0 1 auto;
+  min-width: 0;
+}
+.hdr__list {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+/* items stay static: every mega menu anchors to the grid's left padding edge,
+   so the panel's grid-based max-width always keeps it on screen */
+.hdr__item {
+  position: static;
+}
+.hdr__link,
+.hdr__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 0;
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 500;
+  color: var(--fg);
+  white-space: nowrap;
+  transition: opacity 0.3s var(--ease);
+}
+.hdr__link:hover,
+.hdr__trigger:hover {
+  opacity: 0.6;
+}
+/* nav labels + tertiary "Members" sit on the raw sky: same soft glow as .on-sky */
+.hdr__link,
+.hdr__trigger,
+.hdr__login span {
+  text-shadow:
+    0 2px 16px rgba(6, 18, 58, 0.45),
+    0 0 2px rgba(6, 18, 58, 0.25);
+}
+.hdr__menu .hdr__link,
+.hdr__menu .hdr__trigger {
+  text-shadow: none;
+}
+.hdr__chev {
+  flex-shrink: 0;
+  transition: rotate 0.35s var(--ease);
+}
+.hdr__trigger[aria-expanded="true"] .hdr__chev,
+.hdr__m-trigger[aria-expanded="true"] .hdr__chev {
+  rotate: 180deg;
+}
+
+/* ---------- Mega menu panel ---------------------------------------------- */
+/* Positioned against .hdr__inner (72px): top = bar bottom + 16px = y 88, matching
+   the reference; left = the grid's 24px page margin (the containing block's padding
+   box starts at the grid edge, so 0 would be the viewport edge, not the nav's). The
+   max-width is grid-based, so on viewports wider than --page-width (1600) the panel
+   stays inside the centred grid rather than measuring against the viewport. */
+.hdr__menu {
+  position: absolute;
+  top: calc(100% + 16px);
+  left: var(--row-margin);
+  display: flex;
+  padding: 20px;
+  box-sizing: border-box;
+  max-width: calc(100% - var(--row-margin) * 2);
+  background: var(--white);
+  color: var(--black);
+  border-radius: var(--radius-cards);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  transform-origin: top left;
+  opacity: 0;
+  scale: 0.96;
+  translate: 0 -10px;
+  pointer-events: none;
+  visibility: hidden;
+  transition:
+    all 0.35s var(--ease),
+    visibility 0s linear 0.35s;
+}
+/* invisible hover bridge so the mouse can travel straight down from the label into
+   the panel: the trigger's bottom edge sits at y 52 (32px tall, centred in 72) and the
+   panel's top at y 88. The bridge covers y 56–88 — the header buttons end at y 55, so
+   it never sits over them; the remaining 4px hop is covered by the 120ms hover grace */
+.hdr__menu::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  height: 32px;
+}
+.hdr__menu.is-open {
+  opacity: 1;
+  scale: 1;
+  translate: 0 0;
+  pointer-events: auto;
+  visibility: visible;
+  transition:
+    all 0.35s var(--ease),
+    visibility 0s;
+}
+
+.hdr__col {
+  flex: 0 1 403px;
+  width: 403px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.hdr__col-title {
+  font-size: 14px;
+  line-height: 1.5;
+  opacity: 0.6;
+  padding-left: 8px;
+}
+
+/* Sub item: 56px haze icon square + title 16 + description 13 @ 50% */
+.hdr__sub {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  border-radius: var(--radius-buttons);
+  color: var(--fg);
+  transition: background-color 0.5s;
+}
+.hdr__sub:hover {
+  background-color: var(--haze);
+}
+.hdr__sub-icon {
+  flex: 0 0 56px;
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-buttons);
+  background: var(--haze);
+  color: var(--fg);
+}
+.hdr__sub-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.hdr__sub-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--fg);
+}
+.hdr__sub-desc {
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(var(--fg-rgb), 0.5);
+}
+
+/* Item stagger inside the desktop panel: 6px rise, 80ms per item once the panel opens */
+.hdr__menu .hdr__sub {
+  --delay: 0ms;
+  opacity: 0;
+  translate: 0 6px;
+  transition:
+    background-color 0.5s,
+    opacity 0.35s var(--ease) var(--delay),
+    translate 0.35s var(--ease) var(--delay);
+}
+.hdr__menu.is-open .hdr__sub {
+  --delay: calc(var(--i, 0) * 80ms);
+  opacity: 1;
+  translate: 0 0;
+}
+
+/* Right-hand CTA card */
+.hdr__cta {
+  flex: 0 1 403px;
+  width: 403px;
+  min-width: 0;
+  display: flex;
+}
+.hdr__cta-card {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  background: var(--haze);
+  border-radius: var(--radius-buttons);
+}
+.hdr__cta-title {
+  font-size: 16px;
+  line-height: 1.5;
+}
+.hdr__cta-desc {
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(var(--fg-rgb), 0.5);
+}
+.hdr__cta-card .btn {
+  align-self: flex-start;
+}
+
+/* ---------- Center wordmark ------------------------------------------------ */
+.hdr__logo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  display: inline-flex;
+  align-items: center;
+  height: 38px;
+  color: var(--fg);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s var(--ease);
+}
+.hdr__logo.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ---------- Right actions ------------------------------------------------- */
+.hdr__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-left: auto;
+  pointer-events: auto;
+  transition: opacity 0.25s var(--ease);
+}
+.hdr__iconbtn {
+  display: none;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  border: 1px solid var(--fg);
+  border-radius: var(--radius-buttons);
+  color: var(--fg);
+  transition: opacity 0.3s var(--ease);
+}
+.hdr__iconbtn:hover {
+  opacity: 0.6;
+}
+
+/* ---------- Mobile menu (white panel dropping from the top) --------------- */
+.hdr__mobile {
+  display: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  /* own layer above the bar: .btn children carry z-index 1/2 inside the header's
+     stacking context, so without this the white CTA paints through the panel */
+  z-index: 5;
+  box-sizing: border-box;
+  max-height: 100dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 24px 0 0;
+  background: var(--white);
+  color: var(--black);
+  border-radius: 0 0 var(--radius-cards) var(--radius-cards);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  opacity: 0;
+  translate: 0 -10px;
+  pointer-events: none;
+  visibility: hidden;
+  transition:
+    all 0.35s var(--ease),
+    visibility 0s linear 0.35s;
+}
+.hdr__mobile.is-open {
+  opacity: 1;
+  translate: 0 0;
+  pointer-events: auto;
+  visibility: visible;
+  transition:
+    all 0.35s var(--ease),
+    visibility 0s;
+}
+.hdr__m-inner {
+  padding: 0 16px;
+}
+.hdr__m-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 38px;
+}
+.hdr__m-top .hdr__iconbtn {
+  display: inline-flex;
+}
+.hdr__m-logo {
+  display: inline-flex;
+  align-items: center;
+  color: var(--fg);
+}
+.hdr__m-logo .wordmark {
+  text-shadow: none;
+}
+.hdr__m-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.hdr__m-row {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+}
+.hdr__m-trigger {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 0;
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 500;
+  color: var(--fg);
+  text-align: left;
+}
+.hdr__m-sub {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s var(--ease);
+}
+.hdr__m-sub.is-open {
+  max-height: 2000px;
+}
+.hdr__m-sub-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0 0 16px;
+}
+.hdr__m-sub .hdr__col {
+  width: 100%;
+  flex: 1 1 auto;
+}
+.hdr__m-footer {
+  display: flex;
+  gap: 8px;
+  padding: 24px 0;
+}
+.hdr__m-footer .btn {
+  width: calc(50% - 4px);
+  flex: 0 0 calc(50% - 4px);
+  box-sizing: border-box;
+  padding: 0 8px;
+}
+
+/* While the panel is open the bar's own controls step aside: the panel carries its
+   own close button and CTAs, so the burger/X and the white primary button must not
+   show through or stack on top of it. Opacity (not visibility) keeps the burger
+   focusable so Escape can hand focus back to it. */
+.hdr.is-mobile-open .hdr__actions {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ---------- Breakpoints --------------------------------------------------- */
+/* Tablet / small-laptop band: the absolutely centred wordmark (~113px) cannot
+   clear the ~525px nav (five labels, gap 32) until ≈1240px, so below that it
+   leaves the centre and sits in flow at the left of the row, ahead of the nav —
+   the same brand-left arrangement mobile uses (see ≤768). Budget at ≤1024:
+   logo 113 + gap 16 + nav 461 + gap 16 + actions 201 + margins 48 = 855px. */
+@media (min-width: 860px) and (max-width: 1240px) {
+  .hdr__logo {
+    position: static;
+    translate: none;
+    order: -1;
+    margin-right: 8px;
+  }
+}
+/* 769–859: the row cannot hold brand + nav + actions (855px), so the brand steps
+   out and the nav keeps its labels; it is back at 860 and in flow on mobile. */
+@media (min-width: 769px) and (max-width: 859px) {
+  .hdr__logo {
+    display: none;
+  }
+}
+@media (max-width: 1024px) {
+  .hdr__list {
+    gap: 16px;
+  }
+  .hdr__col,
+  .hdr__cta {
+    flex-basis: 300px;
+    width: 300px;
+  }
+  /* nav 461 + gap 16 + Members/Join 201 + margins 48 = 726px fits from 769px up;
+     with "Partner with us" the bar needs 869px and the nav ran under the actions */
+  .hdr__secondary {
+    display: none;
+  }
+}
+@media (max-width: 768px) {
+  .hdr__nav,
+  .hdr__login,
+  .hdr__secondary {
+    display: none;
+  }
+  .hdr__iconbtn,
+  .hdr__mobile {
+    display: inline-flex;
+  }
+  .hdr__mobile {
+    display: block;
+  }
+  /* nav is gone, so the wordmark sits in flow at the left page margin instead of
+     being centred under the "Join QairuHub" button; actions keep margin-left:auto */
+  .hdr__inner {
+    justify-content: flex-start;
+  }
+  .hdr__logo {
+    position: static;
+    translate: none;
+    margin-right: auto;
+  }
+}
+
+/* ---------- Reduced motion ------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  .hdr,
+  .hdr__link,
+  .hdr__trigger,
+  .hdr__chev,
+  .hdr__menu,
+  .hdr__menu .hdr__sub,
+  .hdr__logo,
+  .hdr__actions,
+  .hdr__iconbtn,
+  .hdr__mobile,
+  .hdr__m-sub {
+    transition: none !important;
+  }
+  .hdr__menu.is-open .hdr__sub {
+    --delay: 0ms;
+  }
+}
