@@ -27,9 +27,9 @@ import { validateJoin, type JoinSubmission } from '../_lib/validate'
 const WINDOW_SEC = 600
 
 /**
- * Waitlist rows keep their own, longer retention: the Accelerator opens in spring 2027 and the
- * waitlist promises one email when applications open, so the 180-day join retention would delete
- * sign-ups before that email can go out. ~13 months; override with WAITLIST_RETENTION_DAYS.
+ * Waitlist rows keep their own, longer retention: the Accelerator dates are to be announced (V3-DECISIONS §2)
+ * and the waitlist promises one email when applications open, so the 180-day join retention could
+ * delete sign-ups before that email goes out. ~13 months; override with WAITLIST_RETENTION_DAYS.
  */
 const WAITLIST_RETENTION_DAYS_DEFAULT = 400
 type RetentionEnv = Env & { WAITLIST_RETENTION_DAYS?: string }
