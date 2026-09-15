@@ -11,7 +11,7 @@ import {
 } from 'react'
 import { Button } from '../components/ui/Button'
 import { Wordmark } from '../components/ui/Wordmark'
-import { ArrowRight, ArrowUpRight, ChevronDown, Close, Menu, icons } from '../components/ui/icons'
+import { ArrowUpRight, ChevronDown, Close, Menu, icons } from '../components/ui/icons'
 import { useRoute, useT } from '../i18n/LocaleProvider'
 import { LOCALE_STORAGE_KEY, href, switchLocaleHref, type Locale, type Route } from '../i18n/locale'
 import { scrollToAnchor, useLenis } from '../lib/SmoothScroll'
@@ -23,7 +23,6 @@ import {
   NAV,
   NAV_ORDER,
   text as headerText,
-  type CtaText,
   type NavLink,
   type NavMenuDef,
   type SubText,
@@ -33,7 +32,7 @@ import './Header.css'
 /**
  * Mouse-leave grace before a mega menu closes. The label's bottom edge (y 52) and the panel's
  * hover bridge (y 56–88) leave a thin dead band, and the between-label gaps are outside every
- * <li>: a diagonal move from a label toward the panel's far CTA card crosses ~40px of that at
+ * <li>: a diagonal move from a label toward the panel's last item crosses ~40px of that at
  * ~150px/s (≈270ms), so the grace must comfortably outlast it.
  */
 const HOVER_GRACE_MS = 300
@@ -44,8 +43,7 @@ const HOVER_GRACE_MS = 300
 const LOGO_HIDE_AT = 0.05
 
 /**
- * Window event the "Ask Q" CTA (About menu) dispatches after its `/#launchpad` link is followed
- * on the home page. The assistant launcher (WP3) listens for it and opens its panel.
+ * Window event that asks the assistant launcher (WP3) to open its panel.
  */
 export const ASSISTANT_OPEN_EVENT = 'qh:assistant-open'
 /**
@@ -161,7 +159,7 @@ function SubItem({
         onClick={onNavigate}
       >
         <span className="hdr__sub-icon" aria-hidden="true">
-          <Icon size={20} />
+          <Icon size={16} />
         </span>
         <span className="hdr__sub-text">
           <span className="hdr__sub-title">
@@ -193,51 +191,6 @@ function Column({
         <SubItem key={key} sub={items[key]} def={def.items[key]} index={i} newTab={newTab} onNavigate={onNavigate} />
       ))}
     </ul>
-  )
-}
-
-/** A menu CTA's href and click handler (closes the menu; About's "Ask Q" also opens the assistant). */
-function useCta(def: NavMenuDef<string>, onNavigate: () => void) {
-  const route = useRoute()
-  const { href: to } = resolveLink(route, def.cta)
-  const onClick = () => {
-    onNavigate()
-    if (def.opensAssistant) {
-      // after the anchor glide has been scheduled; on a sub-page the link navigates home instead
-      window.setTimeout(() => window.dispatchEvent(new CustomEvent(ASSISTANT_OPEN_EVENT)), 0)
-    }
-  }
-  return { to, onClick }
-}
-
-function CtaCard({ def, cta, onNavigate }: { def: NavMenuDef<string>; cta: CtaText; onNavigate: () => void }) {
-  const { to, onClick } = useCta(def, onNavigate)
-  return (
-    <div className="hdr__cta">
-      <div className="hdr__cta-card">
-        <p className="hdr__cta-title">{cta.title}</p>
-        <p className="hdr__cta-desc">{cta.description}</p>
-        <Button variant="secondary" href={to} onClick={onClick}>
-          {cta.cta}
-        </Button>
-      </div>
-    </div>
-  )
-}
-
-/** The mobile panel's version of a menu CTA: one more row in the sub-item style. */
-function MobileCta({ def, cta, onNavigate }: { def: NavMenuDef<string>; cta: CtaText; onNavigate: () => void }) {
-  const { to, onClick } = useCta(def, onNavigate)
-  return (
-    <a className="hdr__sub" href={to} onClick={onClick}>
-      <span className="hdr__sub-icon" aria-hidden="true">
-        <ArrowRight size={20} />
-      </span>
-      <span className="hdr__sub-text">
-        <span className="hdr__sub-title">{cta.cta}</span>
-        <span className="hdr__sub-desc">{cta.description}</span>
-      </span>
-    </a>
   )
 }
 
@@ -486,7 +439,7 @@ export default function Header() {
                   </li>
                 )
               }
-              const menuText = t.nav[key as 'programs' | 'platform' | 'about']
+              const menuText = t.nav[key as 'platform' | 'about']
               const menuDef = item.menu as NavMenuDef<string>
               const isOpen = openMenu === i
               const menuId = `hdr-menu-${key}`
@@ -529,7 +482,6 @@ export default function Header() {
                       newTab={t.a11y.newTab}
                       onNavigate={closeMenu}
                     />
-                    <CtaCard def={menuDef} cta={menuText.cta} onNavigate={closeMenu} />
                   </div>
                 </li>
               )
@@ -621,7 +573,7 @@ export default function Header() {
                   </li>
                 )
               }
-              const menuText = t.nav[key as 'programs' | 'platform' | 'about']
+              const menuText = t.nav[key as 'platform' | 'about']
               const menuDef = item.menu as NavMenuDef<string>
               const expanded = mobileExpanded === i
               const subId = `hdr-m-sub-${key}`
@@ -645,7 +597,6 @@ export default function Header() {
                         newTab={t.a11y.newTab}
                         onNavigate={closeMobile}
                       />
-                      <MobileCta def={menuDef} cta={menuText.cta} onNavigate={closeMobile} />
                     </div>
                   </div>
                 </li>

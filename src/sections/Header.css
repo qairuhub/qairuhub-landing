@@ -72,10 +72,9 @@
   margin: 0;
   padding: 0;
 }
-/* items stay static: every mega menu anchors to the grid's left padding edge,
-   so the panel's grid-based max-width always keeps it on screen */
+/* each compact menu hangs under its own label: the item is the panel's containing block */
 .hdr__item {
-  position: static;
+  position: relative;
 }
 .hdr__link,
 .hdr__trigger {
@@ -116,19 +115,17 @@
 }
 
 /* ---------- Mega menu panel ---------------------------------------------- */
-/* Positioned against .hdr__inner (72px): top = bar bottom + 16px = y 88, matching
-   the reference; left = the grid's 24px page margin (the containing block's padding
-   box starts at the grid edge, so 0 would be the viewport edge, not the nav's). The
-   max-width is grid-based, so on viewports wider than --page-width (1600) the panel
-   stays inside the centred grid rather than measuring against the viewport. */
+/* Positioned against its .hdr__item: the 32px label is centred in the 72px bar
+   (bottom edge at y 52), so top = 100% + 36px keeps the panel at y 88 like the
+   reference; left = -12px lines the icon squares up with the label text. */
 .hdr__menu {
   position: absolute;
-  top: calc(100% + 16px);
-  left: var(--row-margin);
+  top: calc(100% + 36px);
+  left: -12px;
   display: flex;
-  padding: 20px;
+  padding: 6px;
   box-sizing: border-box;
-  max-width: calc(100% - var(--row-margin) * 2);
+  max-width: calc(100vw - var(--row-margin) * 2);
   background: var(--white);
   color: var(--black);
   border-radius: var(--radius-cards);
@@ -168,12 +165,12 @@
 }
 
 .hdr__col {
-  flex: 0 1 403px;
-  width: 403px;
+  flex: 0 1 300px;
+  width: 300px;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -185,12 +182,12 @@
   padding-left: 8px;
 }
 
-/* Sub item: 56px haze icon square + title 16 + description 13 @ 50% */
+/* Sub item: compact 36px haze icon square + title 14 + description 12 @ 55% */
 .hdr__sub {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px;
+  gap: 10px;
+  padding: 6px 8px 6px 6px;
   border-radius: var(--radius-buttons);
   color: var(--fg);
   transition: background-color 0.5s;
@@ -199,9 +196,9 @@
   background-color: var(--haze);
 }
 .hdr__sub-icon {
-  flex: 0 0 56px;
-  width: 56px;
-  height: 56px;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
   display: grid;
   place-items: center;
   border-radius: var(--radius-buttons);
@@ -217,14 +214,14 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 16px;
-  line-height: 1.5;
+  font-size: 14px;
+  line-height: 1.4;
   color: var(--fg);
 }
 .hdr__sub-desc {
-  font-size: 13px;
-  line-height: 1.5;
-  color: rgba(var(--fg-rgb), 0.5);
+  font-size: 12px;
+  line-height: 1.4;
+  color: rgba(var(--fg-rgb), 0.55);
 }
 
 /* Item stagger inside the desktop panel: 6px rise, 80ms per item once the panel opens */
@@ -238,39 +235,9 @@
     translate 0.35s var(--ease) var(--delay);
 }
 .hdr__menu.is-open .hdr__sub {
-  --delay: calc(var(--i, 0) * 80ms);
+  --delay: calc(var(--i, 0) * 50ms);
   opacity: 1;
   translate: 0 0;
-}
-
-/* Right-hand CTA card */
-.hdr__cta {
-  flex: 0 1 403px;
-  width: 403px;
-  min-width: 0;
-  display: flex;
-}
-.hdr__cta-card {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  background: var(--haze);
-  border-radius: var(--radius-buttons);
-}
-.hdr__cta-title {
-  font-size: 16px;
-  line-height: 1.5;
-}
-.hdr__cta-desc {
-  font-size: 13px;
-  line-height: 1.5;
-  color: rgba(var(--fg-rgb), 0.5);
-}
-.hdr__cta-card .btn {
-  align-self: flex-start;
 }
 
 /* ---------- Center wordmark ------------------------------------------------ */
@@ -531,10 +498,9 @@
 
 /* --- mega menu columns narrow with the viewport (both locales) --- */
 @media (max-width: 1240px) {
-  .hdr__col,
-  .hdr__cta {
-    flex-basis: 300px;
-    width: 300px;
+  .hdr__col {
+    flex-basis: 280px;
+    width: 280px;
   }
 }
 

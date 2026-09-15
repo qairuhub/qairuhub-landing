@@ -22,7 +22,7 @@ import './Assistant.css'
 
 /**
  * The Launchpad Ask bar (CONTENT-V3 §4.2–§4.3, AGENT-SPEC §11): a solid card (no blur) with the
- * input, Send/Stop, six suggestion chips and the note. While the input is empty, unfocused and
+ * input, Send/Stop and the note (no suggestion chips on the landing). While the input is empty, unfocused and
  * idle, a typewriter cycles the suggestions in place of the placeholder. An answer to a question
  * asked here renders inline under the bar (max-height 360, scrolls) with its Handbook sources,
  * "Continue in chat" (opens the panel on the same thread) and "Ask something else".
@@ -257,7 +257,7 @@ export default function AskBar({ onPromptChange }: AskBarProps) {
       </form>
       <div ref={turnstileRef} className="ask__turnstile" />
 
-      {answer ? (
+      {answer && (
         <div className="ask__answer">
           {question && <p className="ask__q">{question.text}</p>}
           <div className="ask__scroll" data-lenis-prevent="">
@@ -275,14 +275,6 @@ export default function AskBar({ onPromptChange }: AskBarProps) {
               </Button>
             )}
           </div>
-        </div>
-      ) : (
-        <div className="ask__chips" role="group" aria-label={t.suggestionsLabel}>
-          {t.suggestions.map((s) => (
-            <button key={s} type="button" className="ask__chip" onClick={() => submit(s)} onPointerEnter={() => warm(false)}>
-              {s}
-            </button>
-          ))}
         </div>
       )}
       <Note text={t.note} newTab={t.newTab} />
