@@ -3,14 +3,15 @@ import { useFrame, type ThreeElements } from '@react-three/fiber'
 import { MeshTransmissionMaterial, type MeshTransmissionMaterialProps } from '@react-three/drei'
 import * as THREE from 'three'
 import { Font } from 'three/examples/jsm/loaders/FontLoader.js'
-import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js'
 import type { TypefaceData } from '../../lib/ttf'
+import { extrudeGlyphShapes } from './extrudeGlyphs'
 
 /**
  * The one frosted-glass lettering recipe (docs/JOURNEY-SPEC.md "Frosted glass wordmark").
  *
- *   - geometry: three's TextGeometry (extruded glyph outlines) with a ROUNDED bevel that turns
- *     every thin script stroke into a tube-like rounded bar. Built once per (font, text, shape)
+ *   - geometry: extruded glyph outlines (./extrudeGlyphs, three's ExtrudeGeometry with clamped
+ *     inset bevels) with a ROUNDED bevel that turns every script stroke into a tube-like rounded
+ *     bar, optionally pulled inside the outline (`offset`). Built once per (font, text, shape)
  *     and kept in a module-level cache, so a sculpture can mount/unmount for free (the
  *     transmission pass only exists while it is on screen). Disposed on full page unload only.
  *   - material: `frosted` = drei MeshTransmissionMaterial with blurred transmission (the matte
@@ -29,6 +30,13 @@ export interface GlassTextBevel {
   size: number
   /** quarter-round subdivisions — 3 is all a 0.024-unit quarter-round can show at hero scale */
   segments: number
+  /**
+   * Shifts the whole bevel profile along the outline normal (three's `bevelOffset`): negative
+   * values pull the cap face INSIDE the glyph outline, so the rounded tube can end up thinner
+   * than the font's own stroke. Strokes narrower than the inset collapse to a hairline instead of
+   * folding (clamped in ./extrudeGlyphs.ts). Default 0.
+   */
+  offset?: number
 }
 
 export interface GlassGeometryOptions {
@@ -266,7 +274,14 @@ function TransmissionBacklight({ top, bottom, strength }: GlassBacklight) {
 
 /* ------------------------------------------------------------------ geometry cache */
 
-const geometries = new Map<string, TextGeometry>()
+/**
+ * Holes smaller than this (× size²) are slivers left by overlapping font contours at a join, not
+ * counters: Courgette's q carries one (≈ 5e-7) where the stem meets the bowl, while the real
+ * counters of a / b / q are ≈ 0.05. An inset bevel would grow the sliver into a notch.
+ */
+const MIN_HOLE_AREA = 5e-4
+
+const geometries = new Map<string, THREE.BufferGeometry>()
 const fonts = new WeakMap<TypefaceData, Font>()
 let unloadHooked = false
 
@@ -280,12 +295,13 @@ function disposeAll() {
  * Cached per font file (`familyName` is the TTF's file name, see lib/ttf.ts), text and shape
  * parameters; the same instance is handed to every mount, so never dispose it yourself.
  */
-export function getGlassGeometry(font: TypefaceData, text: string, opts: GlassGeometryOptions = {}): TextGeometry {
+export function getGlassGeometry(font: TypefaceData, text: string, opts: GlassGeometryOptions = {}): THREE.BufferGeometry {
   const size = opts.size ?? 1
   const height = opts.height ?? GLASS_HEIGHT * size
   const curveSegments = opts.curveSegments ?? GLASS_CURVE_SEGMENTS
   const bevel: GlassTextBevel = { ...GLASS_BEVEL, ...opts.bevel }
-  const key = [font.familyName, text, size, height, curveSegments, bevel.thickness, bevel.size, bevel.segments].join('|')
+  const bevelOffset = bevel.offset ?? 0
+  const key = [font.familyName, text, size, height, curveSegments, bevel.thickness, bevel.size, bevelOffset, bevel.segments].join('|')
   let geometry = geometries.get(key)
   if (!geometry) {
     let typeface = fonts.get(font)
@@ -293,16 +309,16 @@ export function getGlassGeometry(font: TypefaceData, text: string, opts: GlassGe
       typeface = new Font(font)
       fonts.set(font, typeface)
     }
-    geometry = new TextGeometry(text, {
-      font: typeface,
-      size,
+    // Same shapes and parameters as three's TextGeometry; the extruder clamps an inset bevel so
+    // thin tails collapse to a hairline instead of folding (see extrudeGlyphs.ts).
+    geometry = extrudeGlyphShapes(typeface.generateShapes(text, size), {
       depth: height,
       curveSegments,
-      bevelEnabled: true,
       bevelThickness: bevel.thickness * size,
       bevelSize: bevel.size * size,
-      bevelOffset: 0,
+      bevelOffset: bevelOffset * size,
       bevelSegments: bevel.segments,
+      minHoleArea: MIN_HOLE_AREA * size * size,
     })
     // Centre from the BEVELLED bounds (the bevel swells the outline), so the visual centre of the
     // run is the origin whatever the viewport does — the fit is then pure scale.
@@ -323,7 +339,7 @@ export function getGlassGeometry(font: TypefaceData, text: string, opts: GlassGe
 /* ------------------------------------------------------------------ component */
 
 export interface GlassTextProps extends Omit<ThreeElements['mesh'], 'ref' | 'children' | 'material' | 'geometry' | 'args'> {
-  /** The glyph run to extrude (copy comes from content.ts). */
+  /** The glyph run to extrude (the brand wordmark from src/i18n/shared.ts). */
   text: string
   /** Parsed typeface from lib/ttf.ts `useTTFFont` (stable identity — the geometry cache keys on it). */
   font: TypefaceData

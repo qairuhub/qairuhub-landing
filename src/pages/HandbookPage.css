@@ -1,0 +1,380 @@
+/* =============================================================================
+   The QairuHub Handbook page (WP10). Builds on subpage.css.
+   Long-form: max 70ch, Inter 17/28, tables scroll inside their own box. The article sits on a
+   flat navy reading surface (no blur, no glow on thousands of glyphs: cheap to rasterise on
+   integrated GPUs at DPR 2, and white text keeps its contrast over any star).
+   ========================================================================== */
+
+.handbook__title {
+  font-size: clamp(56px, 10vw, 150px);
+}
+.handbook__meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 10px;
+  color: rgba(var(--white-rgb), 0.75);
+}
+.handbook__dot {
+  opacity: 0.6;
+}
+.handbook__ctas {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+/* ---------- Layout: sticky TOC | article */
+.subpage .handbook__layout {
+  display: grid;
+  grid-template-columns: 248px minmax(0, 1fr);
+  align-items: start;
+  column-gap: 48px;
+}
+.handbook__aside {
+  position: sticky;
+  top: calc(var(--header-height) + 24px);
+  min-width: 0;
+}
+.handbook__main {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+
+/* ---------- Desktop TOC */
+.hb-toc--desk {
+  max-height: calc(100vh - var(--header-height) - 48px);
+  max-height: calc(100dvh - var(--header-height) - 48px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--white-rgb), 0.25) transparent;
+  padding: 4px 8px 4px 4px;
+  text-shadow: var(--text-glow-soft);
+}
+.hb-toc__label {
+  margin: 0 0 12px 12px;
+  color: rgba(var(--white-rgb), 0.7);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.hb-toc__list,
+.hb-toc__sub {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.hb-toc__sub {
+  margin: 2px 0 8px 12px;
+  padding-left: 8px;
+  border-left: 1px solid rgba(var(--white-rgb), 0.18);
+}
+.hb-toc__link {
+  display: block;
+  padding: 6px 12px;
+  border-radius: var(--radius-buttons);
+  color: rgba(var(--white-rgb), 0.72);
+  font-size: 14px;
+  line-height: 1.45;
+  text-decoration: none;
+  transition:
+    color 0.3s var(--ease),
+    background-color 0.3s var(--ease);
+}
+.hb-toc__link--h2 {
+  color: rgba(var(--white-rgb), 0.88);
+}
+.hb-toc__link--h3 {
+  font-size: 13px;
+  padding-block: 5px;
+}
+.hb-toc__link:hover {
+  color: var(--white);
+  background: rgba(var(--white-rgb), 0.06);
+}
+.hb-toc__link[aria-current] {
+  color: var(--white);
+  background: rgba(var(--white-rgb), 0.1);
+}
+
+/* ---------- Tablet / phone TOC: collapsible "Contents" box above the article */
+.hb-toc-m {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .subpage .handbook__layout {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 16px;
+  }
+  /* not sticky here: a stuck bar would cover headings that anchor links land under the header */
+  .handbook__aside {
+    position: static;
+  }
+  .hb-toc--desk {
+    display: none;
+  }
+  .hb-toc-m {
+    display: block;
+    border: 1px solid var(--card-line);
+    border-radius: var(--radius-cards);
+    background: rgba(var(--glow-rgb), 0.62);
+    overflow: hidden;
+  }
+  .hb-toc-m__summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 48px;
+    padding: 0 16px;
+    cursor: pointer;
+    list-style: none;
+    color: var(--white);
+  }
+  .hb-toc-m__summary::-webkit-details-marker {
+    display: none;
+  }
+  .hb-toc-m__summary:focus-visible {
+    outline: 2px solid rgba(var(--white-rgb), 0.8);
+    outline-offset: -2px;
+    border-radius: var(--radius-cards);
+  }
+  .hb-toc-m__chev {
+    flex: none;
+    transition: rotate 0.35s var(--ease);
+  }
+  .hb-toc-m[open] .hb-toc-m__chev {
+    rotate: 180deg;
+  }
+  .hb-toc--mobile {
+    max-height: min(60vh, 520px);
+    max-height: min(60dvh, 520px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 4px 8px 12px;
+    border-top: 1px solid rgba(var(--white-rgb), 0.1);
+  }
+  .hb-toc--mobile .hb-toc__link {
+    padding-block: 9px;
+  }
+}
+
+/* ---------- KK note */
+.hb-kk-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 0;
+  padding: 16px 20px;
+  border: 1px solid var(--card-line);
+  border-radius: var(--radius-cards);
+  background: var(--card-fill);
+  color: var(--white);
+}
+.hb-kk-note__icon {
+  flex: none;
+  margin-top: 2px;
+  opacity: 0.85;
+}
+
+/* ---------- Article (generated vocabulary: section.hb-section, h2[id], h3[id] > a.hb-anchor,
+   h4, p, ul, ol, li, strong, code, br, div.hb-table > table, a) */
+.hb-body {
+  padding: 16px 56px 56px;
+  border: 1px solid var(--card-line);
+  border-radius: var(--radius-cards);
+  background: rgba(var(--glow-rgb), 0.62);
+  color: rgba(var(--white-rgb), 0.9);
+  font-size: 17px;
+  line-height: 28px;
+  overflow-wrap: break-word;
+}
+.hb-body > .hb-section {
+  max-width: 70ch;
+}
+.hb-body > .hb-section + .hb-section {
+  margin-top: 24px;
+  border-top: 1px solid rgba(var(--white-rgb), 0.12);
+}
+
+.hb-body h2,
+.hb-body h3,
+.hb-body h4 {
+  margin: 0;
+  color: var(--white);
+  font-weight: 500;
+}
+/* Anchor landing: Lenis puts the heading box at the header's bottom edge (ANCHOR_OFFSET). The
+   padding-top gives the text air below it. No scroll-margin-top here: Lenis adds scroll-margin to
+   its offset, which would double the header gap. */
+.hb-body h2 {
+  margin-top: 16px;
+  padding-top: 40px;
+  font-size: clamp(26px, 2.25vw, 32px);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+.hb-body h3 {
+  margin-top: 16px;
+  padding-top: 24px;
+  font-size: 20px;
+  line-height: 1.4;
+}
+.hb-body h4 {
+  margin-top: 24px;
+  font-size: 17px;
+  line-height: 28px;
+}
+.hb-body h2 + h3 {
+  margin-top: 0;
+}
+
+.hb-body .hb-anchor {
+  position: relative;
+  color: inherit;
+  text-decoration: none;
+}
+.hb-body .hb-anchor::before {
+  content: "#";
+  position: absolute;
+  right: 100%;
+  margin-right: 10px;
+  color: rgba(var(--white-rgb), 0.45);
+  opacity: 0;
+  transition: opacity 0.25s var(--ease);
+}
+.hb-body .hb-anchor:hover::before,
+.hb-body .hb-anchor:focus-visible::before {
+  opacity: 1;
+}
+
+.hb-body p,
+.hb-body ul,
+.hb-body ol,
+.hb-body .hb-table {
+  margin: 16px 0 0;
+}
+.hb-body ul,
+.hb-body ol {
+  padding-left: 1.4em;
+}
+.hb-body ul {
+  list-style: disc;
+}
+.hb-body ol {
+  list-style: decimal;
+}
+.hb-body li + li {
+  margin-top: 6px;
+}
+.hb-body li > ul,
+.hb-body li > ol {
+  margin-top: 6px;
+}
+.hb-body li::marker {
+  color: rgba(var(--white-rgb), 0.5);
+}
+.hb-body strong {
+  color: var(--white);
+  font-weight: 600;
+}
+.hb-body code {
+  padding: 1px 6px;
+  border-radius: var(--radius-inputs);
+  background: rgba(var(--white-rgb), 0.1);
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  font-size: 0.88em;
+}
+.hb-body a:not(.hb-anchor) {
+  color: var(--white);
+  text-decoration: underline;
+  text-decoration-color: rgba(var(--white-rgb), 0.45);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.25s var(--ease);
+}
+.hb-body a:not(.hb-anchor):hover {
+  text-decoration-color: var(--white);
+}
+
+.hb-body .hb-table {
+  overflow-x: auto;
+  border: 1px solid var(--card-line);
+  border-radius: var(--radius-images);
+  overscroll-behavior-x: contain;
+}
+.hb-body table {
+  width: 100%;
+  min-width: 480px;
+  border-collapse: collapse;
+  font-size: 15px;
+  line-height: 24px;
+}
+.hb-body th,
+.hb-body td {
+  padding: 10px 16px;
+  text-align: left;
+  vertical-align: top;
+}
+.hb-body th {
+  color: rgba(var(--white-rgb), 0.75);
+  font-weight: 500;
+  background: rgba(var(--white-rgb), 0.05);
+  border-bottom: 1px solid var(--card-line);
+}
+.hb-body td {
+  border-top: 1px solid rgba(var(--white-rgb), 0.08);
+}
+.hb-body tbody tr:first-child td {
+  border-top: 0;
+}
+
+/* ---------- After the article */
+.hb-end {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 24px;
+  padding: 8px 4px 0;
+  text-shadow: var(--text-glow);
+}
+.hb-end__feedback {
+  max-width: 62ch;
+  color: rgba(var(--white-rgb), 0.85);
+}
+.hb-end__feedback a {
+  color: var(--white);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (max-width: 768px) {
+  .hb-body {
+    padding: 4px 20px 32px;
+  }
+  .hb-body h2 {
+    padding-top: 32px;
+  }
+  .hb-body table {
+    font-size: 14px;
+    line-height: 22px;
+  }
+  .hb-body .hb-anchor::before {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hb-toc__link,
+  .hb-toc-m__chev,
+  .hb-body .hb-anchor::before,
+  .hb-body a:not(.hb-anchor) {
+    transition: none;
+  }
+}

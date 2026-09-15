@@ -1,99 +1,278 @@
-/* DemoForm — light "join" card on the dark sky.
-   Uses global tokens. The error colour below is the only semantic status colour on the
-   page; it is scoped here as a stop-gap until global.css :root exposes
-   `--color-error` / `--color-error-rgb` (same names, so these two lines can then be
-   deleted without touching the rules that consume them). */
+/* =============================================================================
+   Compact join form (#join) · CONTENT-V3 §15 · V3-BUILD-PLAN §WP9
+   Read in dusk → night, so the card is a flat ink-translucent surface (no blur, no shadow,
+   no gradient) with Air hairlines and radii: card 12 · inputs 4 · button 8.
+   ≥1025px: headline (5 cols) beside the card (6 cols, offset 1). ≤1024px: stacked.
+   Height target: ≤ 0.63 vh at 1440×900 and ≤ 0.75 vh at 390×844 (was 1.14 vh in v2).
+   ========================================================================== */
 
-.formcard {
-  --color-error: #ee3238;
-  --color-error-rgb: 238, 50, 56;
+.section-air.join {
+  --join-ink-rgb: 7, 11, 30;
+  --join-error: #ff9aa0;
+  --join-error-line: rgba(255, 154, 160, 0.7);
+  padding-block: 88px;
+}
+
+.join__grid {
+  align-items: center;
+  row-gap: 32px;
+}
+
+.join__text {
+  gap: 16px;
+}
+.join__title {
+  margin: 0;
+  text-wrap: balance;
+}
+.join__body {
+  max-width: 40ch;
+  margin: 0;
+  color: rgba(var(--white-rgb), 0.86);
+}
+
+/* ---------- Card */
+.joincard {
   position: relative;
   box-sizing: border-box;
   width: 100%;
-  background: var(--white);
-  color: var(--black);
+  padding: 24px;
   border-radius: var(--radius-cards);
-  padding: 40px;
+  background: rgba(var(--join-ink-rgb), 0.58);
+  border: 1px solid var(--card-line);
+  color: var(--white);
+}
+
+.joincard__form {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+  min-width: 0;
+}
+
+/* ---------- Honeypot: visually hidden, not display:none (bots skip hidden inputs) */
+.joincard__hp {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
   overflow: hidden;
-}
-@media (max-width: 768px) {
-  .formcard {
-    padding: 24px;
-  }
+  opacity: 0;
+  pointer-events: none;
 }
 
-/* ---------- Form layout */
-.formcard__form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+/* ---------- Field with an inset label */
+.jf {
+  position: relative;
+  grid-column: span 3;
   min-width: 0;
 }
-.formcard__row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-}
-.formcard__row > .formcard__field {
-  flex: 1 1 200px;
-}
-.formcard__field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 0;
-}
-.formcard__field .input-air {
-  min-width: 0;
+.jf--full {
+  grid-column: 1 / -1;
 }
 
-/* ---------- Validation */
-.formcard .input-air.is-invalid,
-.formcard .input-air.is-invalid:focus {
-  border-color: rgba(var(--color-error-rgb), 0.6);
-}
-.formcard__error {
+.jf__label {
+  position: absolute;
+  top: 7px;
+  left: 12px;
+  right: 34px;
+  z-index: 1;
   font-size: 12px;
-  line-height: 1.5;
-  color: var(--color-error);
+  line-height: 16px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: rgba(var(--white-rgb), 0.78);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  transition: color 0.3s var(--ease);
+}
+.jf__req {
+  margin-left: 1px;
+  color: rgba(var(--white-rgb), 0.6);
+}
+.jf:focus-within .jf__label {
+  color: rgba(var(--white-rgb), 0.9);
 }
 
-/* ---------- Submit + legal */
-.formcard__submit {
-  display: flex;
-  justify-content: center;
-  padding-top: 8px;
+.jf__control {
+  font: inherit;
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  height: 48px;
+  margin: 0;
+  padding: 23px 12px 3px;
+  appearance: none;
+  -webkit-appearance: none;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--white);
+  background-color: rgba(var(--white-rgb), 0.05);
+  border: 1px solid rgba(var(--white-rgb), 0.14);
+  border-radius: var(--radius-inputs);
+  outline: none;
+  color-scheme: dark;
+  transition:
+    border-color 0.3s var(--ease),
+    background-color 0.3s var(--ease);
 }
-.formcard__legal {
-  max-width: 400px;
-  margin: -4px auto 0;
-  text-align: center;
-  /* Colour (not opacity) so the links below keep full Signal Blue. .6 on the white card
-     is #767676 ≈ 4.5:1 — the lowest the 12px legal copy can go and still pass AA
-     (the reference's .5 would fail). */
-  color: rgba(var(--fg-rgb), 0.6);
+.jf__control::placeholder {
+  color: rgba(var(--white-rgb), 0.42);
+  opacity: 1;
 }
-.formcard__legal a {
-  color: var(--signal-blue);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  transition: opacity 0.3s var(--ease);
+.jf__control:hover {
+  border-color: rgba(var(--white-rgb), 0.24);
 }
-.formcard__legal a:hover {
-  opacity: 0.7;
+.jf__control:focus {
+  border-color: rgba(var(--white-rgb), 0.62);
+  background-color: rgba(var(--white-rgb), 0.08);
 }
-
-/* ---------- Focus ring inside the light card */
-.formcard :focus-visible {
-  outline: 2px solid rgba(0, 0, 0, 0.5);
-  outline-offset: 2px;
-}
-.formcard .input-air:focus-visible {
+.jf__control:focus-visible {
+  outline: 2px solid rgba(var(--white-rgb), 0.5);
   outline-offset: 1px;
 }
+/* Autofill keeps the dark surface instead of the browser's pale yellow slab. */
+.jf__control:-webkit-autofill,
+.jf__control:-webkit-autofill:hover,
+.jf__control:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--white);
+  box-shadow: 0 0 0 1000px rgb(20, 26, 48) inset;
+  caret-color: var(--white);
+}
 
-/* ---------- Success overlay (covers the whole card) */
-.formcard__success {
+.jf__control--select {
+  padding-right: 34px;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml;utf8,<svg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'><path d='M12 6L8 10L4 6' stroke='white' stroke-opacity='.7' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+.jf__control--select[data-empty] {
+  color: rgba(var(--white-rgb), 0.42);
+}
+.jf__control--select option {
+  color: var(--white);
+  background-color: #111733;
+}
+
+.jf__control--area {
+  height: auto;
+  min-height: 92px;
+  padding-top: 26px;
+  resize: none;
+  line-height: 20px;
+}
+
+.jf.is-invalid .jf__control,
+.jf.is-invalid .jf__control:focus {
+  border-color: var(--join-error-line);
+}
+.jf__error {
+  margin: 4px 0 0 2px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--join-error);
+}
+
+/* ---------- Turnstile (only mounted when a site key exists; collapsed while empty) */
+.joincard__turnstile {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+.joincard__turnstile:empty {
+  display: none;
+}
+
+/* ---------- Submission error */
+.joincard__alert {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: var(--radius-inputs);
+  border: 1px solid rgba(255, 154, 160, 0.35);
+  background: rgba(255, 110, 120, 0.1);
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--join-error);
+}
+
+/* ---------- Footer row: legal line + Send */
+.joincard__foot {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 6px;
+}
+.joincard__legal {
+  margin: 0;
+  max-width: 44ch;
+  font-size: 12px;
+  line-height: 1.45;
+  color: rgba(var(--white-rgb), 0.62);
+}
+.joincard__legal a,
+.joincard__success-body a {
+  color: var(--white);
+  text-decoration: underline;
+  text-decoration-color: rgba(var(--white-rgb), 0.4);
+  text-underline-offset: 2px;
+  transition: text-decoration-color 0.3s var(--ease);
+}
+.joincard__legal a:hover,
+.joincard__success-body a:hover {
+  text-decoration-color: currentColor;
+}
+.joincard__ts-note {
+  color: rgba(var(--white-rgb), 0.5);
+}
+
+.joincard__submit {
+  flex: none;
+  min-width: 108px;
+}
+.joincard__submit svg {
+  position: relative;
+  z-index: 2;
+  margin-left: 4px;
+  color: var(--bg);
+}
+.joincard__submit:hover svg {
+  filter: none;
+  color: var(--fg);
+}
+/* Disabled on the dark card: a quiet ghost, not the global haze slab. */
+.joincard .joincard__submit:disabled {
+  background: transparent;
+  border-color: rgba(var(--white-rgb), 0.24);
+  opacity: 1;
+  filter: none;
+}
+.joincard .joincard__submit:disabled span,
+.joincard .joincard__submit:disabled:hover span,
+.joincard .joincard__submit:disabled svg {
+  color: rgba(var(--white-rgb), 0.5);
+}
+
+.joincard :focus-visible {
+  outline: 2px solid rgba(var(--white-rgb), 0.7);
+  outline-offset: 2px;
+}
+
+/* ---------- Success: replaces the fields in place, card keeps its height */
+/* Buttons animate `all`, which would delay an inherited visibility change: hide instantly. */
+.joincard.is-success .joincard__form,
+.joincard.is-success .joincard__form * {
+  visibility: hidden;
+  opacity: 0;
+  transition: none;
+}
+.joincard__success {
   position: absolute;
   inset: 0;
   z-index: 2;
@@ -101,43 +280,126 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  text-align: center;
-  gap: 8px;
+  gap: 6px;
   padding: 24px;
   box-sizing: border-box;
-  background: var(--white);
-  border-radius: var(--radius-cards);
-  color: var(--black);
+  text-align: center;
   opacity: 0;
   translate: 0 12px;
-  animation: formcard-success-in 800ms var(--ease) forwards;
+  animation: joincard-success-in 800ms var(--ease) forwards;
 }
-.formcard__success:focus {
+.joincard__success:focus {
   outline: none;
 }
-.formcard__success__body {
-  color: rgba(var(--fg-rgb), 0.75);
-  max-width: 40ch;
+.joincard__success-icon {
+  margin-bottom: 4px;
+  color: rgba(var(--white-rgb), 0.9);
 }
-.formcard__success .btn {
-  margin-top: 16px;
+.joincard__success-title {
+  margin: 0;
 }
-@keyframes formcard-success-in {
+.joincard__success-body {
+  max-width: 42ch;
+  margin: 0 0 14px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: rgba(var(--white-rgb), 0.78);
+}
+@keyframes joincard-success-in {
   to {
     opacity: 1;
     translate: 0 0;
   }
 }
 
+/* ---------- Tablet: stacked */
+@media (max-width: 1024px) {
+  .section-air.join {
+    padding-block: 72px;
+  }
+  .join__grid {
+    justify-content: center;
+    row-gap: 24px;
+  }
+}
+
+/* ---------- Mobile */
+@media (max-width: 768px) {
+  .section-air.join {
+    padding-block: 36px;
+  }
+  .join__grid {
+    row-gap: 20px;
+  }
+  .join__text {
+    gap: 10px;
+  }
+  .join__body {
+    font-size: 15px;
+    line-height: 1.45;
+  }
+  .joincard {
+    padding: 14px;
+  }
+  .joincard__form {
+    gap: 8px;
+  }
+  /* 16px text stops iOS zooming into the field on focus. */
+  .jf__control {
+    height: 50px;
+    padding: 24px 10px 4px;
+    font-size: 16px;
+  }
+  .jf__label {
+    left: 10px;
+    right: 28px;
+  }
+  .jf__control--select {
+    padding-right: 28px;
+    background-position: right 8px center;
+  }
+  .jf__control--area {
+    min-height: 92px;
+    padding-top: 26px;
+  }
+  .joincard__foot {
+    gap: 12px;
+    padding-top: 4px;
+  }
+  .joincard__legal {
+    font-size: 11.5px;
+  }
+  .joincard__submit {
+    min-width: 92px;
+  }
+}
+
+/* Phones: one field per row, so email addresses and the longer (KK) labels never truncate. */
+@media (max-width: 560px) {
+  .jf {
+    grid-column: 1 / -1;
+  }
+}
+
 /* ---------- Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .formcard__success {
+  .joincard__success {
     animation: none;
     opacity: 1;
     translate: 0 0;
   }
-  .formcard .input-air,
-  .formcard__legal a {
+  .jf__control,
+  .jf__label,
+  .joincard__legal a,
+  .joincard__success-body a {
     transition: none;
   }
+}
+
+/* Only the select needs room for its chevron; text labels may use the full width. */
+.jf__label {
+  right: 10px;
+}
+.jf:has(select) .jf__label {
+  right: 30px;
 }

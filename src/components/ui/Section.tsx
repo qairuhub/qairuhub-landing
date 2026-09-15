@@ -87,8 +87,8 @@ export function SectionText({
     <Grid center={align === 'center'} className={className} style={style}>
       <Col large={cols} medium={10} small={12}>
         <RevealGroup className={clsx('text-air', align === 'left' && 'text-air--left', onSky && 'on-sky')}>
-          {title != null && <TitleTag className={titleClass}>{title}</TitleTag>}
-          {body != null && <p className={clsx(bodyClass, 'max-w-[62ch]')}>{body}</p>}
+          {title != null && <TitleTag className={clsx(titleClass, '[text-wrap:balance]')}>{title}</TitleTag>}
+          {body != null && <p className={clsx(bodyClass, 'max-w-[62ch] [text-wrap:pretty]')}>{body}</p>}
           {ctas != null && <div className="text-air__ctas">{ctas}</div>}
         </RevealGroup>
       </Col>

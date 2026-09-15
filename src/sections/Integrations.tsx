@@ -2,56 +2,47 @@ import { Section, SectionText } from '../components/ui/Section'
 import { Grid, Col } from '../components/ui/Grid'
 import { Reveal } from '../components/ui/Reveal'
 import { AutoCarousel } from '../components/ui/AutoCarousel'
-import { LogoMark, type LogoItem } from '../components/ui/LogoMark'
-import { integrations } from '../content'
-import { useReducedMotion } from '../lib/media'
+import { LogoMark } from '../components/ui/LogoMark'
+import { Accent } from '../i18n/Accent'
+import { useT } from '../i18n/LocaleProvider'
+import { sectionIds, toolItems } from '../i18n/shared'
+import { text } from './tools.i18n'
 import './Integrations.css'
 
 /**
- * Integrations (reference #10): small spacing + header padding, u-h4 title with one cursive word,
- * and a single seamless marquee row of 80×80 wordmark tiles (80px gap, edge mask).
- *
- * Tiles are the shared <LogoMark variant="tile"> (src/components/ui/LogoMark.tsx) — the same
- * placeholder the logo bar uses. To swap in real logos, add `src` to `integrations.items` in
- * content.ts (see the LogoMark docblock); it is forwarded below.
+ * Tools row (`#tools`, CONTENT-V3 §13 + V3-DECISIONS §4): u-h4 title with one cursive word, a
+ * single seamless marquee of flat wordmark chips (developer tools only, never repeating the
+ * ecosystem marquee's AI row), and a small "not partnerships" caption. AutoCarousel pauses
+ * offscreen and under reduced motion.
  */
 export default function Integrations() {
-  const reducedMotion = useReducedMotion()
+  const t = useT(text)
 
-  // Read the content through LogoItem so an optional `src` flows to <LogoMark> untouched.
-  const items: readonly LogoItem[] = integrations.items
-  const tiles = items.map((item) => (
-    <LogoMark key={item.name} variant="tile" name={item.name} style={item.style} src={item.src} />
-  ))
+  const tiles = toolItems.map((item) => <LogoMark key={item.name} variant="tile" name={item.name} style={item.style} />)
 
   return (
-    <Section id="integrations" spacing="small" headerPadding className="integrations">
+    <Section id={sectionIds.tools} spacing="small" headerPadding className="integrations" aria-labelledby="tools-title">
       <SectionText
         titleAs="h2"
         titleClass="u-h4"
         title={
-          <>
-            {integrations.titleBefore}
-            <i>{integrations.titleCursive}</i>
-            {integrations.titleAfter}
-          </>
+          <span id="tools-title">
+            <Accent text={t.title} />
+          </span>
         }
       />
 
       <Grid hero>
         <Col large={12} className="min-w-0">
           <Reveal className="w-full min-w-0">
-            <AutoCarousel
-              items={tiles}
-              speed={50}
-              gap={80}
-              itemHeight={80}
-              paused={reducedMotion}
-              ariaLabel="Integrations and partners"
-            />
+            <AutoCarousel items={tiles} speed={50} gap={24} itemHeight={80} repeat={2} ariaLabel={t.a11yLabel} />
           </Reveal>
         </Col>
       </Grid>
+
+      <Reveal index={1} className="w-full">
+        <p className="u-caption on-sky integrations__note">{t.note}</p>
+      </Reveal>
     </Section>
   )
 }

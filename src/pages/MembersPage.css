@@ -1,0 +1,309 @@
+/* =============================================================================
+   Members page (WP10). Builds on subpage.css.
+   ========================================================================== */
+
+/* ---------- Executive board: 2 wide seats + 3, one column on phones */
+.members__board {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 16px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.member-card {
+  grid-column: span 2;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+  padding: 28px;
+  border: 1px solid var(--card-line);
+  border-radius: var(--radius-cards);
+  background: var(--card-fill);
+  transition: background-color 0.6s var(--ease);
+}
+.member-card:hover {
+  background: var(--card-fill-hover);
+}
+.member-card--president,
+.member-card--cto {
+  grid-column: span 3;
+}
+.member-card__mono {
+  display: inline-grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid rgba(var(--white-rgb), 0.3);
+  border-radius: 9999px;
+  background: rgba(var(--white-rgb), 0.06);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--white);
+}
+.member-card__text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.member-card__name {
+  overflow-wrap: anywhere;
+}
+.member-card__role {
+  color: rgba(var(--white-rgb), 0.85);
+}
+.member-card__focus {
+  margin-top: 8px;
+  color: rgba(var(--white-rgb), 0.75);
+}
+
+@media (max-width: 1024px) {
+  .members__board {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .member-card,
+  .member-card--president,
+  .member-card--cto {
+    grid-column: span 1;
+  }
+  .member-card--president {
+    grid-column: span 2;
+  }
+}
+@media (max-width: 640px) {
+  .members__board {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .member-card--president {
+    grid-column: span 1;
+  }
+  .member-card {
+    padding: 24px;
+    gap: 16px;
+  }
+}
+
+/* ---------- Builders: hairline rows inside one flat surface */
+.members__builders {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 32px;
+  width: 100%;
+  margin: 0;
+  padding: 8px 28px;
+  list-style: none;
+  border: 1px solid var(--card-line);
+  border-radius: var(--radius-cards);
+  background: var(--card-fill);
+  box-sizing: border-box;
+}
+.builder-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 18px 0;
+}
+/* hairlines between rows: two columns → every item after the first row */
+.builder-row:nth-child(n + 3) {
+  border-top: 1px solid rgba(var(--white-rgb), 0.1);
+}
+.builder-row__role {
+  color: rgba(var(--white-rgb), 0.75);
+  overflow-wrap: anywhere;
+}
+@media (max-width: 768px) {
+  .members__builders {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 4px 20px;
+  }
+  .builder-row:nth-child(2) {
+    border-top: 1px solid rgba(var(--white-rgb), 0.1);
+  }
+}
+
+/* ---------- Who to ask */
+.members__ask {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  width: 100%;
+}
+.members-table {
+  width: 100%;
+  min-width: 560px;
+  border-collapse: collapse;
+  text-align: left;
+}
+.members-table th {
+  padding: 16px 24px;
+  font-weight: 500;
+  color: rgba(var(--white-rgb), 0.75);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--card-line);
+}
+.members-table td {
+  padding: 16px 24px;
+  vertical-align: top;
+  border-bottom: 1px solid rgba(var(--white-rgb), 0.1);
+}
+.members-table tr:last-child td {
+  border-bottom: 0;
+}
+.members-table td:first-child {
+  width: 58%;
+  color: rgba(var(--white-rgb), 0.9);
+}
+.members-table__who {
+  display: block;
+}
+.members-table__name {
+  display: block;
+  color: rgba(var(--white-rgb), 0.7);
+}
+.members__ask-more {
+  padding: 4px 0;
+}
+@media (max-width: 640px) {
+  /* phones: each row becomes a small stacked entry instead of a sideways-scrolling table */
+  .members-table,
+  .members-table tbody,
+  .members-table tr,
+  .members-table td {
+    display: block;
+    width: auto;
+    min-width: 0;
+  }
+  .members-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .members-table tr {
+    padding: 16px 20px;
+  }
+  .members-table tr + tr {
+    border-top: 1px solid rgba(var(--white-rgb), 0.1);
+  }
+  .members-table td,
+  .members-table td:first-child {
+    width: auto;
+    padding: 0;
+    border: 0;
+  }
+  .members-table td + td {
+    margin-top: 6px;
+  }
+  .members-table td:first-child::first-letter {
+    text-transform: uppercase;
+  }
+  .members-table__who,
+  .members-table__name {
+    display: inline;
+  }
+  .members-table__name::before {
+    content: " · ";
+  }
+}
+
+/* ---------- Contact + join */
+.members__end {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  gap: 16px;
+  width: 100%;
+}
+.members-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  padding: 36px;
+  border: 1px solid var(--card-line);
+  border-radius: var(--radius-cards);
+  background: var(--card-fill);
+  box-sizing: border-box;
+}
+.members-panel__body {
+  max-width: 52ch;
+  color: rgba(var(--white-rgb), 0.8);
+}
+.members-panel__cta {
+  margin-top: auto;
+  padding-top: 20px;
+}
+
+.members-contact {
+  display: flex;
+  flex-direction: column;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.members-contact li + li {
+  border-top: 1px solid rgba(var(--white-rgb), 0.1);
+}
+.members-contact__link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 52px;
+  padding: 8px 4px;
+  border-radius: var(--radius-buttons);
+  color: var(--white);
+  text-decoration: none;
+  transition: background-color 0.4s var(--ease);
+}
+.members-contact__link:hover {
+  background: rgba(var(--white-rgb), 0.06);
+}
+.members-contact__icon {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  color: rgba(var(--white-rgb), 0.85);
+}
+.members-contact__label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.members-contact__arrow {
+  flex: none;
+  opacity: 0.6;
+  transition:
+    opacity 0.4s var(--ease),
+    translate 0.4s var(--ease);
+}
+.members-contact__link:hover .members-contact__arrow {
+  opacity: 1;
+  translate: 2px 0;
+}
+
+@media (max-width: 900px) {
+  .members__end {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 768px) {
+  .members-panel {
+    padding: 24px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .member-card,
+  .members-contact__link,
+  .members-contact__arrow {
+    transition: none;
+  }
+}

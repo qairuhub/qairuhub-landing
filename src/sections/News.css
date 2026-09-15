@@ -1,0 +1,151 @@
+/* =============================================================================
+   Latest news (#news): 3-up grid on desktop, 2-up on tablet, a snap-scroll row on phones.
+   Flat translucent cards on the shared recipe; no shadows, gradients or backdrop-filter.
+   ========================================================================== */
+
+.news__wrap {
+  width: 100%;
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding: 0 var(--row-margin);
+  box-sizing: border-box;
+}
+
+.news__list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--column-gutter);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (max-width: 1023px) {
+  .news__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .news__wrap {
+    padding: 0;
+  }
+  .news__list {
+    display: flex;
+    gap: 16px;
+    padding: 4px 16px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 16px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .news__item {
+    flex: 0 0 min(84%, 340px);
+    scroll-snap-align: start;
+  }
+}
+
+.news__item {
+  display: flex;
+  min-width: 0;
+}
+
+.ncard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  padding: 24px;
+  box-sizing: border-box;
+  border: 1px solid var(--card-line);
+  border-radius: var(--radius-cards);
+  background: var(--card-fill);
+  color: var(--fg);
+  transition: background-color 0.6s var(--ease);
+}
+.ncard:hover {
+  background: var(--card-fill-hover);
+}
+
+.ncard__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  min-height: 24px;
+}
+.ncard__tag {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 9999px;
+  background: rgba(var(--fg-rgb), 0.12);
+  font-size: 12px;
+  line-height: 1;
+  white-space: nowrap;
+}
+.ncard__date {
+  color: rgba(var(--fg-rgb), 0.75);
+  white-space: nowrap;
+}
+.ncard__past {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 8px;
+  border: 1px solid rgba(var(--fg-rgb), 0.5);
+  border-radius: var(--radius-inputs);
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.ncard__title {
+  margin: 4px 0 0;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.35;
+  overflow-wrap: break-word;
+  text-wrap: pretty;
+}
+/* 16px body (the rule for running text); the doubled class outranks the u-body-2 utility
+   in the markup regardless of stylesheet order. .85 keeps it legible when a cloud passes behind. */
+.ncard .ncard__body {
+  color: rgba(var(--fg-rgb), 0.85);
+  font-size: 16px;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+.ncard__foot {
+  margin-top: auto;
+  padding-top: 8px;
+}
+.ncard__foot .btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Past: the card keeps its place (no layout change); it only steps back a little. */
+.ncard.is-past {
+  background: rgba(var(--fg-rgb), 0.05);
+}
+.ncard.is-past .ncard__title,
+.ncard.is-past .ncard__body {
+  color: rgba(var(--fg-rgb), 0.7);
+}
+
+:lang(kk) .ncard__title,
+:lang(kk) .ncard__body {
+  hyphens: manual;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ncard {
+    transition: none;
+  }
+}

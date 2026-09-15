@@ -1,0 +1,54 @@
+{
+  "siteName": "QairuHub",
+  "ogLocale": { "en": "en_US", "kk": "kk_KZ" },
+  "pages": {
+    "home": {
+      "en": {
+        "path": "/",
+        "title": "QairuHub — Learn it. Build it. Launch it.",
+        "description": "A Kazakhstan tech community, born at QAIRU. Events, hackathons, mentorship, teams on our platform, QairuHub Demo Day and Accelerator."
+      },
+      "kk": {
+        "path": "/kk/",
+        "title": "QairuHub — Үйрен. Құр. Іске қос.",
+        "description": "QAIRU-да дүниеге келген қазақстандық технологиялық қауымдастық. Іс-шаралар, хакатондар, менторлық, платформадағы командалар, QairuHub Demo Day және Accelerator."
+      }
+    },
+    "members": {
+      "en": {
+        "path": "/members",
+        "title": "Members — QairuHub",
+        "description": "The students who run QairuHub: the executive board, the builders behind our projects, and how to reach the team."
+      },
+      "kk": {
+        "path": "/kk/members",
+        "title": "Мүшелер — QairuHub",
+        "description": "QairuHub-ты жүргізетін студенттер: атқарушы кеңес, жобаларымызды құрып жүргендер және командамен байланыс."
+      }
+    },
+    "handbook": {
+      "en": {
+        "path": "/handbook",
+        "title": "The QairuHub Handbook — QairuHub",
+        "description": "Everything about QairuHub in one place: what we are, how to join, programs, the platform, values, roadmap and FAQ."
+      },
+      "kk": {
+        "path": "/kk/handbook",
+        "title": "The QairuHub Handbook — QairuHub",
+        "description": "QairuHub туралы бәрі бір жерде: біз кімбіз, қалай қосылуға болады, бағдарламалар, платформа, құндылықтар, жоспарлар және жиі қойылатын сұрақтар."
+      }
+    },
+    "notFound": {
+      "en": {
+        "path": null,
+        "title": "Page not found — QairuHub",
+        "description": "The page may have moved, or the link is out of date."
+      },
+      "kk": {
+        "path": null,
+        "title": "Бет табылмады — QairuHub",
+        "description": "Бет басқа жерге көшкен немесе сілтеме ескірген болуы мүмкін."
+      }
+    }
+  }
+}

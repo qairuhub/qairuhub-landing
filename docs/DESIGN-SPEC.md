@@ -4,6 +4,10 @@ This is the ground truth for every section. It was derived from the Refero "Air"
 (tokens, components, do/don't) and from a live inspection of the reference landing at 1440×900
 (computed styles, DOM structure, CSS keyframes/transitions, screenshots at every 900px).
 
+**v3 (2026-09-15):** §4 is the v3 section list (ids, components, copy sources, sub-pages, Q). Where
+this file and `docs/V3-DECISIONS.md` / `docs/V3-BUILD-PLAN.md` disagree, those win; the backdrop
+numbers live in `docs/JOURNEY-SPEC.md` "v3 constants".
+
 ## 1. Atmosphere
 
 The backdrop is specified in **`docs/JOURNEY-SPEC.md`** — that document owns the phases, the
@@ -50,7 +54,8 @@ Type (substitutes for the proprietary Control family):
 | body | Inter | 16 / 1.5 | 500 | everything else, nav, footer links |
 | u-body-2 | Inter | 14 / 1.5 | 500 | button labels |
 | u-body-3 | Inter | 12 / 1.5 | 500 | tab labels, legal, copyright |
-| cursive accent | Caveat italic | 1.18em of parent | 600 | ONE word per headline (`<i>`) |
+| display, Kazakh | Oswald 600 (Cyrillic subset inside the `"Anton"` family via `unicode-range`) | as u-h1 / u-h1-small | 600 | EN keeps Anton pixel-for-pixel; Kazakh display glyphs switch per range |
+| cursive accent | Caveat italic | 1.18em of parent | 600 | ONE word per headline (`<i>`, rendered by `<Accent>` from a `*word*` marker); Caveat covers Kazakh |
 | wordmark | Courgette (fallback Dancing Script) | 28px header/footer; 3D per JOURNEY-SPEC | 400 | lowercase `brand.wordmark` (`qairuhub`), same face for the DOM mark and the 3D glass sculpture (`/fonts/Courgette-Regular.ttf`) |
 
 Layout: 12 columns, 24px gutter, content 1150px, hero/page 1600px, side padding 24px (16 mobile),
@@ -78,69 +83,152 @@ Easing: everything uses `cubic-bezier(0.22, 1, 0.36, 1)` (`var(--ease)`).
   → open in 350ms; list items 56px haze icon square + title 16 + description 13 @ 50%, each item
   fades/slides in with an 80ms stagger; right-hand haze CTA card (padding 24, radius 8).
 
-## 4. Page structure (top → bottom) and motion
+## 4. Page structure (v3, top → bottom) and motion
 
-1. **Header** (fixed, 72px, transparent, z-100). Left: nav labels 16px/500 with chevrons on
-   dropdown items (gap 32). Center: cursive wordmark (Courgette, 28px), `opacity 0` while the 3D
-   glass lettering is on screen — hidden during the hero run, fading in as `journey.wordmarkHero`
-   drops (≈ 1.4vh), hiding again as `journey.wordmarkFooter` rises — so the two never coexist. Right: "Members" (tertiary) · "Join QairuHub" (primary white)
-   · "Partner with us" (secondary ghost). Mobile ≤768: primary button + hamburger; menu is a white
-   panel dropping from the top (radius 12 bottom corners, 350ms).
-2. **Hero** (100vh + 80px). No text — only the frosted-glass 3D wordmark floating in **space**
-   (≈ 0.70 × the visible width, never touching the header buttons), stars refracting through the
-   letters, slow float, subtle mouse parallax; on scroll it turns one full 360° and drifts up out of
-   frame as the descent begins (`journey.wordmarkHero`). sr-only `<h1>`.
-3. **Agentic cards** (`u-h2-large` title, 16px subtitle, primary CTA, all revealed with stagger).
-   Below: a **typewriter pill** (48px, rounded-full, white/10, sparkle icon) that types prompts one
-   after another (width animates 800ms ease-out, blinking caret), and **three cards** (4 cols each,
-   radius 12, 1px white/10 border, square media area on top, `p-5` text: title 40px/400 (u-h2),
-   body 16 white/60). The card matching the current prompt is active (`opacity 1`, border white/30);
-   the others sit at `opacity .4`. Cards cross-fade every ~3.5s in sync with the typing.
-4. **Logos** (small spacing): title u-h4 centered; two marquee rows of monochrome wordmarks
-   (80px tall items, 80px gap, edge mask), second row reversed/slower.
-5. **Waitlist** (Accelerator): Pill "Spring 2027" · title u-h2 two lines, second line cursive ·
-   body · row [ghost input 48px ~370px wide + primary "Notify me"] · then a large media card
-   (~8–10 cols, radius 20, light haze/grey glass surface) that carries a caption in u-h2-large
-   ("Qairu Accelerator can turn your MVP into a company.") and a small animated step row
-   (Idea → MVP → Demo Day → Astana Hub) — a stand-in for the reference's product video.
-6. **Supersize text**: `u-h1` uppercase, left-aligned, bleeding the viewport, 3–4 lines
-   ("BUILDERS OVER TALKERS. SHIP EVERY SEMESTER."). Scroll-linked reveal: each line's opacity/fill
-   progresses from 0.15 → 1 as it crosses the middle of the viewport (like a wipe), lines slide
-   up a few px. ~950px tall section.
-7. **Product demo**: a light "app window" card (10 cols, radius 10, `#fff`, subtle inner UI mock:
-   sidebar + header + content) that swaps content with a 500ms cross-fade; below it a **tab bar**
-   (8 cols centered, 36px, `rgba(255,255,255,.1)` bg + backdrop blur, radius 10): three tabs
-   12px/500 with icons, inactive at opacity .5, a white sliding indicator (radius 8, `--x/--width`,
-   500ms ease) behind the active tab, and a 3px timer line at the bottom of the indicator that
-   grows over 9s then auto-advances to the next tab. Click = manual select, resets timer.
-8. **Features** (large spacing): title u-h3 with cursive "at scale." + body. Grid 7/5 · 5/7 ·
-   4/4/4 of **AnimatedBorder cards** (radius 12, `rgba(255,255,255,.06)` fill + `backdrop-blur(4px)`,
-   padding 32, title u-h5, body 16 @ 80%; the first four hold a media area at the bottom with
-   radius 11 corners — build simple CSS/SVG mock visuals: schedule list, bar chart, link cards,
-   timeline). Cards reveal with 200ms stagger.
-9. **CTA card** (full width 12 cols, padding 40, radius 12, AnimatedBorder): left column
-   cursive u-h3 title, u-h5 subtitle, 16px body (max ~500px); right: secondary button. Background:
-   three huge blurred colour orbs (blue, green/yellow, pink) slowly rotating (`rotate 0→1turn`) and
-   pulsing (`scale .5→1.5`) inside an `overflow:hidden` card — the ONLY colourful moment on the page.
-10. **Integrations** (small spacing, header padding): title u-h4 with cursive "whole"; one marquee
-    row of 80×80 wordmark tiles.
-11. **Storytelling triptych**: sticky section, height = 100lvh × 4.5, `margin-top:-50vh`. Inner
-    sticky 100lvh. Three stacked items (grid-row 1 / grid-column 1) — u-h1-small headline
-    (LEARN / BUILD / LAUNCH) + centered 16px paragraph (8 cols). Scroll-driven: item i is fully
-    visible in the middle third of its slice; while scrolling it moves up and fades out
-    (`translate 0 → -120px`, opacity 1 → 0, scale 1 → .96) as the next one rises in from below
-    (`translate 120px → 0`, opacity 0 → 1). Use `scrollState` in a rAF loop, not React state per frame.
-12. **Form**: title u-h2-large two lines with cursive "ship." + body; white card (7 cols,
-    radius 12, padding 40, `[data-theme=light]`): first/last name row, email, telegram, two selects,
-    message, centered primary Submit (disabled until valid), 12px legal text @ 50% with underlined
-    Signal Blue links. Submitting shows an in-card success state.
-13. **Footer** (150vh, `align-items:flex-end`, `pointer-events:none` on the root): a **150vh DOM
-    spacer over the night phase of the single SkyScene canvas** — it draws nothing itself. The
-    moonlit field, the stars and the returning glass wordmark are all painted by the fixed canvas as
-    `journey.night` / `journey.ground` / `journey.wordmarkFooter` rise over this last stretch of
-    scroll. Content row pinned at the bottom (24px margin, pointer events re-enabled): left links
-    16px (external ones with ↗), right social icon buttons 38×38 (ghost circles), and the 12px
-    copyright at 75% opacity; all text carries the `.on-sky` glow because it sits on the raw night sky.
+Copy for every block below lives in `docs/CONTENT-V3.md` / `CONTENT-V3.kk.md` (section numbers in
+the table) and in code in the section's `*.i18n.ts`; `docs/V3-DECISIONS.md` wins where they differ.
+Component file names are kept from v2 (V3-BUILD-PLAN D5); the DOM ids are the v3 ones, listed in
+`sectionIds` (`src/i18n/shared.ts`). Every headline carries at most one cursive `*accent*` word,
+rendered by `<Accent>`.
+
+| # | Section | DOM id | Component | i18n | Copy |
+|---|---|---|---|---|---|
+| — | Header (fixed) | — | `Header.tsx` | `header.i18n.ts` | §2 |
+| 1 | Hero, 3D glass wordmark | `top` | `Hero.tsx` | `hero.i18n.ts` | §3 |
+| 2 | Launchpad + Ask bar | `launchpad` | `AgenticCards.tsx` + `assistant/AskBar.tsx` | `launchpad.i18n.ts` | §4 |
+| 3 | Ecosystem marquee | `ecosystem` | `Logos.tsx` | `ecosystem.i18n.ts` | §5 + DECISIONS §4 |
+| 4 | QairuHub Accelerator waitlist | `accelerator` | `Waitlist.tsx` | `waitlist.i18n.ts` | §6 |
+| 5 | Supersize line | `supersize` | `Supersize.tsx` | `supersize.i18n.ts` | §7 |
+| 6 | Platform showcase, "This is the Hub" | `platform` | `ProductDemo.tsx` | `platform.i18n.ts` | §8 |
+| 7 | What we offer | `offer` | `Features.tsx` | `offer.i18n.ts` | §9 |
+| 8 | Highlighted projects | `projects` | `Projects.tsx` | `projects.i18n.ts` | §10 + DECISIONS §1 |
+| 9 | Latest news | `news` | `News.tsx` | `news.i18n.ts` | §11 + DECISIONS §3 |
+| 10 | CTA card | `cta` | `ModelsCTA.tsx` | `cta.i18n.ts` | §12 |
+| 11 | Tools row | `tools` | `Integrations.tsx` | `tools.i18n.ts` | §13 + DECISIONS §4 |
+| 12 | Storytelling LEARN · BUILD · LAUNCH · MEET | `story` | `Storytelling.tsx` | `story.i18n.ts` | §14 |
+| 13 | Compact join form | `join` | `DemoForm.tsx` | `form.i18n.ts` | §15 |
+| — | Footer | `footer` | `Footer.tsx` | `footer.i18n.ts` | §16 |
+| — | Q launcher (every page) | — | `assistant/AssistantLauncher.tsx` | `assistant.i18n.ts` | §19 |
+
+Sub-pages (`src/pages/`, lazy chunks, static sky, compact footer): `/members` (§17),
+`/handbook` (§18), 404 (§20). Details at the end of this section.
+
+1. **Header** (fixed, 72px, transparent, z-100). Left: nav labels 16px/500: Programs (mega),
+   Platform (mega), Projects, News, About (mega), with chevrons on the mega items (gap 32).
+   Center: cursive wordmark (Courgette, 28px), `opacity 0` while the 3D glass lettering is on screen:
+   hidden during the hero run, fading in as `heroWordmarkWeight` drops (gone by `HERO_EXIT_VH` 1.4),
+   hiding again as `footerWordmarkWeight` rises, so the two never coexist. Both curves are imported
+   from `sky/journey.ts`; on sub-pages the logo is always shown and links to `route.base`.
+   Right: the segmented **EN | ҚАЗ** switcher (two `<a hreflang lang>`, `aria-current` on the active
+   one, keeps the hash) · "Members" (tertiary) · "Open platform" (primary white, external, small ↗).
+   Mega menus: white panel as in §3, each with a right-hand CTA card (Programs: the next dated news
+   item; Platform: "This is the Hub"; About: "Ask Q", which also opens the assistant).
+   Mobile ≤ 768: primary button + hamburger; the drop-down panel lists every item, "Join" and the
+   switcher. The nav must not overflow at 769 / 860 / 1024 / 1100 px in KK (the longer locale) or EN.
+2. **Hero** (100vh + 80px, `#top`). No text, sr-only `<h1>` (`hero.srTitle`). The frosted-glass
+   `qairuhub` wordmark (Latin in both locales) floats in **space**: v3 thinner tube (net stroke
+   ≈ 0.09 × size) and ~15 % smaller (0.60 × the visible width, 0.66 on ≤ 768 px), stars refracting
+   through the letters, slow float, subtle mouse parallax. On scroll it turns one full 360°,
+   **recedes into depth** (visibly shrinks, ≈ −30 % apparent size) and rises out of the frame by
+   1.4 vh. Constants: JOURNEY-SPEC "v3 constants".
+3. **Launchpad** (`#launchpad`): `u-h2-large` title with one accent ("Your launchpad for AI
+   *builders*"), 16px subtitle, primary "Join QairuHub". Below it the **Ask bar** replaces the v2
+   typewriter pill: a 48px rounded input on a solid `rgba(8,12,32,.72)` card (no blur), submit /
+   stop button, six suggestion chips; the placeholder types the suggestions only while the input is
+   empty and unfocused. An answer streams inline under the bar with its sources and "Continue in
+   chat". Then the **three cards** (4 cols each, radius 12, 1px white/10 border, square media on
+   top with explicit `visual` keys `learn` / `build` / `launch`, `p-5` text: title u-h2, body 16
+   white/75); the active card is `opacity 1` with border white/30, the others ≥ .55, cross-fading
+   every ~3.5 s. The Launchpad is read through the descent: see JOURNEY-SPEC (whiteout peak 0.6).
+4. **Ecosystem** (`#ecosystem`, small spacing): title u-h4 "The ecosystem and tools we build with"
+   (KK equivalent); two marquee rows of text wordmarks (80px tall, 80px gap, edge mask, row 2
+   reversed and slower), then a small caption "Tools, platforms and ecosystem around our builders."
+   Row 1: Alem.ai · Astana Hub · HackAlem AI · QairuHub Accelerator · QairuHub Community.
+   Row 2: Anthropic Claude · OpenAI · Google Gemini · Cursor · Lovable · Qaldy AI.
+   No logo files, and never "partner", "sponsor" or "backed by" next to these names.
+5. **Waitlist** (`#accelerator`): Pill "Spring 2027 · planned" · title u-h2 two lines, second line
+   the cursive accent · body · row [ghost input 48px ~370px + primary "Notify me"] · consent line ·
+   then the large haze media card (radius 20) with the caption and the animated step row
+   Idea → Team → Demo Day → Accelerator. States: success, invalid email, rate limited, failed; a
+   duplicate email still shows success.
+6. **Supersize** (`#supersize`): `u-h1` uppercase, left-aligned, bleeding the viewport
+   ("Builders over talkers. Projects over lectures."). Scroll-linked wipe per line from 0.15 → 1
+   as it crosses the middle of the viewport. KK renders in Oswald through `unicode-range` and must
+   not overflow at 390 px.
+7. **Platform showcase** (`#platform`): pill `community.qairuhub.com`, title "This is the *Hub*",
+   body. The light "app window" card (10 cols, radius 10, `#fff`, sidebar + header chrome, a visible
+   **Sample data** badge) with **four tabs** (Team Finder, Projects, Events, People), each its own
+   screen; tables collapse to stacked rows at 390 px. Tab bar (centered, 36px, `rgba(255,255,255,.14)`
+   + backdrop blur, radius 10), sliding white indicator (500ms ease) with a 3px timer line that
+   auto-advances every 9 s (paused offscreen); roving tablist with Left/Right/Home/End. A caption
+   under the window per tab, then the CTA row: primary "Open the platform" and secondary "See public
+   projects" (both external) and the access note (@qairu.edu.kz email, admin approval). Our own
+   design, not a copy of the platform's.
+8. **What we offer** (`#offer`, large spacing): title u-h3 "What we *offer*." + body. **Seven**
+   AnimatedBorder cards in the 7/5 · 5/7 · 4/4/4 grid (radius 12, `rgba(255,255,255,.08)` fill, no
+   blur, padding 32, title u-h5, body 16 @ 80 %): Events & masterclasses (`schedule` mock),
+   Hackathons & preparation (`chart`), Teams on the platform (`links`), QairuHub Demo Day
+   (`timeline`), Mentorship, QairuHub Accelerator, Partnerships. Mock rows are real or planned items
+   only. Borders pause offscreen; `contain: paint`.
+9. **Highlighted projects** (`#projects`, new): title "What we're *building*" + body. A horizontal
+   scroll-snap carousel of cards (name, tagline, status pill, badges Live / Internal / Open source,
+   tags, one or two links) with prev / next and pause / play buttons; autoplay every 6 s only while
+   in view, paused on hover, focus and reduced motion; a list with "n of N" for screen readers. The
+   cards include `theqairubook` (live + open source, "Open app" and "Source code", the one card
+   allowed a builder credit). The last card is the dashed **"Your project here"** slot with no status
+   pill. All data is build-time (`src/data/projects.ts`), so the height never shifts.
+10. **Latest news** (`#news`, new): title "Latest *news*" + body + "All updates on Telegram" link.
+    Six cards (date label, tag, title, body, one link) in a 3-up grid on desktop and a snap-scroll row
+    on mobile; after its `expires` date a card shows the "Past" label. Card 1: "QairuHub Hackathon
+    Mentorship with Sanzhar Madiyev, Head of Education & Hackathon at BAITC" (Мадиев in KK), 15 Sep
+    2026, 14:00, Shai Cafeteria. Data: `src/data/news.ts`.
+11. **CTA card** (`#cta`, full width 12 cols, padding 40, radius 12, AnimatedBorder): left column
+    u-h3 title with ONE accent word ("Start where you *are*."), u-h5 subtitle, 16px body (max
+    ~500px); right: secondary button "Read the QairuHub Handbook" → `/handbook` (same tab).
+    Background: the three blurred colour orbs slowly rotating and pulsing, still the ONLY
+    colourful moment on the page.
+12. **Tools row** (`#tools`, small spacing): title u-h4 "The *tools* our teams build with"; one
+    marquee row of 80×80 text tiles: GitHub · Telegram · Figma · Cloudflare · Vercel · Railway ·
+    Hugging Face · Python · TypeScript · Codex (developer tools only, never repeating ecosystem
+    row 2), and the small caption "Tools we use, not partnerships."
+13. **Storytelling** (`#story`): sticky section, runway `calc(100lvh * 6)` (1.5 × 100lvh per item),
+    `margin-top: -50vh`, inner sticky 100lvh. **Four** stacked items (LEARN / BUILD / LAUNCH /
+    MEET): u-h1-small headline + centered 16px paragraph (8 cols). Item i is fully visible in the
+    middle third of its slice; outgoing `translate 0 → -120px`, opacity 1 → 0, scale 1 → .96;
+    incoming `translate 120px → 0`, opacity 0 → 1. Driven by `scrollState` on the shared ticker.
+    MEET lands at dusk start ("meet at night"); its text keeps ≥ 4.5:1.
+14. **Join form** (`#join`, compact, ≤ 0.63 vh tall at 1440×900): title u-h2-large two lines with
+    the cursive "*ship*" + body; white card (6 cols, radius 12, padding 40, `[data-theme=light]`):
+    rows name | email, telegram | interest (select, locale-neutral values), a 3-row message, an
+    inline Turnstile container (only when a site key is configured), a visually hidden honeypot,
+    centered primary Submit (disabled until valid), 12px legal text @ 50 % with underlined links to
+    `/handbook#platform-rules` and `/handbook#privacy-on-this-site`. In-card success state; error
+    codes `invalid` (focus the field), `rate_limited`, `verify_failed`, `failed`.
+15. **Footer** (`#footer`; home: 150vh, `align-items:flex-end`, `pointer-events:none` on the
+    root): a DOM spacer over the night phase of the single SkyScene canvas; the field, the stars and
+    the returning glass wordmark are painted by the canvas. Content row pinned at the bottom (24px
+    margin, pointer events re-enabled): links (Programs, Platform, Projects, News, Join, Members, The
+    QairuHub Handbook, Privacy, community.qairuhub.com ↗, plus the theqairubook and "Source code of
+    this site" links from DECISIONS §1), the locale switcher, social icon buttons 38×38 (Telegram,
+    Instagram, GitHub; no X or LinkedIn), the 12px copyright at 75 % opacity; all text `.on-sky`.
+    Sub-pages use a compact footer without the spacer.
+16. **Q launcher** (every page): a 56px round button bottom-right with safe-area insets: white
+    disc, navy `#0B1729` snail-Q mark (DECISIONS §7 geometry), soft ring on hover, 3 s idle bob (off
+    under reduced motion), label "Ask Q". Hidden while the mobile nav is open; offset so it never
+    covers the footer socials at 390 px. The panel (dialog, focus trap, Esc returns focus, live region
+    for the finished answer) is a lazy chunk loaded on hover, focus or click.
+
+**Sub-pages**
+
+- **Members** (`/members`, `/kk/members`): heading; **Executive board** cards (name, role, what
+  they look after) for the five board members; the team list (DECISIONS §6); **Who to ask** table;
+  **Contact** block (Telegram channel, Instagram, the join form, "Open platform"); a join CTA. No
+  emails, phones or personal handles anywhere.
+- **The QairuHub Handbook** (`/handbook`, `/kk/handbook`): sticky TOC on desktop, collapsible TOC on
+  mobile (keyboard walkable); body from `src/data/handbook.generated.ts` with H3 anchor links that
+  land under the header; "Ask Q" and "Open platform" buttons; long-form type max 70ch, Inter 17/28,
+  tables inside `overflow-x: auto`. The KK page shows the Kazakh note above the English body.
+- **404**: CONTENT-V3 §20 on the `space` sky preset, with a real 404 status from `dist/404.html`.
 
 ## 5. Do / Don't
 

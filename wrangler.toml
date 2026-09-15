@@ -1,0 +1,49 @@
+# Cloudflare Pages project: qairuhub-landing (V3-BUILD-PLAN §WP4, DECISIONS §5). Owned by WP4.
+# Static site from ./dist + Pages Functions from ./functions (only /api/* invokes Functions).
+#
+# Secrets are NEVER in this file. Set them per environment:
+#   npx wrangler pages secret put SESSION_SIGNING_KEY --project-name qairuhub-landing
+#   npx wrangler pages secret put RATE_LIMIT_SALT     --project-name qairuhub-landing
+#   npx wrangler pages secret put TURNSTILE_SECRET_KEY --project-name qairuhub-landing   (later, by the user)
+#   optional: OPENAI_API_KEY (fallback when the EDGE binding is absent), TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID
+# Local development reads the same names from .dev.vars (git-ignored; see .dev.vars.example).
+name = "qairuhub-landing"
+pages_build_output_dir = "./dist"
+compatibility_date = "2026-09-01"
+
+[vars]
+OPENAI_MODEL = "gpt-5.6-luna"
+OPENAI_REASONING_EFFORT = "low"
+OPENAI_MAX_OUTPUT_TOKENS = "700"
+OPENAI_BASE_URL = "https://api.openai.com/v1"
+ASK_ENABLED = "true"
+ASK_DAILY_CAP = "1500"
+ASK_PER_IP_PER_MINUTE = "6"
+ASK_PER_IP_PER_DAY = "40"
+ASK_TOP_K = "5"
+# Tuned on the eval set for BM25F-lite scores (AGENT-SPEC's 1.2 made one-term chip questions offline-empty).
+ASK_MIN_SCORE = "0.8"
+ASK_CONTEXT_CHARS = "9000"
+JOIN_PER_IP_PER_10MIN = "5"
+SUBMISSION_RETENTION_DAYS = "180"
+# Accelerator waitlist emails must survive until applications open (~13 months).
+WAITLIST_RETENTION_DAYS = "400"
+# Comma-separated. Preview deployments (*.qairuhub-landing.pages.dev) are matched by suffix in code.
+ALLOWED_ORIGINS = "https://qairuhub-landing.pages.dev"
+SITE_ORIGIN = "https://qairuhub-landing.pages.dev"
+# Public Turnstile site key, returned by GET /api/config. Empty until the user creates the widget;
+# the server enforces Turnstile only once the TURNSTILE_SECRET_KEY secret is set.
+TURNSTILE_SITE_KEY = ""
+
+[[d1_databases]]
+binding = "DB"
+database_name = "qairuhub-landing"
+# Created by the Release agent with `npx wrangler d1 create qairuhub-landing` (region EEUR).
+database_id = "0639eac4-2682-4cc8-b8fd-f3ce90a2c1b0"
+migrations_dir = "migrations"
+
+# Internal Worker `qairuhub-edge` (edge/wrangler.toml): holds the OpenAI key from Secrets Store and
+# proxies POST /openai/responses. Deploy it before this project. Nothing here touches the Secrets Store.
+[[services]]
+binding = "EDGE"
+service = "qairuhub-edge"

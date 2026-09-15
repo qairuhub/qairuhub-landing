@@ -90,7 +90,9 @@ export function scrollToAnchor(lenis: Lenis, hash: string, opts: { push?: boolea
   lenis.scrollTo(top ? 0 : el!, {
     offset: top ? 0 : ANCHOR_OFFSET,
     onComplete: () => {
-      if (el) focusAnchor(el)
+      // A CTA may open a dialog (e.g. the Q assistant) while the glide runs; never pull
+      // focus out from under an open modal.
+      if (el && !document.activeElement?.closest('[role="dialog"], dialog')) focusAnchor(el)
     },
   })
   return true

@@ -1,0 +1,268 @@
+/* =============================================================================
+   Highlighted projects (#projects) + the scroll-snap Carousel (src/components/ui/Carousel.tsx).
+   Air rules: flat translucent cards (shared --card-fill / --card-line recipe), radii 4/8/11/12,
+   no shadows, no UI gradients, no backdrop-filter. Only global tokens; no new hex.
+   ========================================================================== */
+
+.projects__rail {
+  width: 100%;
+}
+
+/* ---------- Carousel ------------------------------------------------------ */
+.qcar {
+  width: 100%;
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding: 0 var(--row-margin);
+  box-sizing: border-box;
+  color: var(--fg);
+}
+
+.qcar__track {
+  --qcar-gap: var(--column-gutter);
+  position: relative; /* offsetParent for the slides (Carousel measures offsetLeft) */
+  display: flex;
+  gap: var(--qcar-gap);
+  margin: 0;
+  padding: 4px 0; /* room for focus rings inside the scroller */
+  list-style: none;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+.qcar__track:focus-visible {
+  outline: 2px solid rgba(var(--fg-rgb), 0.8);
+  outline-offset: 4px;
+}
+
+.qcar__slide {
+  display: flex;
+  flex: 0 0 calc((100% - 2 * var(--qcar-gap)) / 3);
+  min-width: 0;
+  scroll-snap-align: start;
+}
+
+@media (max-width: 1023px) {
+  .qcar__slide {
+    flex-basis: calc((100% - var(--qcar-gap)) / 2);
+  }
+}
+
+/* Phones: the rail bleeds to the screen edge and the next card peeks in. */
+@media (max-width: 767px) {
+  .qcar {
+    padding: 0;
+  }
+  .qcar__track {
+    --qcar-gap: 16px;
+    padding-inline: 16px;
+    scroll-padding-inline: 16px;
+  }
+  .qcar__track:focus-visible {
+    outline-offset: -2px;
+  }
+  .qcar__slide {
+    flex-basis: min(84%, 340px);
+  }
+  .qcar__controls {
+    padding-inline: 16px;
+  }
+}
+
+.qcar__controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 24px;
+}
+.qcar__count {
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  color: rgba(var(--fg-rgb), 0.8);
+  text-shadow: var(--text-glow);
+}
+.qcar__progress {
+  position: relative;
+  flex: 1 1 auto;
+  height: 2px;
+  border-radius: 9999px;
+  background: rgba(var(--fg-rgb), 0.18);
+  overflow: hidden;
+}
+.qcar__thumb {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 33%;
+  border-radius: inherit;
+  background: var(--fg);
+}
+.qcar__buttons {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.qcar__btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1px solid var(--card-line);
+  border-radius: var(--radius-buttons);
+  background: var(--card-fill);
+  color: var(--fg);
+  cursor: pointer;
+  transition:
+    background-color 0.3s var(--ease),
+    border-color 0.3s var(--ease);
+}
+.qcar__btn:hover {
+  background: var(--card-fill-hover);
+  border-color: rgba(var(--fg-rgb), 0.4);
+}
+.qcar__btn:active {
+  translate: 0 1px;
+}
+
+/* ---------- Project card -------------------------------------------------- */
+.pcard {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  min-height: 300px;
+  padding: 24px;
+  box-sizing: border-box;
+  border: 1px solid var(--card-line);
+  border-radius: var(--radius-cards);
+  background: var(--card-fill);
+  color: var(--fg);
+  transition: background-color 0.6s var(--ease);
+}
+.pcard:hover {
+  background: var(--card-fill-hover);
+}
+
+.pcard__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+}
+
+.pchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 10px;
+  border: 1px solid var(--card-line);
+  border-radius: 9999px;
+  font-size: 12px;
+  line-height: 1;
+  white-space: nowrap;
+  color: rgba(var(--fg-rgb), 0.9);
+}
+.pchip--status {
+  background: rgba(var(--fg-rgb), 0.12);
+  border-color: transparent;
+  color: var(--fg);
+}
+.pchip__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--fg);
+}
+
+.pcard__text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.pcard__name {
+  overflow-wrap: anywhere;
+}
+.pcard__credit {
+  color: rgba(var(--fg-rgb), 0.7);
+}
+/* Body copy never drops below 16px; the doubled selector outranks the `u-body-2` utility on the <p>. */
+.pcard .pcard__tagline {
+  margin-top: 2px;
+  font-size: 16px;
+  line-height: 1.5;
+  color: rgba(var(--fg-rgb), 0.8);
+}
+
+/* Reserve the tags line + gap + button row (18 + 16 + 38) so the tags sit at the same Y
+   across the rail whether or not a card has a CTA. */
+.pcard__foot {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 72px;
+  margin-top: auto;
+}
+.pcard__tags {
+  color: rgba(var(--fg-rgb), 0.8);
+  letter-spacing: 0.01em;
+}
+.pcard__links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+}
+.pcard__links .btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* "Your project here": dashed outline, near-empty fill, always last. */
+.pcard--slot {
+  border: 1px dashed rgba(var(--fg-rgb), 0.45);
+  background: rgba(var(--fg-rgb), 0.03);
+}
+.pcard--slot:hover {
+  background: rgba(var(--fg-rgb), 0.07);
+}
+.pcard__plus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px dashed rgba(var(--fg-rgb), 0.45);
+  border-radius: 9999px;
+}
+.pcard__howto {
+  align-self: flex-start;
+  color: rgba(var(--fg-rgb), 0.75);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(var(--fg-rgb), 0.35);
+  transition: color 0.3s;
+}
+.pcard__howto:hover {
+  color: var(--fg);
+}
+
+:lang(kk) .pcard__name,
+:lang(kk) .pcard__tagline {
+  hyphens: manual;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qcar__track {
+    scroll-behavior: auto;
+  }
+  .pcard,
+  .qcar__btn {
+    transition: none;
+  }
+}

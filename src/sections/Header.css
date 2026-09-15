@@ -30,6 +30,18 @@
   mask-image: linear-gradient(to bottom, #000, transparent);
 }
 
+/* Reading pages (/members, /handbook) sit on the static night sky and their body copy runs under
+   the bar the whole way down: the fade becomes a flat translucent fill in the night-sky top colour
+   (invisible at y 0) with a hairline, so the nav never overlaps running text. Home keeps the fade
+   over the moving sky; the 404 keeps it over the space preset. */
+.hdr[data-page="members"] .hdr__shade,
+.hdr[data-page="handbook"] .hdr__shade {
+  background: rgba(2, 20, 56, 0.95);
+  -webkit-mask-image: none;
+  mask-image: none;
+  border-bottom: 1px solid rgba(var(--white-rgb), 0.08);
+}
+
 /* The 72px inner row is the containing block for the mega menus and the centred
    wordmark: the panels hang from the bar's bottom edge, not from the 32px nav */
 .hdr__inner {
@@ -290,6 +302,53 @@
   pointer-events: auto;
   transition: opacity 0.25s var(--ease);
 }
+/* ---------- Locale switch: segmented EN | ҚАЗ (two links) ------------------
+   Also used in the mobile panel's top row and in the footer. 38px tall like
+   every control in the bar; radius 8 outside, 4 on the options; the current
+   option is a solid --fg chip with a --bg label (white on the sky, ink in the
+   white panel). No shadows, no gradients. */
+.lsw {
+  display: inline-flex;
+  align-items: stretch;
+  flex-shrink: 0;
+  height: 38px;
+  padding: 3px;
+  gap: 2px;
+  box-sizing: border-box;
+  border: 1px solid rgba(var(--fg-rgb), 0.3);
+  border-radius: var(--radius-buttons);
+  pointer-events: auto;
+}
+.lsw__opt {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  padding: 0 8px;
+  border-radius: var(--radius-inputs);
+  font-size: 13px;
+  line-height: 1;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  color: rgba(var(--fg-rgb), 0.75);
+  transition:
+    background-color 0.3s var(--ease),
+    color 0.3s var(--ease);
+}
+.lsw__opt:hover {
+  color: var(--fg);
+  background-color: rgba(var(--fg-rgb), 0.12);
+}
+.lsw__opt.is-current {
+  color: var(--bg);
+  background-color: var(--fg);
+  cursor: default;
+}
+.lsw__opt:focus-visible {
+  outline-offset: 1px;
+}
+
 .hdr__iconbtn {
   display: none;
   width: 38px;
@@ -305,6 +364,18 @@
 }
 .hdr__iconbtn:hover {
   opacity: 0.6;
+}
+/* ↗ on the primary buttons (bar + panel): the arrow follows the label colour —
+   --bg on the solid fill, --fg once hover melts the fill to a ghost */
+.hdr .btn--primary svg {
+  width: 14px;
+  height: 14px;
+  margin-left: 4px;
+  color: var(--bg);
+}
+.hdr .btn--primary:hover svg {
+  color: var(--fg);
+  filter: none;
 }
 
 /* ---------- Mobile menu (white panel dropping from the top) --------------- */
@@ -403,8 +474,15 @@
   width: 100%;
   flex: 1 1 auto;
 }
+.hdr__m-tools {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+/* Members as a full-width row above the two 50 % CTAs (Open platform · Join) */
 .hdr__m-footer {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   padding: 24px 0;
 }
@@ -413,6 +491,21 @@
   flex: 0 0 calc(50% - 4px);
   box-sizing: border-box;
   padding: 0 8px;
+}
+/* Phones: "Платформаны ашу ↗" needs ~190px, more than half of a 343px row, so
+   the two CTAs stack full-width */
+@media (max-width: 480px) {
+  .hdr__m-footer .btn {
+    flex-basis: 100%;
+    width: 100%;
+  }
+}
+.hdr__m-footer .btn.hdr__m-login {
+  flex: 0 0 100%;
+  width: 100%;
+  justify-content: flex-start;
+  min-height: 38px;
+  padding: 0;
 }
 
 /* While the panel is open the bar's own controls step aside: the panel carries its
@@ -425,63 +518,183 @@
 }
 
 /* ---------- Breakpoints --------------------------------------------------- */
-/* Tablet / small-laptop band: the absolutely centred wordmark (~113px) cannot
-   clear the ~525px nav (five labels, gap 32) until ≈1240px, so below that it
-   leaves the centre and sits in flow at the left of the row, ahead of the nav —
-   the same brand-left arrangement mobile uses (see ≤768). Budget at ≤1024:
-   logo 113 + gap 16 + nav 461 + gap 16 + actions 201 + margins 48 = 855px. */
-@media (min-width: 860px) and (max-width: 1240px) {
-  .hdr__logo {
-    position: static;
-    translate: none;
-    order: -1;
-    margin-right: 8px;
-  }
-}
-/* 769–859: the row cannot hold brand + nav + actions (855px), so the brand steps
-   out and the nav keeps its labels; it is back at 860 and in flow on mobile. */
-@media (min-width: 769px) and (max-width: 859px) {
-  .hdr__logo {
-    display: none;
-  }
-}
-@media (max-width: 1024px) {
-  .hdr__list {
-    gap: 16px;
-  }
+/* Row budget, measured with Inter at 16px/500 (Playwright, 1600px):
+     EN nav items 93+84+62+43+66 = 348 · KK 143+110+72+100+104 = 529
+     actions: switch 90 + Members 63 (KK 66) + Open platform 148 (KK 181) + 2×8
+             = EN 317 · KK 353
+     wordmark 113 · page margins 2×24 · inner gap 16
+   Each band below keeps ≥ 20px of slack; the order in which the bar sheds
+   pieces is: centred logo → logo in flow → nav gap 32→16 → Members (also in
+   About) → logo → burger. Kazakh labels run ~50% longer, so the header carries
+   `data-locale` and KK uses its own, wider bands. Pure CSS (no measuring
+   script), verified by a Playwright 320–1600px sweep in both locales. */
+
+/* --- mega menu columns narrow with the viewport (both locales) --- */
+@media (max-width: 1240px) {
   .hdr__col,
   .hdr__cta {
     flex-basis: 300px;
     width: 300px;
   }
-  /* nav 461 + gap 16 + Members/Join 201 + margins 48 = 726px fits from 769px up;
-     with "Partner with us" the bar needs 869px and the nav ran under the actions */
-  .hdr__secondary {
+}
+
+/* --- EN ------------------------------------------------------------------ */
+/* < 1180: the centred wordmark cannot clear the nav (24 + 476 + 16 > 590 − 57),
+   so it joins the row at the left, ahead of the nav (1025+: 994px needed). */
+@media (min-width: 769px) and (max-width: 1179px) {
+  .hdr[data-locale="en"] .hdr__logo {
+    position: static;
+    translate: none;
+    order: -1;
+    margin-right: 8px;
+  }
+  /* In flow the wordmark's slot is always reserved (the band budget above counts
+     it), so the nav never jumps when it fades in or out mid-scroll. Hidden, it is
+     visibility:hidden (out of the tab order and hit-testing); the visibility
+     transition holds it visible until the opacity fade has finished. */
+  .hdr[data-locale="en"] .hdr__logo {
+    transition:
+      opacity 0.5s var(--ease),
+      visibility 0.5s;
+  }
+  .hdr[data-locale="en"] .hdr__logo:not(.is-visible) {
+    visibility: hidden;
+  }
+}
+/* ≤ 1024: nav gap 16 (logo + nav + actions = 930px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .hdr[data-locale="en"] .hdr__list {
+    gap: 16px;
+  }
+}
+/* ≤ 959: Members steps out of the bar (still one click away under About): 859px */
+@media (min-width: 769px) and (max-width: 959px) {
+  .hdr[data-locale="en"] .hdr__login {
     display: none;
   }
 }
-@media (max-width: 768px) {
-  .hdr__nav,
-  .hdr__login,
-  .hdr__secondary {
+/* ≤ 879: the wordmark steps out too; nav + switch + Open platform = 722px */
+@media (min-width: 769px) and (max-width: 879px) {
+  .hdr[data-locale="en"] .hdr__logo {
     display: none;
   }
-  .hdr__iconbtn,
-  .hdr__mobile {
+}
+
+/* --- KK ------------------------------------------------------------------ */
+/* < 1560: logo in flow (centred needs 24 + 657 + 16 ≤ W/2 − 57) — 1211px at gap 32 */
+@media (min-width: 1024px) and (max-width: 1559px) {
+  .hdr[data-locale="kk"] .hdr__logo {
+    position: static;
+    translate: none;
+    order: -1;
+    margin-right: 8px;
+  }
+  /* Same as EN: the slot stays reserved, so the nav holds still while the logo fades. */
+  .hdr[data-locale="kk"] .hdr__logo {
+    transition:
+      opacity 0.5s var(--ease),
+      visibility 0.5s;
+  }
+  .hdr[data-locale="kk"] .hdr__logo:not(.is-visible) {
+    visibility: hidden;
+  }
+}
+/* ≤ 1239: nav gap 16 → 1147px */
+@media (min-width: 1024px) and (max-width: 1239px) {
+  .hdr[data-locale="kk"] .hdr__list {
+    gap: 16px;
+  }
+}
+/* ≤ 1179: Members steps out → 1073px */
+@media (min-width: 1024px) and (max-width: 1179px) {
+  .hdr[data-locale="kk"] .hdr__login {
+    display: none;
+  }
+}
+/* ≤ 1099: the logo steps out → nav + switch + Платформаны ашу = 936px */
+@media (min-width: 1024px) and (max-width: 1099px) {
+  .hdr[data-locale="kk"] .hdr__logo {
+    display: none;
+  }
+}
+
+/* --- Burger mode: EN ≤ 768, KK ≤ 1023 (the five KK labels + actions need 1010px) ---
+   Rules are repeated per locale on purpose (CSS has no mixins); keep the two
+   blocks identical. Header.tsx closes the panel with the same thresholds. */
+@media (max-width: 768px) {
+  .hdr[data-locale="en"] .hdr__nav,
+  .hdr[data-locale="en"] .hdr__login,
+  .hdr[data-locale="en"] .hdr__lsw {
+    display: none;
+  }
+  .hdr[data-locale="en"] .hdr__iconbtn {
     display: inline-flex;
   }
-  .hdr__mobile {
+  .hdr[data-locale="en"] .hdr__mobile {
     display: block;
   }
-  /* nav is gone, so the wordmark sits in flow at the left page margin instead of
-     being centred under the "Join QairuHub" button; actions keep margin-left:auto */
-  .hdr__inner {
+  /* nav is gone, so the wordmark sits in flow at the left page margin; actions keep margin-left:auto */
+  .hdr[data-locale="en"] .hdr__inner {
     justify-content: flex-start;
   }
-  .hdr__logo {
+  .hdr[data-locale="en"] .hdr__logo {
     position: static;
     translate: none;
     margin-right: auto;
+  }
+}
+@media (max-width: 1023px) {
+  .hdr[data-locale="kk"] .hdr__nav,
+  .hdr[data-locale="kk"] .hdr__login,
+  .hdr[data-locale="kk"] .hdr__lsw {
+    display: none;
+  }
+  .hdr[data-locale="kk"] .hdr__iconbtn {
+    display: inline-flex;
+  }
+  .hdr[data-locale="kk"] .hdr__mobile {
+    display: block;
+  }
+  .hdr[data-locale="kk"] .hdr__inner {
+    justify-content: flex-start;
+  }
+  .hdr[data-locale="kk"] .hdr__logo {
+    position: static;
+    translate: none;
+    margin-right: auto;
+  }
+}
+/* Tablet widths in burger mode: the panel is a centred sheet, not a 1000px-wide slab */
+@media (min-width: 769px) and (max-width: 1023px) {
+  .hdr[data-locale="kk"] .hdr__mobile {
+    left: auto;
+    width: min(480px, 100%);
+    right: 0;
+    border-radius: 0 0 0 var(--radius-cards);
+  }
+}
+/* Phones: logo 113 + Open platform + burger must fit between 16px margins
+   (logo + gap + CTA + 8 + burger 38). The full KK button (label 129 + ↗ = 181px)
+   overflows below 400px, so from 360 to 399 it goes compact instead of leaving
+   the bar: the ↗ steps out (the new-tab hint stays in the sr-only suffix), side
+   padding 16→12 and the bar gap 16→8 → CTA 155px against a 161px budget at 360
+   (176 at 375). Below 360 neither locale's CTA fits (EN 148): the bar keeps
+   logo + burger and the panel carries the CTA. */
+@media (max-width: 399px) {
+  .hdr[data-locale="kk"] .hdr__inner {
+    gap: 8px;
+  }
+  .hdr[data-locale="kk"] .hdr__primary {
+    padding: 0 12px;
+  }
+  .hdr[data-locale="kk"] .hdr__primary svg {
+    display: none;
+  }
+}
+@media (max-width: 359px) {
+  .hdr[data-locale="en"] .hdr__primary,
+  .hdr[data-locale="kk"] .hdr__primary {
+    display: none;
   }
 }
 
@@ -497,7 +710,8 @@
   .hdr__actions,
   .hdr__iconbtn,
   .hdr__mobile,
-  .hdr__m-sub {
+  .hdr__m-sub,
+  .lsw__opt {
     transition: none !important;
   }
   .hdr__menu.is-open .hdr__sub {

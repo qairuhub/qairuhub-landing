@@ -1,0 +1,450 @@
+/* =============================================================================
+   Q, the QairuHub assistant (entry CSS): tokens, the Launchpad Ask bar and the floating launcher.
+   The panel (Panel.css) and answers (Answer.css) load with their lazy chunks.
+   Solid translucent surfaces only (no backdrop-filter over the WebGL canvas), no shadows,
+   no UI gradients, radii 4/8/12. White text on navy-black; secondary text ≥ .75.
+   ========================================================================== */
+
+:root {
+  --qa-surface: rgba(8, 12, 32, 0.72);
+  --qa-panel: #080c20;
+  --qa-line: rgba(var(--white-rgb), 0.14);
+  --qa-muted: rgba(var(--white-rgb), 0.75);
+  --qa-edge: max(16px, env(safe-area-inset-right));
+  --qa-floor: max(16px, env(safe-area-inset-bottom));
+  --qa-fab: 56px;
+}
+
+/* ---------- Ask bar ------------------------------------------------------- */
+.ask {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: var(--radius-cards);
+  border: 1px solid var(--card-line);
+  background: var(--qa-surface);
+  color: var(--white);
+  text-align: left;
+  transition: border-color 0.3s var(--ease);
+}
+.ask:focus-within {
+  border-color: rgba(var(--white-rgb), 0.5);
+}
+.ask__form {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 8px 8px 18px;
+}
+.ask__icon {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  color: var(--qa-muted);
+}
+.ask__field {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 48px;
+}
+.ask__input {
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--white);
+  font: inherit;
+  font-size: 16px;
+  line-height: 1.5;
+}
+.ask__input::placeholder {
+  color: var(--qa-muted);
+  opacity: 1;
+}
+.ask__input.has-tw::placeholder {
+  color: transparent;
+}
+.ask__input:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+/* Typewriter: the suggestion is revealed left → right with clip-path (paint only, no layout),
+   a caret rides the reveal edge. Hidden (but kept mounted) while the input is busy/focused. */
+.ask__tw {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  pointer-events: none;
+  color: var(--qa-muted);
+  font-size: 16px;
+  line-height: 1.5;
+  white-space: nowrap;
+  transition: opacity 0.2s var(--ease);
+}
+.ask__tw.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+.ask__tw-text {
+  display: inline-block;
+  max-width: calc(100% - 10px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 400ms ease-out;
+}
+.ask__tw.is-open .ask__tw-text {
+  clip-path: inset(0 0 0 0);
+  transition-duration: 800ms;
+}
+.ask__tw-caret {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 2px;
+  height: 22px;
+  margin-top: -11px;
+  border-radius: 1px;
+  background: currentColor;
+  opacity: 0;
+  translate: 0 0;
+  transition:
+    translate 400ms ease-out,
+    opacity 200ms var(--ease);
+}
+.ask__tw.is-open .ask__tw-caret {
+  opacity: 1;
+  translate: calc(var(--w, 0px) + 4px) 0;
+  transition-duration: 800ms, 200ms;
+  animation: ask-blink 760ms ease-in-out infinite;
+}
+.ask__tw.is-reduced .ask__tw-text {
+  clip-path: none;
+  transition: none;
+}
+.ask__tw.is-reduced .ask__tw-caret {
+  display: none;
+}
+@keyframes ask-blink {
+  0%,
+  100% {
+    scale: 1 1;
+  }
+  50% {
+    scale: 1 0;
+  }
+}
+
+/* Send / Stop: one element, so focus survives the swap. */
+.ask__action {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-buttons);
+  border: 1px solid var(--white);
+  background: var(--white);
+  color: var(--color-ink);
+  transition:
+    background-color 0.3s var(--ease),
+    color 0.3s var(--ease),
+    border-color 0.3s var(--ease);
+}
+.ask__action:hover {
+  background: rgba(var(--white-rgb), 0.85);
+}
+.ask__action.is-stop {
+  background: transparent;
+  color: var(--white);
+  border-color: rgba(var(--white-rgb), 0.5);
+}
+.ask__action.is-stop:hover {
+  background: rgba(var(--white-rgb), 0.12);
+}
+.ask__action svg {
+  width: 16px;
+  height: 16px;
+}
+
+.ask__turnstile:empty {
+  display: none;
+}
+.ask__turnstile {
+  padding: 0 16px 12px;
+}
+
+/* Suggestion chips (buttons: radius 8) */
+.ask__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 14px 16px 0;
+  border-top: 1px solid var(--qa-line);
+}
+.ask__chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 6px 12px;
+  box-sizing: border-box;
+  border-radius: var(--radius-buttons);
+  border: 1px solid var(--card-line);
+  background: rgba(var(--white-rgb), 0.06);
+  color: var(--white);
+  font-size: 14px;
+  line-height: 1.35;
+  text-align: left;
+  transition:
+    background-color 0.3s var(--ease),
+    border-color 0.3s var(--ease);
+}
+.ask__chip:hover {
+  background: rgba(var(--white-rgb), 0.14);
+  border-color: rgba(var(--white-rgb), 0.4);
+}
+.ask__note {
+  padding: 12px 16px 14px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--qa-muted);
+}
+.ask__note a,
+.qa-md a {
+  color: var(--white);
+  text-decoration: underline;
+  text-decoration-color: rgba(var(--white-rgb), 0.45);
+  text-underline-offset: 3px;
+  overflow-wrap: anywhere;
+  transition: text-decoration-color 0.3s var(--ease);
+}
+.ask__note a:hover,
+.qa-md a:hover {
+  text-decoration-color: var(--white);
+}
+
+/* Inline answer */
+.ask__answer {
+  padding: 16px 16px 0;
+  border-top: 1px solid var(--qa-line);
+}
+.ask__q {
+  margin-bottom: 10px;
+  padding-left: 12px;
+  border-left: 2px solid rgba(var(--white-rgb), 0.3);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--qa-muted);
+  overflow-wrap: anywhere;
+}
+.ask__scroll {
+  max-height: 360px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--white-rgb), 0.3) transparent;
+}
+.ask__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+  padding-top: 16px;
+}
+
+/* The Ask bar's Suspense fallback uses the answer's thinking line before Answer.css loads. */
+.qa-answer__thinking {
+  color: var(--qa-muted);
+  animation: qa-pulse 1.6s ease-in-out infinite;
+}
+@keyframes qa-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+/* ---------- Floating launcher --------------------------------------------- */
+.qa-fab {
+  position: fixed;
+  right: var(--qa-edge);
+  bottom: var(--qa-floor);
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  pointer-events: none;
+  translate: 0 calc(var(--qa-lift, 0px) * -1);
+  transition:
+    opacity 0.3s var(--ease),
+    visibility 0.3s;
+}
+/* The mobile nav panel is open (Header sets html[data-nav-open]). */
+html[data-nav-open] .qa-fab {
+  opacity: 0;
+  visibility: hidden;
+}
+/* fallback for a header without the attribute; a separate rule so a browser without :has()
+   keeps the one above */
+html:has(.hdr.is-mobile-open) .qa-fab {
+  opacity: 0;
+  visibility: hidden;
+}
+.qa-fab__btn {
+  position: relative;
+  pointer-events: auto;
+  width: var(--qa-fab);
+  height: var(--qa-fab);
+  padding: 0;
+  border-radius: 50%;
+  outline: 0 solid rgba(var(--white-rgb), 0);
+  outline-offset: 0;
+  transition:
+    outline-width 0.35s var(--ease),
+    outline-color 0.35s var(--ease);
+}
+.qa-fab__disc {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  border-radius: 50%;
+  border: 1px solid rgba(11, 23, 41, 0.12);
+  background: var(--white);
+  color: #0b1729;
+  animation: qa-bob 3s ease-in-out infinite;
+}
+.qa-fab__disc svg {
+  translate: 1px 1px;
+}
+@media (hover: hover) {
+  .qa-fab__btn:hover {
+    outline: 6px solid rgba(var(--white-rgb), 0.22);
+  }
+  .qa-fab__btn:hover .qa-fab__disc {
+    animation-play-state: paused;
+  }
+  .qa-fab__btn:hover .qa-fab__label {
+    opacity: 1;
+    translate: 0 -50%;
+  }
+}
+.qa-fab__btn:focus-visible {
+  outline: 2px solid var(--white);
+  outline-offset: 4px;
+}
+.qa-fab__btn:focus-visible .qa-fab__disc,
+.qa-fab.is-open .qa-fab__disc {
+  animation-play-state: paused;
+}
+.qa-fab__label,
+.qa-hint {
+  position: absolute;
+  right: calc(100% + 12px);
+  top: 50%;
+  box-sizing: border-box;
+  padding: 6px 12px;
+  border-radius: var(--radius-buttons);
+  border: 1px solid var(--card-line);
+  background: var(--qa-panel);
+  color: var(--white);
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.qa-fab__label {
+  opacity: 0;
+  translate: 6px -50%;
+  transition:
+    opacity 0.25s var(--ease),
+    translate 0.25s var(--ease);
+}
+.qa-fab__btn:focus-visible .qa-fab__label {
+  opacity: 1;
+  translate: 0 -50%;
+}
+.qa-fab.is-open .qa-fab__label {
+  opacity: 0;
+}
+.qa-hint {
+  right: calc(var(--qa-fab) + 12px);
+  translate: 0 -50%;
+  animation: qa-hint-in 0.5s var(--ease) both;
+}
+.qa-fab:has(.qa-fab__btn:hover) .qa-hint,
+.qa-fab:has(.qa-fab__btn:focus-visible) .qa-hint {
+  display: none;
+}
+@keyframes qa-bob {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -4px;
+  }
+}
+@keyframes qa-hint-in {
+  from {
+    opacity: 0;
+    translate: 8px -50%;
+  }
+}
+
+/* ---------- Small screens -------------------------------------------------- */
+@media (max-width: 768px) {
+  .ask__form {
+    padding-left: 14px;
+    gap: 10px;
+  }
+  /* one swipeable row of chips instead of six wrapped lines */
+  .ask__chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+    scroll-padding: 0 16px;
+  }
+  .ask__chips::-webkit-scrollbar {
+    display: none;
+  }
+  .ask__chips .ask__chip {
+    flex: none;
+    white-space: nowrap;
+  }
+}
+
+/* ---------- Reduced motion ------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .qa-fab__disc,
+  .qa-answer__thinking,
+  .qa-hint,
+  .ask__tw-caret {
+    animation: none !important;
+  }
+  .qa-fab,
+  .qa-fab__btn,
+  .qa-fab__label,
+  .ask,
+  .ask__tw,
+  .ask__tw-text,
+  .ask__tw-caret,
+  .ask__chip,
+  .ask__action {
+    transition: none !important;
+  }
+}

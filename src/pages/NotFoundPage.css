@@ -1,0 +1,18 @@
+/* 404 (WP10). Builds on subpage.css: one centred block on the frozen space preset. */
+.not-found {
+  justify-content: center;
+  min-height: 100svh;
+}
+.not-found__inner {
+  justify-content: center;
+}
+.not-found__ctas {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.not-found .subpage__title {
+  font-size: clamp(56px, 9vw, 136px);
+}

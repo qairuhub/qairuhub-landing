@@ -5,9 +5,17 @@
   "type": "module",
   "scripts": {
     "dev": "vite --port 5173 --strictPort",
-    "build": "tsc -p tsconfig.json --noEmit && vite build",
+    "dev:api": "wrangler pages dev dist --port 8788",
+    "build": "node scripts/build-handbook.mjs && tsc -p tsconfig.json --noEmit && tsc -p functions/tsconfig.json --noEmit && vite build && node scripts/build-html.mjs",
+    "build:handbook": "node scripts/build-handbook.mjs",
+    "build:html": "node scripts/build-html.mjs",
     "preview": "vite preview --port 4173 --strictPort",
     "typecheck": "tsc -p tsconfig.json --noEmit",
+    "typecheck:functions": "tsc -p functions/tsconfig.json --noEmit",
+    "test:routes": "node scripts/test-routes.mjs",
+    "deploy": "wrangler pages deploy dist --project-name qairuhub-landing --branch main",
+    "eval:ask": "node scripts/eval-ask.mjs",
+    "check": "node scripts/check-content.mjs && node scripts/check-fonts.mjs",
     "shots": "node scripts/shots.mjs"
   },
   "dependencies": {
@@ -20,6 +28,7 @@
     "three": "^0.186.0"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260914.1",
     "@tailwindcss/vite": "^4.3.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
@@ -28,6 +37,13 @@
     "playwright": "^1.63.0",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3",
-    "vite": "^8.3.0"
+    "vite": "^8.3.0",
+    "wrangler": "^4.131.2"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "workerd"
+    ]
   }
 }

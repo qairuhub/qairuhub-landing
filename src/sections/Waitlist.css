@@ -15,7 +15,8 @@
 .wl-text > h2,
 .wl-text > p,
 .wl-text .wl-confirm,
-.wl-text .wl-error {
+.wl-text .wl-error,
+.wl-text .wl-consent {
   text-shadow:
     0 2px 24px rgba(6, 18, 58, 0.45),
     0 0 2px rgba(6, 18, 58, 0.25);
@@ -23,17 +24,24 @@
 
 /* ---------- Form row: input + button stay on ONE row down to 640px; below that the
    reference (mobile-04) stacks a full-width ghost input over a full-width "Notify me",
-   so the pair reads as one block rather than an input with a stray centred button. */
+   so the pair reads as one block rather than an input with a stray centred button.
+   The submit button matches the 48px ghost input (reference desktop-03), so the pair
+   reads as one control; stretch keeps both edges flush on the shared line. */
 .wl-form {
   width: 100%;
 }
 .wl-form__row {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
   gap: 8px;
   width: 100%;
+}
+.wl-form__row .btn {
+  height: 48px;
+  padding: 0 20px;
+  box-sizing: border-box;
 }
 .input-air.wl-input {
   width: 371px;
@@ -48,7 +56,7 @@
     width: 100%;
     flex-basis: 100%;
   }
-  /* The .btn primary keeps its 38px height, label and hover fill — only the width changes. */
+  /* The .btn primary keeps its 48px height, label and hover fill — only the width changes. */
   .wl-form__row .btn {
     width: 100%;
     flex: 0 0 100%;
@@ -131,7 +139,7 @@
     0 0 2px rgba(6, 18, 58, 0.25);
 }
 
-/* ---------- Animated step row (Idea → MVP → Demo Day → Astana Hub)
+/* ---------- Animated step row (Idea → Team → Demo Day → Accelerator)
    One registered custom property (--wl-p, 0 → 1 over the cycle) drives everything:
    segment i fills while step i is current, and pill i lights up for its 1/N slice. */
 @property --wl-p {
@@ -239,7 +247,7 @@
 }
 
 /* Phones: the four pills cannot share one line (at 320px the row overflowed the card and
-   clipped "Astana Hub"; at 360–375px the connectors collapsed to their minimum and the
+   clipped the last pill; at 360–375px the connectors collapsed to their minimum and the
    progress-line animation vanished). Let the row wrap onto two centred lines instead, with
    every pill keeping a visible 28px connector. The card body's bottom padding grows to
    clear two rows of pills (2 × 32px + 10px gap + 2 × 20px padding = 114px). */
@@ -277,10 +285,18 @@
   }
 }
 
-/* Submission error under the form row (copy: form.submitFailed in content.ts). */
+/* Submission error under the form row (copy: waitlist.i18n.ts error keys). */
 .wl-error {
   flex-basis: 100%;
   text-align: center;
-  color: rgba(var(--fg-rgb), 0.85);
-  margin-top: 4px;
+  color: rgba(var(--fg-rgb), 0.92);
+  margin: 4px 0 0;
+}
+
+/* Consent line: one quiet row under the form, full width so it always sits below the pair. */
+.wl-consent {
+  flex-basis: 100%;
+  text-align: center;
+  color: rgba(var(--fg-rgb), 0.75);
+  margin: 4px 0 0;
 }

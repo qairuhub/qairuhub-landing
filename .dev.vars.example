@@ -1,0 +1,10 @@
+# Local secrets for `pnpm dev:api` (wrangler pages dev). Copy to `.dev.vars` (git-ignored) and
+# fill in locally. Names only here: never commit values. Production values live in Cloudflare
+# (Pages secrets / Secrets Store), never in files.
+OPENAI_API_KEY=
+TURNSTILE_SITE_KEY=
+TURNSTILE_SECRET_KEY=
+SESSION_SIGNING_KEY=
+RATE_LIMIT_SALT=
+TELEGRAM_BOT_TOKEN=
+TELEGRAM_CHAT_ID=

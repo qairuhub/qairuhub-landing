@@ -1,0 +1,102 @@
+/* =============================================================================
+   Sub-page scaffold shared by /members, /handbook and 404 (WP10).
+   Air tokens only: Inter 500, compressed uppercase display, one cursive accent, flat translucent
+   surfaces (--card-fill / --card-line), radii 4/8/11/12, no shadows, no UI gradients, no
+   backdrop-filter (it would re-blur the WebGL sky every frame).
+   ========================================================================== */
+
+.subpage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 96px;
+  width: 100%;
+  min-height: 100lvh;
+  padding: calc(var(--header-height) + 88px) 0 120px;
+  color: var(--white);
+  overflow-x: clip;
+}
+
+.subpage .grid-air {
+  flex-direction: column;
+  flex-wrap: nowrap;
+}
+
+/* ---------- Heading block */
+.subpage__intro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  text-align: center;
+}
+.subpage__eyebrow {
+  color: rgba(var(--white-rgb), 0.75);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.subpage__title {
+  max-width: 100%;
+  overflow-wrap: break-word;
+  /* room for Kazakh descenders (Қ, Ң, Ұ) under the 0.85 display line-height */
+  padding-bottom: 0.08em;
+}
+.subpage__lede {
+  max-width: 62ch;
+  color: rgba(var(--white-rgb), 0.85);
+}
+
+/* ---------- Content blocks */
+.subpage__block {
+  gap: 32px;
+}
+.subpage__block-head {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 70ch;
+}
+.subpage__note {
+  color: rgba(var(--white-rgb), 0.75);
+}
+
+/* Anchor targets (#board, #builders, #who-to-ask, #contact): Lenis lands the section box at the
+   header's bottom edge (ANCHOR_OFFSET); the padding/negative-margin pair gives the heading 24px
+   of air under the header without changing the layout. No scroll-margin-top: Lenis adds it to the
+   offset and would double the gap. */
+.subpage__block {
+  padding-top: 24px;
+  margin-top: -24px;
+}
+
+/* Shared horizontally scrollable table wrapper (tables are the only thing allowed to be wider
+   than the viewport). */
+.table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--card-line);
+  border-radius: var(--radius-cards);
+  background: var(--card-fill);
+  overscroll-behavior-x: contain;
+}
+.table-scroll:focus-visible {
+  outline: 2px solid rgba(var(--white-rgb), 0.8);
+  outline-offset: 2px;
+}
+
+@media (max-width: 768px) {
+  .subpage {
+    gap: 64px;
+    padding: calc(var(--header-height) + 48px) 0 80px;
+  }
+  .subpage__intro {
+    gap: 16px;
+  }
+}
+
+/* Kazakh titles carry long cursive accents (e.g. «жүргізетін», ≈ 6.2 × the title size once the
+   1.18em accent is uppercase). At the 200px desktop cap it outgrew the 1102px column and broke
+   mid-word; 12.5vw capped at 165px keeps the accent on one line at every width (integrator). */
+:lang(kk) .subpage__title.u-h1-small {
+  font-size: clamp(50px, 12.5vw, 165px);
+}

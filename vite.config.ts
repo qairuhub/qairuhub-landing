@@ -25,7 +25,12 @@ const R3F_AND_HELPERS =
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  server: { port: 5173, strictPort: true },
+  server: {
+    port: 5173,
+    strictPort: true,
+    // Pages Functions run under `pnpm dev:api` (wrangler pages dev dist --port 8788).
+    proxy: { '/api': 'http://127.0.0.1:8788' },
+  },
   preview: { port: 4173, strictPort: true },
   build: {
     target: 'es2022',

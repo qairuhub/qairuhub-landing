@@ -1,7 +1,7 @@
 /* =============================================================================
    Supersize — one uppercase compressed sentence filling the viewport width, filled in
    word-by-word as it scrolls through the viewport (styles written from a rAF loop).
-   Lines are tight (.85, from .u-h1), both side paddings are the 24px row margin, and
+   Lines are tight (.92; .u-h1 is .85 but Anton caps are taller), both side paddings are the 24px row margin, and
    the words carry the .on-sky glow because they sit directly on the moving sky.
    ========================================================================== */
 
@@ -27,7 +27,10 @@
      orphaning "over" once the bleed is gone. Measured with Anton metrics: a balanced 4-line
      stack from 360 to 1536 (≥15px right margin on phones), 3 lines from ~1700 up. */
   font-size: clamp(60px, 16.5vw, 240px);
-  line-height: 0.85;
+  /* .u-h1 uses .85, but Anton/Oswald caps are ~.89em tall, so .85 stacked the lines into each
+     other (3px overlap at 390, 11px at 1440). .92 keeps the tight Air stack with the glyphs just
+     clear of the line above. */
+  line-height: 0.92;
   text-align: left;
   color: var(--fg);
   white-space: normal;

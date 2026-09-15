@@ -1,6 +1,8 @@
-import type { SVGProps } from 'react'
+import type { ComponentType, SVGProps } from 'react'
 
 type P = SVGProps<SVGSVGElement> & { size?: number }
+export type IconProps = P
+export type IconComponent = ComponentType<P>
 const base = (size = 16): SVGProps<SVGSVGElement> => ({
   width: size,
   height: size,
@@ -17,6 +19,11 @@ const base = (size = 16): SVGProps<SVGSVGElement> => ({
 export const ChevronDown = ({ size, ...p }: P) => (
   <svg {...base(size)} {...p}>
     <path d="M6 9l6 6 6-6" />
+  </svg>
+)
+export const ChevronLeft = ({ size, ...p }: P) => (
+  <svg {...base(size)} {...p}>
+    <path d="M15 6l-6 6 6 6" />
   </svg>
 )
 export const ChevronRight = ({ size, ...p }: P) => (
@@ -121,6 +128,39 @@ export const Play = ({ size, ...p }: P) => (
     <path d="M8 5.5v13l11-6.5-11-6.5z" />
   </svg>
 )
+export const Pause = ({ size, ...p }: P) => (
+  <svg {...base(size)} {...p} fill="currentColor" stroke="none">
+    <rect x="6.5" y="5" width="4" height="14" rx="1.2" />
+    <rect x="13.5" y="5" width="4" height="14" rx="1.2" />
+  </svg>
+)
+/** Stop generating (assistant). */
+export const Stop = ({ size, ...p }: P) => (
+  <svg {...base(size)} {...p} fill="currentColor" stroke="none">
+    <rect x="6.5" y="6.5" width="11" height="11" rx="2" />
+  </svg>
+)
+/** Send a message (paper plane). */
+export const Send = ({ size, ...p }: P) => (
+  <svg {...base(size)} {...p}>
+    <path d="M20.5 3.5L10 14" />
+    <path d="M20.5 3.5L14 20.5l-4-6.5-6.5-4 17-6.5z" />
+  </svg>
+)
+/** Language / locale. */
+export const Globe = ({ size, ...p }: P) => (
+  <svg {...base(size)} {...p}>
+    <circle cx="12" cy="12" r="8.5" />
+    <path d="M3.5 12h17M12 3.5c2.3 2.4 3.5 5.2 3.5 8.5s-1.2 6.1-3.5 8.5c-2.3-2.4-3.5-5.2-3.5-8.5s1.2-6.1 3.5-8.5z" />
+  </svg>
+)
+/** External link (box + arrow). */
+export const External = ({ size, ...p }: P) => (
+  <svg {...base(size)} {...p}>
+    <path d="M13.5 4.5h6v6M19.5 4.5L11 13" />
+    <path d="M17.5 14v4a2 2 0 01-2 2h-9.5a2 2 0 01-2-2V8.5a2 2 0 012-2h4" />
+  </svg>
+)
 
 /* ---- Social glyphs (generic placeholders — swap for official assets later) ---- */
 export const SocialTelegram = ({ size, ...p }: P) => (
@@ -136,17 +176,6 @@ export const SocialInstagram = ({ size, ...p }: P) => (
     <circle cx="17" cy="7" r="0.8" fill="currentColor" />
   </svg>
 )
-export const SocialX = ({ size, ...p }: P) => (
-  <svg {...base(size)} {...p}>
-    <path d="M5 4l14 16M19 4L5 20" />
-  </svg>
-)
-export const SocialLinkedIn = ({ size, ...p }: P) => (
-  <svg {...base(size)} {...p}>
-    <rect x="4" y="4" width="16" height="16" rx="3" />
-    <path d="M8 10.5v6M8 7.8v.2M12 16.5v-6M12 13c0-1.5 1-2.5 2.3-2.5S16.5 11.5 16.5 13v3.5" />
-  </svg>
-)
 export const SocialGitHub = ({ size, ...p }: P) => (
   <svg {...base(size)} {...p}>
     <path d="M8 20c-4 1.2-4-2-5.5-2.4M15 20v-3.3a2.8 2.8 0 00-.8-2.2c2.7-.3 5.5-1.3 5.5-6a4.6 4.6 0 00-1.3-3.2 4.3 4.3 0 00-.1-3.2s-1-.3-3.3 1.2a11.4 11.4 0 00-6 0C6.7 1.8 5.7 2.1 5.7 2.1a4.3 4.3 0 00-.1 3.2A4.6 4.6 0 004.3 8.5c0 4.7 2.8 5.7 5.5 6a2.8 2.8 0 00-.8 2.2V20" />
@@ -158,3 +187,40 @@ export const SocialYouTube = ({ size, ...p }: P) => (
     <path d="M10.5 9.5v5l4-2.5-4-2.5z" fill="currentColor" stroke="none" />
   </svg>
 )
+
+/* ---- Registry ----------------------------------------------------------------
+ * v3 keyed icon set (plan WP0 task 11). Data files reference icons by these keys; X and LinkedIn
+ * are intentionally absent. */
+export const icons = {
+  arrowRight: ArrowRight,
+  arrowUpRight: ArrowUpRight,
+  book: Book,
+  bolt: Bolt,
+  calendar: Calendar,
+  check: Check,
+  checkCircle: CheckCircle,
+  chevronDown: ChevronDown,
+  chevronLeft: ChevronLeft,
+  chevronRight: ChevronRight,
+  close: Close,
+  external: External,
+  folder: Folder,
+  github: SocialGitHub,
+  globe: Globe,
+  grid: Grid2,
+  instagram: SocialInstagram,
+  menu: Menu,
+  pause: Pause,
+  pencil: Pencil,
+  play: Play,
+  rocket: Rocket,
+  search: Search,
+  send: Send,
+  sparkle: Sparkle,
+  stop: Stop,
+  telegram: SocialTelegram,
+  users: Users,
+  youtube: SocialYouTube,
+} satisfies Record<string, IconComponent>
+
+export type IconKey = keyof typeof icons

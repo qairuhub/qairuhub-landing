@@ -1,125 +1,8 @@
 /* =============================================================================
-   AgenticCards — typewriter pill + three synced cards (reference "Air" agentic cards).
+   Launchpad (AgenticCards.tsx) — three cards synced to the Ask bar's typewriter suggestion
+   (reference "Air" agentic cards). The Ask bar itself is styled in src/assistant/Assistant.css.
    Uses only tokens from global.css: rgba(var(--fg-rgb), .x), var(--bg), var(--ease), radii.
    ========================================================================== */
-
-/* ---------- Typewriter pill ------------------------------------------------ */
-.ac-pill-row {
-  position: relative;
-  width: 100%;
-  height: 48px;
-}
-.ac-pill {
-  position: absolute;
-  left: 50%;
-  top: 0;
-  transform: translateX(-50%);
-  display: inline-flex;
-  align-items: center;
-  box-sizing: border-box;
-  height: 48px;
-  max-width: 100%;
-  padding: 0 20px;
-  border-radius: 9999px;
-  background: rgba(var(--fg-rgb), 0.14);
-  border: 1px solid rgba(var(--fg-rgb), 0.18);
-  color: var(--fg);
-  white-space: nowrap;
-  text-shadow: 0 1px 12px rgba(6, 18, 58, 0.35);
-  transition: transform 800ms ease-out;
-  will-change: transform;
-}
-.ac-pill__icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: none;
-  width: 28px;
-  height: 21px;
-  margin-right: 8px;
-  color: var(--fg);
-}
-.ac-pill__icon svg {
-  width: 14px;
-  height: 14px;
-  transform: scale(1.5);
-  transform-origin: center;
-}
-.ac-pill__text {
-  position: relative;
-  display: block;
-  flex: 0 1 auto;
-  min-width: 0;
-  width: var(--w, 0px);
-  overflow: hidden;
-  white-space: nowrap;
-  font-size: 16px;
-  line-height: 1.5;
-  transition: width 800ms ease-out;
-}
-.ac-pill__text.is-collapsing {
-  transition-duration: 400ms;
-}
-.ac-pill__text.is-capped {
-  text-overflow: ellipsis;
-}
-.ac-pill__label {
-  display: inline;
-}
-.ac-pill__twin {
-  position: absolute;
-  left: 0;
-  top: 0;
-  visibility: hidden;
-  pointer-events: none;
-  white-space: nowrap;
-}
-.ac-pill__caret {
-  flex: none;
-  width: 0;
-  height: 24px;
-  margin-left: 0;
-  border-radius: 1px;
-  background: currentColor;
-  opacity: 0;
-  transform-origin: center;
-  transition:
-    opacity 200ms var(--ease),
-    width 200ms var(--ease),
-    margin-left 200ms var(--ease);
-}
-.ac-pill__caret.is-on {
-  width: 2px;
-  margin-left: 8px;
-  opacity: 1;
-  animation: ac-blink 760ms ease-in-out infinite;
-}
-@keyframes ac-blink {
-  0%,
-  100% {
-    transform: scaleY(1);
-  }
-  50% {
-    transform: scaleY(0);
-  }
-}
-
-/* Reduced motion: full prompt, crossfade between prompts. */
-.ac-pill.is-reduced {
-  transition: none;
-}
-.ac-pill.is-reduced .ac-pill__text {
-  width: auto;
-  max-width: 100%;
-  text-overflow: ellipsis;
-  transition: opacity 400ms var(--ease);
-}
-.ac-pill.is-reduced .ac-pill__text.is-fading {
-  opacity: 0;
-}
-.ac-pill.is-reduced .ac-pill__caret {
-  display: none;
-}
 
 /* ---------- Cards ---------------------------------------------------------- */
 .ac-card {
@@ -560,7 +443,7 @@
     width: 44%;
   }
 }
-/* ≤1024 (medium/small): the cards wrap to 2+1 or stack full-width, so the prompt pill
+/* ≤1024 (medium/small): the cards wrap to 2+1 or stack full-width, so the Ask bar typewriter
    that drives the active-card cross-fade is off-screen while the user reads them —
    keep only a whisper of emphasis on the mock and none on the copy (body 1 × text .9). */
 @media (max-width: 1024px) {
@@ -584,14 +467,9 @@
 
 /* ---------- Reduced motion ------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
-  .ac-pill,
-  .ac-pill__caret,
   .ac-card,
   .ac-card * {
     transition-duration: 0ms !important;
     animation: none !important;
-  }
-  .ac-pill__text {
-    transition: opacity 400ms var(--ease) !important;
   }
 }

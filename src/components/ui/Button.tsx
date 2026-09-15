@@ -14,6 +14,13 @@ export interface ButtonProps {
   variant?: ButtonVariant
   href?: string
   target?: string
+  /**
+   * External link: opens in a new tab with `rel="noopener noreferrer"`. Pass the localized
+   * screen-reader suffix (`a11y.newTab`, e.g. "(opens in a new tab)") as `newTabLabel`; it is
+   * appended as visually hidden text. Only applies when `href` is set.
+   */
+  external?: boolean
+  newTabLabel?: string
   icon?: ReactNode
   iconRight?: ReactNode
   className?: string
@@ -33,6 +40,8 @@ export function Button({
   variant = 'primary',
   href,
   target,
+  external,
+  newTabLabel,
   icon,
   iconRight,
   className,
@@ -51,16 +60,18 @@ export function Button({
       {icon}
       {children != null && <span className={labelClass}>{children}</span>}
       {iconRight}
+      {href && external && newTabLabel && <span className="sr-only"> {newTabLabel}</span>}
     </>
   )
   if (href && !disabled) {
+    const linkTarget = external ? '_blank' : target
     return (
       <a
         className={cls}
         style={style}
         href={href}
-        target={target}
-        rel={target === '_blank' ? 'noreferrer' : undefined}
+        target={linkTarget}
+        rel={external ? 'noopener noreferrer' : linkTarget === '_blank' ? 'noreferrer' : undefined}
         aria-label={ariaLabel}
         onClick={onClick}
       >

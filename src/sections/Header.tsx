@@ -4,53 +4,31 @@ import {
   useEffect,
   useRef,
   useState,
-  type ComponentType,
   type CSSProperties,
   type FocusEvent,
   type MouseEvent,
-  type SVGProps,
+  type SyntheticEvent,
 } from 'react'
-import { nav, type NavColumn, type NavCta, type NavSubItem } from '../content'
 import { Button } from '../components/ui/Button'
 import { Wordmark } from '../components/ui/Wordmark'
-import {
-  ArrowUpRight,
-  Bolt,
-  Book,
-  Calendar,
-  CheckCircle,
-  ChevronDown,
-  Close,
-  Folder,
-  Grid2,
-  Menu,
-  Pencil,
-  Rocket,
-  Search,
-  Sparkle,
-  Users,
-} from '../components/ui/icons'
-import { useLenis } from '../lib/SmoothScroll'
+import { ArrowRight, ArrowUpRight, ChevronDown, Close, Menu, icons } from '../components/ui/icons'
+import { useRoute, useT } from '../i18n/LocaleProvider'
+import { LOCALE_STORAGE_KEY, href, switchLocaleHref, type Locale, type Route } from '../i18n/locale'
+import { scrollToAnchor, useLenis } from '../lib/SmoothScroll'
 import { scrollState } from '../lib/scroll'
 import { useTick } from '../lib/ticker'
-import { journey, smoothstep } from './sky/journey'
+import { footerWordmarkWeight, heroWordmarkWeight, journey } from './sky/journey'
+import {
+  ACTIONS,
+  NAV,
+  NAV_ORDER,
+  text as headerText,
+  type CtaText,
+  type NavLink,
+  type NavMenuDef,
+  type SubText,
+} from './header.i18n'
 import './Header.css'
-
-/* ------------------------------------------------------------------ icons */
-type IconComponent = ComponentType<SVGProps<SVGSVGElement> & { size?: number }>
-const ICONS: Record<NavSubItem['icon'], IconComponent> = {
-  sparkle: Sparkle,
-  bolt: Bolt,
-  rocket: Rocket,
-  users: Users,
-  folder: Folder,
-  pencil: Pencil,
-  calendar: Calendar,
-  book: Book,
-  grid: Grid2,
-  search: Search,
-  check: CheckCircle,
-}
 
 /**
  * Mouse-leave grace before a mega menu closes. The label's bottom edge (y 52) and the panel's
@@ -65,27 +43,120 @@ const HOVER_GRACE_MS = 300
  */
 const LOGO_HIDE_AT = 0.05
 
-/** mobile panel footer: lets the full-width login row wrap above the two 50 % CTAs */
-const MOBILE_FOOTER_STYLE: CSSProperties = { flexWrap: 'wrap' }
-const MOBILE_LOGIN_STYLE: CSSProperties = {
-  flex: '0 0 100%',
-  width: '100%',
-  justifyContent: 'flex-start',
-  minHeight: 38,
-  padding: 0,
+/**
+ * Window event the "Ask Q" CTA (About menu) dispatches after its `/#launchpad` link is followed
+ * on the home page. The assistant launcher (WP3) listens for it and opens its panel.
+ */
+export const ASSISTANT_OPEN_EVENT = 'qh:assistant-open'
+/**
+ * Attribute set on <html> while the mobile nav panel is open, so the floating assistant launcher
+ * (WP3) can hide itself with CSS: `html[data-nav-open] .q-launcher { … }`.
+ */
+export const NAV_OPEN_ATTR = 'data-nav-open'
+
+/**
+ * First width at which the full nav bar returns (Header.css "Burger mode"). Kazakh labels run
+ * ~50% longer, so KK keeps the burger up to 1023px.
+ */
+const BURGER_EXIT_QUERY: Record<Locale, string> = {
+  en: '(min-width: 769px)',
+  kk: '(min-width: 1024px)',
 }
 
-/* ------------------------------------------------------------------ sub item */
-function SubItem({ item, index, onNavigate }: { item: NavSubItem; index: number; onNavigate: () => void }) {
-  const Icon = ICONS[item.icon]
-  const external = item.external === true
+/** Tabbable elements considered by the mobile panel's focus trap. */
+const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])'
+
+/* ------------------------------------------------------------------ links */
+function resolveLink(route: Route, link: NavLink): { href: string; external: boolean } {
+  return link.kind === 'ext' ? { href: link.href, external: true } : { href: href(route, link.to), external: false }
+}
+
+/** `target` / `rel` for an external link (new tab, no opener, no referrer). */
+function extProps(external: boolean) {
+  return external ? { target: '_blank', rel: 'noopener noreferrer' } : {}
+}
+
+/* ------------------------------------------------------------------ locale switch */
+/**
+ * Segmented `EN | ҚАЗ` control: two plain links (a locale switch is a full navigation, plan D1).
+ * Each points at the same page in its locale and keeps the current hash, which can change
+ * without a re-render (Lenis pushes anchors), so the href is refreshed from `location.hash`
+ * right before it can be followed (hover, focus, pointer down, click). The choice is stored in
+ * `localStorage['qh.locale']` for main.tsx's bare-`/` redirect. Announced as
+ * "Language, group · EN, current".
+ */
+export function LocaleSwitch({ className }: { className?: string }) {
+  const route = useRoute()
+  const t = useT(headerText).localeSwitch
+
+  const refresh = (to: Locale) => (e: SyntheticEvent<HTMLAnchorElement>) => {
+    e.currentTarget.setAttribute('href', switchLocaleHref(route, to, window.location.hash))
+  }
+  const onClick = (to: Locale) => (e: MouseEvent<HTMLAnchorElement>) => {
+    if (to === route.locale) {
+      // already here: nothing to navigate to
+      e.preventDefault()
+      return
+    }
+    refresh(to)(e)
+    try {
+      window.localStorage.setItem(LOCALE_STORAGE_KEY, to)
+    } catch {
+      /* storage blocked: the switch still navigates */
+    }
+  }
+
+  const option = (to: Locale, label: string, title: string) => {
+    const current = to === route.locale
+    return (
+      <a
+        className={clsx('lsw__opt', current && 'is-current')}
+        href={switchLocaleHref(route, to)}
+        hrefLang={to}
+        lang={to}
+        title={title}
+        aria-current={current ? 'true' : undefined}
+        onMouseEnter={refresh(to)}
+        onFocus={refresh(to)}
+        onPointerDown={refresh(to)}
+        onClick={onClick(to)}
+      >
+        {label}
+      </a>
+    )
+  }
+
+  return (
+    <div className={clsx('lsw', className)} role="group" aria-label={t.label}>
+      {option('en', t.en, t.enTitle)}
+      {option('kk', t.kk, t.kkTitle)}
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------------ menu parts */
+function SubItem({
+  sub,
+  def,
+  index,
+  newTab,
+  onNavigate,
+}: {
+  sub: SubText
+  def: NavMenuDef<string>['items'][string]
+  index: number
+  newTab: string
+  onNavigate: () => void
+}) {
+  const route = useRoute()
+  const Icon = icons[def.icon]
+  const { href: to, external } = resolveLink(route, def.link)
   return (
     <li>
       <a
         className="hdr__sub"
-        href={item.href}
-        target={external ? '_blank' : undefined}
-        rel={external ? 'noreferrer' : undefined}
+        href={to}
+        {...extProps(external)}
         style={{ '--i': index } as CSSProperties}
         onClick={onNavigate}
       >
@@ -94,38 +165,59 @@ function SubItem({ item, index, onNavigate }: { item: NavSubItem; index: number;
         </span>
         <span className="hdr__sub-text">
           <span className="hdr__sub-title">
-            {item.title}
+            {sub.title}
             {external && <ArrowUpRight size={14} />}
           </span>
-          <span className="hdr__sub-desc">{item.description}</span>
+          <span className="hdr__sub-desc">{sub.description}</span>
+          {external && <span className="sr-only"> {newTab}</span>}
         </span>
       </a>
     </li>
   )
 }
 
-function Columns({ columns, onNavigate }: { columns: NavColumn[]; onNavigate: () => void }) {
+function Column({
+  def,
+  items,
+  newTab,
+  onNavigate,
+}: {
+  def: NavMenuDef<string>
+  items: Record<string, SubText>
+  newTab: string
+  onNavigate: () => void
+}) {
   return (
-    <>
-      {columns.map((col, c) => (
-        <ul className="hdr__col" key={c}>
-          {col.title && <li className="hdr__col-title">{col.title}</li>}
-          {col.items.map((item, i) => (
-            <SubItem key={item.title} item={item} index={i} onNavigate={onNavigate} />
-          ))}
-        </ul>
+    <ul className="hdr__col">
+      {Object.keys(def.items).map((key, i) => (
+        <SubItem key={key} sub={items[key]} def={def.items[key]} index={i} newTab={newTab} onNavigate={onNavigate} />
       ))}
-    </>
+    </ul>
   )
 }
 
-function CtaCard({ cta, onNavigate }: { cta: NavCta; onNavigate: () => void }) {
+/** A menu CTA's href and click handler (closes the menu; About's "Ask Q" also opens the assistant). */
+function useCta(def: NavMenuDef<string>, onNavigate: () => void) {
+  const route = useRoute()
+  const { href: to } = resolveLink(route, def.cta)
+  const onClick = () => {
+    onNavigate()
+    if (def.opensAssistant) {
+      // after the anchor glide has been scheduled; on a sub-page the link navigates home instead
+      window.setTimeout(() => window.dispatchEvent(new CustomEvent(ASSISTANT_OPEN_EVENT)), 0)
+    }
+  }
+  return { to, onClick }
+}
+
+function CtaCard({ def, cta, onNavigate }: { def: NavMenuDef<string>; cta: CtaText; onNavigate: () => void }) {
+  const { to, onClick } = useCta(def, onNavigate)
   return (
     <div className="hdr__cta">
       <div className="hdr__cta-card">
         <p className="hdr__cta-title">{cta.title}</p>
         <p className="hdr__cta-desc">{cta.description}</p>
-        <Button variant="secondary" href={cta.href} onClick={onNavigate}>
+        <Button variant="secondary" href={to} onClick={onClick}>
           {cta.cta}
         </Button>
       </div>
@@ -133,42 +225,63 @@ function CtaCard({ cta, onNavigate }: { cta: NavCta; onNavigate: () => void }) {
   )
 }
 
+/** The mobile panel's version of a menu CTA: one more row in the sub-item style. */
+function MobileCta({ def, cta, onNavigate }: { def: NavMenuDef<string>; cta: CtaText; onNavigate: () => void }) {
+  const { to, onClick } = useCta(def, onNavigate)
+  return (
+    <a className="hdr__sub" href={to} onClick={onClick}>
+      <span className="hdr__sub-icon" aria-hidden="true">
+        <ArrowRight size={20} />
+      </span>
+      <span className="hdr__sub-text">
+        <span className="hdr__sub-title">{cta.cta}</span>
+        <span className="hdr__sub-desc">{cta.description}</span>
+      </span>
+    </a>
+  )
+}
+
 /* ------------------------------------------------------------------ header */
 export default function Header() {
+  const route = useRoute()
+  const t = useT(headerText)
+  const isHome = route.page === 'home'
   const lenis = useLenis()
   const [openMenu, setOpenMenu] = useState<number | null>(null)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [mobileExpanded, setMobileExpanded] = useState<number | null>(null)
-  const [showLogo, setShowLogo] = useState(false)
+  // sub-pages have no 3D wordmark run: the DOM logo is always there
+  const [showLogo, setShowLogo] = useState(!isHome)
 
-  const logoVisibleRef = useRef(false)
+  const logoVisibleRef = useRef(!isHome)
   const navRef = useRef<HTMLElement>(null)
   const burgerRef = useRef<HTMLButtonElement>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
+  const mobileRef = useRef<HTMLDivElement>(null)
   const triggerRefs = useRef<(HTMLButtonElement | null)[]>([])
   const menuRefs = useRef<(HTMLDivElement | null)[]>([])
   const graceRef = useRef<number | null>(null)
   /** last known mouse position while a mega menu is open (viewport px); null = unknown */
   const pointerRef = useRef<{ x: number; y: number } | null>(null)
 
-  /* --- wordmark visibility: driven by the journey, state flips only on change --- */
+  /* --- wordmark visibility (home only): driven by the journey, state flips only on change --- */
   useTick(() => {
     const vh = Math.max(1, window.innerHeight)
     const y = scrollState.y / vh
-    // `journey` is written by SkyScene's frame loop (priority -100). While that loop is not
-    // running — chunk still loading, tab hidden, no WebGL — it keeps its last values, so fall
-    // back to the very same curves evaluated from the scroll position: the DOM wordmark must
-    // still appear once the hero has scrolled away even without the 3D run.
+    // `journey` is written by SkyScene's frame loop. While that loop is not running (chunk still
+    // loading, tab hidden, no WebGL) it keeps its last values, so evaluate the very same curves
+    // (journey.ts exports) from the scroll position: the DOM wordmark must still appear once the
+    // hero has scrolled away even without the 3D run.
     const live = Math.abs(journey.vh - y) < 0.25
     const end = Math.max(4, scrollState.limit / vh)
-    const hero = live ? journey.wordmarkHero : 1 - smoothstep(0, 1.4, y)
-    const footer = live ? journey.wordmarkFooter : smoothstep(end - 1.4, end - 0.3, y)
+    const hero = live ? journey.wordmarkHero : heroWordmarkWeight(y)
+    const footer = live ? journey.wordmarkFooter : footerWordmarkWeight(y, end)
     const next = hero < LOGO_HIDE_AT && footer < LOGO_HIDE_AT
     if (next !== logoVisibleRef.current) {
       logoVisibleRef.current = next
       setShowLogo(next)
     }
-  })
+  }, isHome)
 
   /* --- desktop mega menu open/close with hover grace --- */
   const clearGrace = useCallback(() => {
@@ -191,9 +304,7 @@ export default function Header() {
   /**
    * Aim-aware: is the mouse still "on its way" into menu `i`? True while it sits inside the open
    * panel's box extended straight up to its trigger's bottom edge — the corridor a hand crosses
-   * when it leaves a label sideways and heads for a column or the CTA card. Entering the panel
-   * itself re-fires mouseenter on the <li> and cancels the timer, so this only has to cover the
-   * dead band the CSS bridge cannot.
+   * when it leaves a label sideways and heads for a column or the CTA card.
    */
   const isAimingAt = useCallback((i: number) => {
     const p = pointerRef.current
@@ -211,7 +322,6 @@ export default function Header() {
       const tick = () => {
         graceRef.current = null
         if (isAimingAt(i)) {
-          // still crossing the corridor: keep it open and look again shortly
           graceRef.current = window.setTimeout(tick, HOVER_GRACE_MS)
           return
         }
@@ -236,26 +346,53 @@ export default function Header() {
     setOpenMenu(null)
   }, [])
 
-  // lock page scroll while the mobile panel is open; move focus into the panel
+  // lock page scroll while the mobile panel is open; move focus into the panel and keep it there
+  // (Tab / Shift+Tab wrap inside it); flag <html> so the floating assistant launcher steps aside
   useEffect(() => {
     if (!mobileOpen) return
     lenis?.stop()
+    const root = document.documentElement
+    root.setAttribute(NAV_OPEN_ATTR, '')
     const t = window.setTimeout(() => closeRef.current?.focus(), 60)
+    const onTab = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return
+      const panel = mobileRef.current
+      if (!panel) return
+      // visible and not inside a collapsed (inert) sub-list
+      const items = [...panel.querySelectorAll<HTMLElement>(FOCUSABLE)].filter(
+        (el) => !el.closest('[inert]') && el.getClientRects().length > 0,
+      )
+      if (!items.length) return
+      const first = items[0]
+      const last = items[items.length - 1]
+      const active = document.activeElement
+      const inside = active instanceof Node && panel.contains(active)
+      if (e.shiftKey && (active === first || !inside)) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && (active === last || !inside)) {
+        e.preventDefault()
+        first.focus()
+      }
+    }
+    document.addEventListener('keydown', onTab)
     return () => {
       window.clearTimeout(t)
+      document.removeEventListener('keydown', onTab)
+      root.removeAttribute(NAV_OPEN_ATTR)
       lenis?.start()
     }
   }, [mobileOpen, lenis])
 
-  // leaving the mobile breakpoint closes the panel
+  // leaving burger mode closes the panel (Header.css: EN ≤ 768, KK ≤ 1023)
   useEffect(() => {
-    const mq = window.matchMedia('(min-width: 769px)')
+    const mq = window.matchMedia(BURGER_EXIT_QUERY[route.locale])
     const onChange = (e: MediaQueryListEvent) => {
       if (e.matches) closeMobile()
     }
     mq.addEventListener('change', onChange)
     return () => mq.removeEventListener('change', onChange)
-  }, [closeMobile])
+  }, [closeMobile, route.locale])
 
   /* --- escape + click outside --- */
   useEffect(() => {
@@ -303,8 +440,8 @@ export default function Header() {
   }
   const onItemFocus = (i: number) => (e: FocusEvent<HTMLLIElement>) => {
     // open on keyboard focus only — pointer clicks are handled by the trigger toggle
-    const t = e.target as HTMLElement
-    if (t.matches(':focus-visible')) openAt(i)
+    const target = e.target as HTMLElement
+    if (target.matches(':focus-visible')) openAt(i)
   }
   const onItemBlur = (i: number) => (e: FocusEvent<HTMLLIElement>) => {
     const next = e.relatedTarget as Node | null
@@ -312,31 +449,51 @@ export default function Header() {
     setOpenMenu((cur) => (cur === i ? null : cur))
   }
 
+  /* --- logo: the locale home; on home itself it glides back to the top instead of reloading --- */
+  const onLogoClick = (e: MouseEvent<HTMLAnchorElement>) => {
+    closeMobile()
+    if (!isHome || !lenis) return
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+    e.preventDefault()
+    scrollToAnchor(lenis, '#', { push: true })
+  }
+
+  const members = resolveLink(route, ACTIONS.members)
+  const join = resolveLink(route, ACTIONS.join)
+  const platform = resolveLink(route, ACTIONS.openPlatform)
+
   return (
-    <header className={clsx('hdr', mobileOpen && 'is-mobile-open')}>
+    <header
+      className={clsx('hdr', mobileOpen && 'is-mobile-open', !isHome && 'hdr--sub')}
+      data-locale={route.locale}
+      data-page={route.page}
+    >
       <div className="hdr__shade" aria-hidden="true" />
 
       <div className="grid-air grid-air--hero hdr__inner">
-        {/* ---------------- left nav (≥768) ---------------- */}
-        <nav className="hdr__nav" aria-label="Primary" ref={navRef}>
+        {/* ---------------- left nav (≥769) ---------------- */}
+        <nav className="hdr__nav" aria-label={t.a11y.primaryNav} ref={navRef}>
           <ul className="hdr__list">
-            {nav.items.map((item, i) => {
-              const hasMenu = !!item.columns?.length
-              if (!hasMenu) {
+            {NAV_ORDER.map((key, i) => {
+              const item = NAV[key]
+              const label = t.nav[key].label
+              if (!('menu' in item)) {
                 return (
-                  <li className="hdr__item" key={item.label}>
-                    <a className="hdr__link" href={item.href}>
-                      {item.label}
+                  <li className="hdr__item" key={key}>
+                    <a className="hdr__link" href={resolveLink(route, item.link).href}>
+                      {label}
                     </a>
                   </li>
                 )
               }
+              const menuText = t.nav[key as 'programs' | 'platform' | 'about']
+              const menuDef = item.menu as NavMenuDef<string>
               const isOpen = openMenu === i
-              const menuId = `hdr-menu-${i}`
+              const menuId = `hdr-menu-${key}`
               return (
                 <li
                   className="hdr__item"
-                  key={item.label}
+                  key={key}
                   onMouseEnter={() => openAt(i)}
                   onMouseLeave={() => closeSoon(i)}
                   onFocus={onItemFocus(i)}
@@ -346,28 +503,33 @@ export default function Header() {
                     type="button"
                     className="hdr__trigger"
                     aria-expanded={isOpen}
-                    aria-haspopup="true"
                     aria-controls={menuId}
                     onClick={onTriggerClick(i)}
                     ref={(el) => {
                       triggerRefs.current[i] = el
                     }}
                   >
-                    {item.label}
+                    {label}
                     <ChevronDown size={16} className="hdr__chev" />
                   </button>
                   <div
                     id={menuId}
                     className={clsx('hdr__menu', isOpen && 'is-open')}
                     data-theme="light"
-                    aria-label={item.label}
+                    role="group"
+                    aria-label={label}
                     inert={!isOpen}
                     ref={(el) => {
                       menuRefs.current[i] = el
                     }}
                   >
-                    <Columns columns={item.columns ?? []} onNavigate={closeMenu} />
-                    {item.cta && <CtaCard cta={item.cta} onNavigate={closeMenu} />}
+                    <Column
+                      def={menuDef}
+                      items={menuText.items as Record<string, SubText>}
+                      newTab={t.a11y.newTab}
+                      onNavigate={closeMenu}
+                    />
+                    <CtaCard def={menuDef} cta={menuText.cta} onNavigate={closeMenu} />
                   </div>
                 </li>
               )
@@ -375,31 +537,38 @@ export default function Header() {
           </ul>
         </nav>
 
-        {/* ---------------- center wordmark ---------------- */}
+        {/* ---------------- wordmark (centred on wide screens) ---------------- */}
         <a
           className={clsx('hdr__logo', showLogo && 'is-visible')}
-          href="#"
+          href={route.base}
+          aria-label={t.a11y.home}
           tabIndex={showLogo ? 0 : -1}
           aria-hidden={!showLogo}
+          onClick={onLogoClick}
         >
-          <Wordmark />
+          <Wordmark decorative />
         </a>
 
         {/* ---------------- right actions ---------------- */}
         <div className="hdr__actions">
-          <Button variant="tertiary" href={nav.login.href} className="hdr__login">
-            {nav.login.label}
+          <LocaleSwitch className="hdr__lsw" />
+          <Button variant="tertiary" href={members.href} className="hdr__login" active={route.page === 'members'}>
+            {t.actions.members}
           </Button>
-          <Button variant="primary" href={nav.primary.href}>
-            {nav.primary.label}
-          </Button>
-          <Button variant="secondary" href={nav.secondary.href} className="hdr__secondary">
-            {nav.secondary.label}
+          <Button
+            variant="primary"
+            href={platform.href}
+            external
+            newTabLabel={t.a11y.newTab}
+            className="hdr__primary"
+            iconRight={<ArrowUpRight size={14} />}
+          >
+            {t.actions.openPlatform}
           </Button>
           <button
             type="button"
             className="hdr__iconbtn hdr__burger"
-            aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+            aria-label={mobileOpen ? t.a11y.closeMenu : t.a11y.openMenu}
             aria-expanded={mobileOpen}
             aria-controls="hdr-mobile-menu"
             onClick={toggleMobile}
@@ -418,33 +587,46 @@ export default function Header() {
         data-lenis-prevent=""
         aria-hidden={!mobileOpen}
         inert={!mobileOpen}
+        ref={mobileRef}
       >
         <div className="hdr__m-inner">
           <div className="hdr__m-top">
-            <a href="#" className="hdr__m-logo" onClick={closeMobile}>
-              <Wordmark />
+            <a href={route.base} className="hdr__m-logo" aria-label={t.a11y.home} onClick={onLogoClick}>
+              <Wordmark decorative />
             </a>
-            <button type="button" className="hdr__iconbtn" aria-label="Close menu" onClick={closeMobile} ref={closeRef}>
-              <Close size={18} />
-            </button>
+            <div className="hdr__m-tools">
+              <LocaleSwitch />
+              <button
+                type="button"
+                className="hdr__iconbtn"
+                aria-label={t.a11y.closeMenu}
+                onClick={closeMobile}
+                ref={closeRef}
+              >
+                <Close size={18} />
+              </button>
+            </div>
           </div>
 
           <ul className="hdr__m-list">
-            {nav.items.map((item, i) => {
-              const hasMenu = !!item.columns?.length
-              if (!hasMenu) {
+            {NAV_ORDER.map((key, i) => {
+              const item = NAV[key]
+              const label = t.nav[key].label
+              if (!('menu' in item)) {
                 return (
-                  <li className="hdr__m-row" key={item.label}>
-                    <a className="hdr__m-trigger" href={item.href} onClick={closeMobile}>
-                      {item.label}
+                  <li className="hdr__m-row" key={key}>
+                    <a className="hdr__m-trigger" href={resolveLink(route, item.link).href} onClick={closeMobile}>
+                      {label}
                     </a>
                   </li>
                 )
               }
+              const menuText = t.nav[key as 'programs' | 'platform' | 'about']
+              const menuDef = item.menu as NavMenuDef<string>
               const expanded = mobileExpanded === i
-              const subId = `hdr-m-sub-${i}`
+              const subId = `hdr-m-sub-${key}`
               return (
-                <li className="hdr__m-row" key={item.label}>
+                <li className="hdr__m-row" key={key}>
                   <button
                     type="button"
                     className="hdr__m-trigger"
@@ -452,12 +634,18 @@ export default function Header() {
                     aria-controls={subId}
                     onClick={() => setMobileExpanded((cur) => (cur === i ? null : i))}
                   >
-                    {item.label}
+                    {label}
                     <ChevronDown size={16} className="hdr__chev" />
                   </button>
                   <div id={subId} className={clsx('hdr__m-sub', expanded && 'is-open')} inert={!expanded}>
                     <div className="hdr__m-sub-inner">
-                      <Columns columns={item.columns ?? []} onNavigate={closeMobile} />
+                      <Column
+                        def={menuDef}
+                        items={menuText.items as Record<string, SubText>}
+                        newTab={t.a11y.newTab}
+                        onNavigate={closeMobile}
+                      />
+                      <MobileCta def={menuDef} cta={menuText.cta} onNavigate={closeMobile} />
                     </div>
                   </div>
                 </li>
@@ -465,25 +653,22 @@ export default function Header() {
             })}
           </ul>
 
-          {/* The bar's tertiary "Members" link is hidden at ≤768, so the panel carries it as a
-              full-width row above the two CTAs. Layout overrides are inline because this file
-              owns no stylesheet of its own: they lift the footer's 50 % button split for this
-              one row (flex-wrap on the footer, full basis + left alignment on the link). */}
-          <div className="hdr__m-footer" style={MOBILE_FOOTER_STYLE}>
+          <div className="hdr__m-footer">
+            <Button variant="tertiary" href={members.href} onClick={closeMobile} className="hdr__m-login">
+              {t.actions.members}
+            </Button>
             <Button
-              variant="tertiary"
-              href={nav.login.href}
+              variant="primary"
+              href={platform.href}
+              external
+              newTabLabel={t.a11y.newTab}
               onClick={closeMobile}
-              className="hdr__m-login"
-              style={MOBILE_LOGIN_STYLE}
+              iconRight={<ArrowUpRight size={14} />}
             >
-              {nav.login.label}
+              {t.actions.openPlatform}
             </Button>
-            <Button variant="primary" href={nav.primary.href} onClick={closeMobile}>
-              {nav.primary.label}
-            </Button>
-            <Button variant="secondary" href={nav.secondary.href} onClick={closeMobile}>
-              {nav.secondary.label}
+            <Button variant="secondary" href={join.href} onClick={closeMobile}>
+              {t.actions.join}
             </Button>
           </div>
         </div>

@@ -83,8 +83,9 @@ const SEED = 20260914
  * cell whose hollow base read as an arch/crescent in the middle of the LEARN / BUILD / LAUNCH copy.
  */
 const CENTRE_CELL = 1
-/** …and its alpha (0.7 put a pale blob behind the LEARN body copy; 0.45 reads as distant haze). */
-const CENTRE_ALPHA = 0.45
+/** …and its alpha (0.7 put a pale blob behind the LEARN body copy; 0.45 still took white copy to
+ *  ≈ 3 : 1 on the day sky, so it is now a faint 0.22 haze — and hidden for the whole day phase). */
+const CENTRE_ALPHA = 0.22
 /** Night: the far layer (the only one kept) fades to this share of `journey.clouds`… */
 const NIGHT_FAR_ALPHA = 0.25
 /** …and rises by this many world units, so no grey blob sits in the valley between the hills. */
@@ -399,10 +400,17 @@ export default function CloudSprites({ tier, reduced }: LayerProps) {
     // Portrait: sprites are wider than the frame and the lanes cannot clear the copy → dim the day
     // deck instead. Short ramp (aspect 1 → .85) so a tablet rotation never pops.
     const portrait = Math.min(1, Math.max(0, (1 - aspect) / 0.15))
+    // v3: it is also gone for the descent bell (0.85 → 2.3 vh), while the Launchpad title, the Ask
+    // bar and its chips are read in the column: at alpha 0.45 the haze took white copy to ≈ 3 : 1.
+    // It is also hidden for the whole day phase (× (1 − day)): the column carries the Accelerator,
+    // "What we're building", news, Projects and MEET copy there, so the sprite only shows in the
+    // whiteout and never behind text.
     // Night: the centre-lane sprite fades out (1 → 0 across NIGHT_CENTRE_FADE) so no cloud sits
     // behind the footer wordmark or over the valley; the lane sprites stay as faint edge shapes.
     const centreFade =
-      1 - Math.min(1, Math.max(0, (night - NIGHT_CENTRE_FADE[0]) / (NIGHT_CENTRE_FADE[1] - NIGHT_CENTRE_FADE[0])))
+      (1 - journey.descent) *
+      (1 - day) *
+      (1 - Math.min(1, Math.max(0, (night - NIGHT_CENTRE_FADE[0]) / (NIGHT_CENTRE_FADE[1] - NIGHT_CENTRE_FADE[0]))))
 
     // Pass 1: positions + coverage estimate (pre-cap alpha).
     let coverage = 0

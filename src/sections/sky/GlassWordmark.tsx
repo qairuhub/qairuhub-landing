@@ -1,10 +1,10 @@
 import { Suspense, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
-import { hero } from '../../content'
+import { brand } from '../../i18n/shared'
 import { preloadTTFFont, useTTFFont } from '../../lib/ttf'
 import GlassText, { getGlassGeometry, type GlassTextBevel } from '../../components/three/GlassText'
-import { journey } from './journey'
+import { journey, smoothstep } from './journey'
 import { QUALITY } from './quality'
 import { pointer } from './pointer'
 import type { LayerProps } from './types'
@@ -17,24 +17,44 @@ import type { LayerProps } from './types'
  * fails to download or parse. Both are TrueType glyf fonts parsed at runtime by lib/ttf.ts.
  */
 const FONTS = ['/fonts/Courgette-Regular.ttf', '/fonts/DancingScript-Variable.ttf'] as const
-preloadTTFFont(FONTS, hero.wordmark)
 
 /**
- * Rounded edge for Courgette's stroke half-width of ≈ 0.055 × size: 0.04 per side (≈ 0.7 × the
- * half-width, the same tube ratio GlassText documents for Mr Dafoe's 0.024). The thin joins
- * become full round tubes, the median stroke keeps a narrow flat face and swells to ≈ 0.19 × size.
- *
- * A 0.04 quarter-round is 1.7 × the 0.024 one GLASS_BEVEL's 3 segments were tuned for: at hero
- * scale on a dpr-2 display three facets span ≈ 8 px each on the side walls, and the specular
- * clearcoat picks every ridge out as the run turns its full 360° (stepped ridges along the 'u' /
- * 'b' extrusions mid-rotation). 5 segments (≈ 5 px per facet under the roughness-0.5 blur) read
- * as a smooth tube. The outline tessellation is raised with it (6 → 8 per curve) so the bowls of
- * the script keep pace with the smoother edge profile. The geometry is built ONCE and cached in
- * GlassText's module-level map, so the extra one-time tessellation (≈ 1.5 × the triangles of the
- * 6 / 3 budget, well under the 70k that produced a > 50 ms task) is the whole cost.
+ * Starts the Courgette download + parse. SkyScene calls it on the home page only: sub-pages never
+ * mount the wordmark, so they must not fetch the TTF either (V3-BUILD-PLAN WP1 C). Idempotent.
  */
-const BEVEL: Partial<GlassTextBevel> = { thickness: 0.04, size: 0.04, segments: 5 }
-/** Outline tessellation per curve — must reach both `getGlassGeometry` and `<GlassText>` (same cache key). */
+export function preloadGlassWordmark(): void {
+  preloadTTFFont(FONTS, brand.wordmark)
+}
+
+/**
+ * v3 thin tube (DECISIONS §9: "thinner", legibility of "qairuhub" must stay perfect).
+ *
+ * three's bevel grows OUTWARD from the glyph outline, so v2's { 0.04, 0.04 } swelled Courgette's
+ * ≈ 0.11 × size stroke to ≈ 0.19 × size, the fat inflated read. v3 keeps a rounded profile but
+ * pulls it inside the outline with `offset`: the side wall sits at outline + (size + offset) =
+ * −0.01 per side and the cap face at −0.03, so the widest point of the median stroke is
+ * ≈ 0.11 + 2 × (0.02 − 0.03) = 0.09 × size (−53 %). `thickness` 0.025 keeps the quarter-round a
+ * little deeper than it is wide, which reads as a tube rather than a slab. Courgette's exit strokes
+ * taper to 10–18° points narrower than the inset: three's extruder folded them into hooks, so
+ * GlassText builds the run with components/three/extrudeGlyphs.ts, which lets a too-thin tail
+ * collapse to a hairline point instead (checked through the full turn at 1440 and 390 px).
+ *
+ * 5 quarter-round segments + 8 outline segments per curve (the v2 budget): the side walls stay
+ * smooth under the clearcoat through the full 360° turn. The geometry is built ONCE and cached in
+ * GlassText's module-level map (the offset is part of the cache key), and the footer run shares it.
+ *
+ * Plan fallback (V3-BUILD-PLAN WP1 A) if the run ever reads bold or shows artefacts again:
+ * { thickness: 0.022, size: 0.012, offset: 0, segments: 4 } (≈ 0.134 × size) with HEIGHT 0.06.
+ */
+const BEVEL: Partial<GlassTextBevel> = { thickness: 0.025, size: 0.02, offset: -0.03, segments: 5 }
+/**
+ * Extrusion depth (× size). Side-on during the spin the depth reads as weight, so it thins with the
+ * stroke (v2 0.14, v3 first pass 0.08 still read chunky at scroll ≈ 300): DECISIONS §9 fallback depth.
+ * The inset BEVEL above stays: the plan fallback profile (offset 0) would widen the face stroke to
+ * ≈ 0.134 × size, bolder at y 0, while its side-on depth (0.06 + 2 × 0.022) matches this one within 0.006.
+ */
+const HEIGHT = 0.06
+/** Outline tessellation per curve: must reach both `getGlassGeometry` and `<GlassText>` (same cache key). */
 const CURVE_SEGMENTS = 8
 
 /** Below this journey weight the run is not on screen at all: no draw, no transmission pass. */
@@ -43,19 +63,29 @@ const PRESENCE_MIN = 0.005
 const MOBILE_MAX = 768
 
 const HERO = {
+  /** start depth; the fit is computed once for this depth (see `baseDist`) */
   z: 0,
-  /** share of the visible width at z 0 the run spans (checklist #3: ≈ 0.70, ≤ 0.78 on mobile) */
-  fit: 0.7,
-  fitMobile: 0.78,
+  /** share of the visible width at z 0 the run spans (v3, DECISIONS §9 "~15 % smaller": 0.60, 0.66 on mobile) */
+  fit: 0.6,
+  fitMobile: 0.66,
   floatAmp: 0.12,
   floatPeriod: 6,
   /** mouse parallax on top of the scroll turn */
   rotY: 0.06,
   rotX: 0.03,
   rotLerp: 0.05,
-  /** world units the run drifts up as `wordmarkHero` goes 1 → 0 */
+  /**
+   * world units the run drifts up as `wordmarkHero` goes 1 → 0, at the start depth. Multiplied by
+   * dist / baseDist while it recedes (the frame is taller further away), so it still clears the
+   * frame top on the v2 timing.
+   */
   exitLift: 6,
-  exitScale: 0.9,
+  /** world units the run recedes toward −z by the exit (the mid cloud deck sits at z −6) */
+  exitDepth: 5,
+  /** the recede lags the turn slightly: recede = smoothstep(recedeFrom, 1, 1 − wordmarkHero) */
+  recedeFrom: 0.05,
+  /** extra scale at the exit. 1: the perspective does the shrink now (10 / 15 ≈ 0.67) */
+  exitScale: 1,
 } as const
 
 const FOOTER = {
@@ -99,8 +129,12 @@ function aboveFrame(y: number, halfHeight: number, halfWidth: number, yaw: numbe
  * valley at the very end (night phase). Both appearances turn a full 360° with the scroll
  * (checklist #4): `rotation.y = (1 − journey.wordmarkHero) × 2π` as it drifts away, and
  * `(1 − journey.wordmarkFooter) × 2π` as it descends into place — eased by the journey's
- * smoothstep, with the mouse parallax and the slow float added on top. Reduced motion: no turn,
- * no float, no parallax.
+ * smoothstep, with the mouse parallax and the slow float added on top.
+ *
+ * v3 hero exit (DECISIONS §9): while it turns and rises the run also RECEDES into depth
+ * (z 0 → −5). The fit is computed once for the start depth (`baseDist`), so the perspective
+ * really shrinks it (≈ −30 % apparent size by the time it leaves the frame) instead of the fit
+ * re-growing it. Reduced motion: no turn, no float, no parallax, no recede.
  *
  * The mesh stays mounted for the life of the scene: unmounting between the two appearances
  * disposed the MeshTransmissionMaterial, so the footer re-linked its large shader on the main
@@ -118,8 +152,8 @@ export default function GlassWordmark(props: LayerProps) {
 
 /** Suspends on the font; the geometry comes from the module-level cache in GlassText. */
 function Letters({ tier, reduced }: LayerProps) {
-  const font = useTTFFont(FONTS, hero.wordmark)
-  const geometry = getGlassGeometry(font, hero.wordmark, { curveSegments: CURVE_SEGMENTS, bevel: BEVEL })
+  const font = useTTFFont(FONTS, brand.wordmark)
+  const geometry = getGlassGeometry(font, brand.wordmark, { height: HEIGHT, curveSegments: CURVE_SEGMENTS, bevel: BEVEL })
   const bounds = geometry.boundingBox as THREE.Box3
   const runWidth = Math.max(1e-4, bounds.max.x - bounds.min.x)
   const halfWidth = runWidth / 2
@@ -149,15 +183,19 @@ function Letters({ tier, reduced }: LayerProps) {
       const halfTan = Math.tan(cam.fov * 0.5 * DEG2RAD)
 
       if (inHero) {
-        // Fit the run to a share of the visible width at its depth; the geometry is centred on
-        // the origin, so position is exactly the visual centre.
-        const dist = cam.position.z - HERO.z
-        const visibleWidth = 2 * dist * halfTan * cam.aspect
+        // Fit the run to a share of the visible width at its START depth, once: measured at the
+        // live depth the fit would re-grow the run exactly as fast as it recedes. The geometry is
+        // centred on the origin, so position is exactly the visual centre.
+        const baseDist = cam.position.z - HERO.z
+        const visibleWidth = 2 * baseDist * halfTan * cam.aspect
         const fit = mobile ? HERO.fitMobile : HERO.fit
         const scale = ((visibleWidth * fit) / runWidth) * (HERO.exitScale + (1 - HERO.exitScale) * wh)
+        const recede = reduced ? 0 : smoothstep(HERO.recedeFrom, 1, 1 - wh)
+        const z = HERO.z - recede * HERO.exitDepth
+        const dist = cam.position.z - z
         const bob = reduced ? 0 : Math.sin((t * TAU) / HERO.floatPeriod) * HERO.floatAmp
-        const y = bob + (1 - wh) * HERO.exitLift
-        g.position.set(0, y, HERO.z)
+        const y = bob + (1 - wh) * HERO.exitLift * (dist / baseDist)
+        g.position.set(0, y, z)
         g.scale.setScalar(scale)
         // One full turn as the run scrolls away (0 at the top of the page), plus the parallax.
         const spin = reduced ? 0 : (1 - wh) * TAU
@@ -195,8 +233,9 @@ function Letters({ tier, reduced }: LayerProps) {
     <group ref={group}>
       <GlassText
         ref={mesh}
-        text={hero.wordmark}
+        text={brand.wordmark}
         font={font}
+        height={HEIGHT}
         curveSegments={CURVE_SEGMENTS}
         bevel={BEVEL}
         mode={quality.transmission ? 'frosted' : 'physical'}
@@ -206,6 +245,10 @@ function Letters({ tier, reduced }: LayerProps) {
           // drei allocates a second FBO for the (unused, `backside: false`) backside pass at
           // `resolution` unless told otherwise — keep it to a token 32² HalfFloat target.
           backsideResolution: 32,
+          // v3 thin strokes: half the v2 optical thickness and a longer attenuation, so a 0.09 × size
+          // tube stays milky and bright instead of tinting toward the attenuation colour.
+          thickness: 0.3,
+          attenuationDistance: 3,
           // > 0 triples the bicubic transmission taps per sample; invisible under the 0.42 roughness
           // blur, so only the high tier pays for the fringe.
           chromaticAberration: tier === 'high' ? 0.02 : 0,

@@ -4,103 +4,139 @@ import { Section, SectionText } from '../components/ui/Section'
 import { Grid, Col } from '../components/ui/Grid'
 import { Reveal, useInView } from '../components/ui/Reveal'
 import { AnimatedBorder } from '../components/ui/AnimatedBorder'
-import { ArrowUpRight, Search } from '../components/ui/icons'
+import { ArrowUpRight, Calendar, Grid2, Pencil, Search, Users, type IconComponent } from '../components/ui/icons'
+import { Accent } from '../i18n/Accent'
+import { useT } from '../i18n/LocaleProvider'
+import { sectionIds } from '../i18n/shared'
 import { useReducedMotion } from '../lib/media'
-import { features } from '../content'
-import { featuresMock } from './features.content'
+import { text, type OfferText } from './offer.i18n'
 import './Features.css'
 
-type Visual = (typeof features.items)[number]['visual']
+/* ------------------------------------------------------------------ layout (locale-invariant) */
 
-/* ------------------------------------------------------------------ mock visuals (decorative) */
+type Visual = 'schedule' | 'chart' | 'links' | 'timeline'
 
-/** Schedule list: 4 rows — time @48px, title, chip. Rows are the Features card's own copy (featuresMock.schedule). */
-function ScheduleMock() {
+/** Card i of `text.items`: column span at >=768px and its mock. The grid is 7/5 · 5/7 · 4/4/4. */
+const LAYOUT: readonly { cols: number; visual: Visual | null }[] = [
+  { cols: 7, visual: 'schedule' },
+  { cols: 5, visual: 'chart' },
+  { cols: 5, visual: 'links' },
+  { cols: 7, visual: 'timeline' },
+  { cols: 4, visual: null },
+  { cols: 4, visual: null },
+  { cols: 4, visual: null },
+]
+
+type Mock = OfferText['mock']
+
+/* ------------------------------------------------------------------ mock visuals (decorative, aria-hidden) */
+
+/** Card 1: the real upcoming schedule (§9.2): date · title · detail. The first row is the next one. */
+function ScheduleMock({ rows }: { rows: Mock['schedule'] }) {
   return (
     <div className="feature-mock feature-mock--schedule">
-      {featuresMock.schedule.map(([time, title, kind], i) => (
-        <div className="fm-row" key={i} style={{ '--d': `${i * 90}ms` } as CSSProperties}>
-          <span className="fm-row__time">{time}</span>
-          <span className="fm-row__title">{title}</span>
-          <span className="fm-chip">{kind}</span>
+      {rows.map((row, i) => (
+        <div
+          className={clsx('fm-row', i === 0 && 'is-next')}
+          key={i}
+          style={{ '--d': `${i * 90}ms` } as CSSProperties}
+        >
+          <span className="fm-row__date">{row.date}</span>
+          <span className="fm-row__text">
+            <span className="fm-row__title">{row.title}</span>
+            <span className="fm-row__detail">{row.detail}</span>
+          </span>
         </div>
       ))}
     </div>
   )
 }
 
-/** Analytics bars: 8 columns, value label above each bar, 20px tile below (reference look). */
-const CHART = [42, 58, 35, 76, 64, 88, 52, 100] as const
-function ChartMock() {
+/** Card 2: the road to HackAlem AI, four rising steps with a label under each bar (no invented numbers). */
+const STEP_HEIGHTS = [38, 58, 80, 100] as const
+function ChartMock({ chart }: { chart: Mock['chart'] }) {
   return (
     <div className="feature-mock feature-mock--chart">
-      {CHART.map((v, i) => (
-        <div className="fm-bar" key={i} style={{ '--h': `${v}%`, '--d': `${i * 60}ms` } as CSSProperties}>
-          <div className="fm-bar__track">
-            <span className="fm-bar__val">{v}</span>
-            <span className="fm-bar__fill" />
+      <div className="fm-chart__head">
+        <Calendar size={14} />
+        <span className="fm-chart__label">{chart.label}</span>
+      </div>
+      <div className="fm-chart__bars">
+        {chart.bars.map((label, i) => (
+          <div
+            className="fm-bar"
+            key={i}
+            style={
+              { '--h': `${STEP_HEIGHTS[i] ?? 100}%`, '--d': `${i * 90}ms`, '--o': 0.4 + i * 0.18 } as CSSProperties
+            }
+          >
+            <div className="fm-bar__track">
+              <span className="fm-bar__fill" />
+            </div>
+            <span className="fm-bar__label">{label}</span>
           </div>
-          <span className="fm-bar__tile" />
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   )
 }
 
-/** Search pill + two stacked link cards (thumbnail, two skeleton lines, ↗). */
-function LinksMock() {
+/** Card 3: the platform address and its three destinations. */
+const LINK_ICONS: readonly IconComponent[] = [Users, Pencil, Grid2]
+function LinksMock({ items }: { items: Mock['links'] }) {
   return (
     <div className="feature-mock feature-mock--links">
       <div className="fm-search">
         <Search size={14} />
-        <span className="fm-line" style={{ width: '38%' }} />
+        <span className="fm-search__text">community.qairuhub.com</span>
       </div>
-      {[0, 1].map((i) => (
-        <div className="fm-link" key={i} style={{ '--d': `${120 + i * 120}ms` } as CSSProperties}>
-          <span className="fm-link__thumb" />
-          <span className="fm-link__lines">
-            <span className="fm-line fm-line--strong" style={{ width: i === 0 ? '64%' : '52%' }} />
-            <span className="fm-line" style={{ width: i === 0 ? '40%' : '30%' }} />
-          </span>
-          <ArrowUpRight size={14} className="fm-link__arrow" />
-        </div>
-      ))}
+      {items.map((label, i) => {
+        const Icon = LINK_ICONS[i] ?? Grid2
+        return (
+          <div className="fm-link" key={i} style={{ '--d': `${120 + i * 110}ms` } as CSSProperties}>
+            <span className="fm-link__thumb">
+              <Icon size={16} />
+            </span>
+            <span className="fm-link__label">{label}</span>
+            <ArrowUpRight size={14} className="fm-link__arrow" />
+          </div>
+        )
+      })}
     </div>
   )
 }
 
-/** 10-week track: a dot per week, progress filled to week 7, 4 milestone labels (weeks 1/4/7/10) from featuresMock.milestones. */
-const WEEKS = 10
-const FILLED_WEEK = 7
-const MILESTONE_WEEKS = [1, 4, 7, 10] as const
-function TimelineMock() {
-  const pct = (week: number) => ((week - 1) / (WEEKS - 1)) * 100
-  const labels = featuresMock.milestones
+/** Card 4: the path to Demo Day. 10 dots with milestones at 1 / 4 / 7 / 10; the last one is the stage. */
+const DOTS = 10
+const MILESTONE_DOTS = [1, 4, 7, 10] as const
+function TimelineMock({ labels }: { labels: Mock['milestones'] }) {
+  const pct = (dot: number) => ((dot - 1) / (DOTS - 1)) * 100
+  const last = MILESTONE_DOTS.length - 1
   return (
     <div className="feature-mock feature-mock--timeline">
       <div className="fm-tl__labels">
-        {MILESTONE_WEEKS.map((w, i) => (
+        {MILESTONE_DOTS.map((dot, i) => (
           <span
-            className={clsx('fm-tl__label', w <= FILLED_WEEK && 'is-done')}
-            key={w}
-            style={{ '--x': `${pct(w)}%`, '--d': `${i * 120}ms` } as CSSProperties}
-            data-edge={i === 0 ? 'start' : i === MILESTONE_WEEKS.length - 1 ? 'end' : undefined}
+            className={clsx('fm-tl__label', i === last && 'is-stage')}
+            key={dot}
+            style={{ '--x': `${pct(dot)}%`, '--d': `${i * 160}ms` } as CSSProperties}
+            data-edge={i === 0 ? 'start' : i === last ? 'end' : undefined}
           >
             {labels[i]}
           </span>
         ))}
       </div>
       <div className="fm-tl__track">
-        <span className="fm-tl__fill" style={{ '--w': `${pct(FILLED_WEEK)}%` } as CSSProperties} />
-        {Array.from({ length: WEEKS }, (_, i) => i + 1).map((w) => (
+        <span className="fm-tl__fill" />
+        {Array.from({ length: DOTS }, (_, i) => i + 1).map((dot) => (
           <span
             className={clsx(
               'fm-tl__dot',
-              w <= FILLED_WEEK && 'is-done',
-              (MILESTONE_WEEKS as readonly number[]).includes(w) && 'is-milestone',
+              (MILESTONE_DOTS as readonly number[]).includes(dot) && 'is-milestone',
+              dot === DOTS && 'is-stage',
             )}
-            key={w}
-            style={{ '--x': `${pct(w)}%`, '--d': `${w * 70}ms` } as CSSProperties}
+            key={dot}
+            style={{ '--x': `${pct(dot)}%`, '--d': `${dot * 110}ms` } as CSSProperties}
           />
         ))}
       </div>
@@ -108,25 +144,27 @@ function TimelineMock() {
   )
 }
 
-function FeatureVisual({ kind }: { kind: Exclude<Visual, null> }) {
+function FeatureVisual({ kind, mock }: { kind: Visual; mock: Mock }) {
   switch (kind) {
     case 'schedule':
-      return <ScheduleMock />
+      return <ScheduleMock rows={mock.schedule} />
     case 'chart':
-      return <ChartMock />
+      return <ChartMock chart={mock.chart} />
     case 'links':
-      return <LinksMock />
+      return <LinksMock items={mock.links} />
     case 'timeline':
-      return <TimelineMock />
+      return <TimelineMock labels={mock.milestones} />
   }
 }
 
 /* ------------------------------------------------------------------ section */
 
+/** What we offer (`#offer`, CONTENT-V3 §9): 7 AnimatedBorder cards on the 7/5 · 5/7 · 4/4/4 grid. */
 export default function Features() {
-  // One observer for the whole grid: pauses the border strokes offscreen and arms the mock animations.
+  const t = useT(text)
+  // One observer for the whole grid: pauses every border stroke offscreen and arms the mock animations.
   const { ref, inView } = useInView<HTMLDivElement>({ once: false, threshold: 0, rootMargin: '0px' })
-  // Reduced motion: the mocks render in their final state immediately (no arming wait) and follow a live OS change.
+  // Reduced motion: the mocks render in their final state immediately and follow a live OS change.
   const reduced = useReducedMotion()
   const [seen, setSeen] = useState(reduced)
   useEffect(() => {
@@ -134,41 +172,33 @@ export default function Features() {
   }, [inView, reduced])
 
   return (
-    <Section id="features" spacing="large">
-      <SectionText
-        titleAs="h2"
-        titleClass="u-h3"
-        title={
-          <>
-            {features.titleBefore}
-            <i>{features.titleCursive}</i>
-            {features.titleAfter}
-          </>
-        }
-        body={features.body}
-      />
+    <Section id={sectionIds.offer} spacing="large">
+      <SectionText titleAs="h2" titleClass="u-h3" title={<Accent text={t.title} />} body={t.body} />
 
       <div ref={ref} className={clsx('features', seen && 'is-in')}>
         <Grid>
-          {features.items.map((item, i) => (
-            <Col key={item.title} large={item.cols} medium={item.cols} small={12} flex>
-              <Reveal index={i} stagger={200} className="flex w-full">
-                <AnimatedBorder radius={12} paused={!inView} className="feature-ab">
-                  <article className="feature">
-                    <div className="feature__text">
-                      <h3 className="u-h5">{item.title}</h3>
-                      <p className="u-body-1-alt">{item.body}</p>
-                    </div>
-                    {item.visual && (
-                      <div className="feature__media" aria-hidden="true">
-                        <FeatureVisual kind={item.visual} />
+          {t.items.map((item, i) => {
+            const { cols, visual } = LAYOUT[i] ?? { cols: 4, visual: null }
+            return (
+              <Col key={i} large={cols} medium={cols} small={12} flex>
+                <Reveal index={i} stagger={200} className="flex w-full">
+                  <AnimatedBorder radius={12} paused={!inView} className="feature-ab">
+                    <article className="feature">
+                      <div className="feature__text">
+                        <h3 className="u-h5">{item.title}</h3>
+                        <p className="u-body-1-alt">{item.body}</p>
                       </div>
-                    )}
-                  </article>
-                </AnimatedBorder>
-              </Reveal>
-            </Col>
-          ))}
+                      {visual && (
+                        <div className="feature__media" aria-hidden="true">
+                          <FeatureVisual kind={visual} mock={t.mock} />
+                        </div>
+                      )}
+                    </article>
+                  </AnimatedBorder>
+                </Reveal>
+              </Col>
+            )
+          })}
         </Grid>
       </div>
     </Section>

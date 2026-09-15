@@ -1,6 +1,8 @@
 import { Fragment, useEffect, useMemo, useRef } from 'react'
 import { Section } from '../components/ui/Section'
-import { supersize } from '../content'
+import { useT } from '../i18n/LocaleProvider'
+import { sectionIds } from '../i18n/shared'
+import { text } from './supersize.i18n'
 import { clamp } from '../lib/ease'
 import { scrollState } from '../lib/scroll'
 import { addTick } from '../lib/ticker'
@@ -38,11 +40,15 @@ function docTop(el: HTMLElement) {
  * are written on refs from the shared page ticker (src/lib/ticker.ts) — no private rAF loop,
  * no React state per frame — and the tick is only registered while an IntersectionObserver
  * says the section is within a viewport of the screen.
+ *
+ * Copy: supersize.i18n.ts. Kazakh renders through the same "Anton" family, whose Cyrillic range is
+ * Oswald 600 (global.css, plan D6), so KK display text never falls back to a system face.
  */
 export default function Supersize() {
   const textRef = useRef<HTMLHeadingElement | null>(null)
   const wordRefs = useRef<(HTMLSpanElement | null)[]>([])
-  const words = useMemo(() => supersize.text.split(/\s+/).filter(Boolean), [])
+  const t = useT(text)
+  const words = useMemo(() => t.text.split(/\s+/).filter(Boolean), [t.text])
 
   useEffect(() => {
     // Position is measured on the whole section so `docTop` deltas stay valid across padding.
@@ -172,7 +178,7 @@ export default function Supersize() {
   }, [words])
 
   return (
-    <Section id="supersize" spacing="none" className="supersize">
+    <Section id={sectionIds.supersize} spacing="none" className="supersize">
       <h2 ref={textRef} className="u-h1 supersize__text">
         {words.map((word, i) => (
           <Fragment key={`${word}-${i}`}>

@@ -1,9 +1,9 @@
 /* =============================================================================
-   Logos section — two edge-to-edge marquee rows of monochrome wordmarks.
-   Sizes/spacing follow the reference: rows of 80px items with an 80px gap,
-   8px vertical gap between rows (reference --v-gap), 1600px hero grid width.
-   The wordmark itself (type hints, 90% white, real-logo swap) is the shared
-   src/components/ui/LogoMark.css `.logo-mark--bar`; this file is layout only.
+   Ecosystem marquee (#ecosystem) — two edge-to-edge rows of monochrome text
+   wordmarks, then a small caption. Rows of 72px items with an 80px gap, 8px
+   between rows, 1600px hero grid width. The wordmark itself (type hints, 90%
+   white) is the shared src/components/ui/LogoMark.css `.logo-mark--bar`; this
+   file is layout only.
    ========================================================================== */
 
 .logos {
@@ -34,11 +34,18 @@
 
 /* Wordmarks sit on the raw sky: the same soft contrast glow as .on-sky */
 .logos .logo-mark--bar {
-  text-shadow:
-    0 2px 20px rgba(6, 18, 58, 0.45),
-    0 0 2px rgba(6, 18, 58, 0.25);
+  text-shadow: var(--text-glow);
 }
 
-/* Reduced motion: global.css already sets `.carousel__track { animation: none }`.
-   Static rows still read fine: the first copy of the set fills the row from the left
-   under the edge mask, so nothing extra is needed here. */
+/* Caption under the rows: quiet, centred, never wider than the row margin allows. */
+.logos__caption {
+  margin: 0 auto;
+  padding: 0 var(--row-margin, 24px);
+  max-width: calc(62ch + 2 * var(--row-margin, 24px));
+  text-align: center;
+  color: rgba(var(--fg-rgb), 0.8);
+  text-wrap: balance;
+}
+
+/* Reduced motion: AutoCarousel stops the track (plus the global.css rule). Static rows still
+   read fine: the first pass of the set fills the row from the left under the edge mask. */

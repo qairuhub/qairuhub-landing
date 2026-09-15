@@ -1,9 +1,11 @@
 /* =============================================================================
-   Features — AnimatedBorder cards on a 7/5 · 5/7 · 4/4/4 grid with monochrome mock visuals.
-   Uses only global tokens (rgba(var(--fg-rgb), .x), var(--ease)); no new hex, no shadows.
-   Surfaces follow the shared card recipe (--card-fill .08 / --card-line .18) and there is NO
-   section-wide scrim (a flat scrim produced a hard seam against the continuous sky) — the
-   per-card fill plus the sky agent's dimmed clouds carry legibility.
+   What we offer (#offer): AnimatedBorder cards on a 7/5 · 5/7 · 4/4/4 grid with monochrome
+   mock visuals that read the real rows in offer.i18n.ts (CONTENT-V3 §9.2).
+   Global tokens only (rgba(var(--fg-rgb), .x), var(--ease), --radius-*); no new hex, no shadows,
+   no gradients, no backdrop-filter. Surfaces follow the shared card recipe (--card-fill .08 /
+   --card-line .18) and there is NO section-wide scrim (a flat scrim seams against the sky).
+   Performance: each card is `contain: paint`, so a mock transition or the travelling border
+   stroke never invalidates paint outside its own card; the strokes pause offscreen (Features.tsx).
    ========================================================================== */
 
 .features {
@@ -14,6 +16,7 @@
 .feature-ab {
   display: flex;
   width: 100%;
+  contain: paint;
 }
 
 .feature {
@@ -35,6 +38,9 @@
   flex-direction: column;
   gap: 8px;
   padding: 32px;
+}
+.feature__text h3 {
+  text-wrap: balance;
 }
 .feature__text p {
   max-width: 52ch;
@@ -62,6 +68,7 @@
   display: flex;
   flex-direction: column;
   width: 100%;
+  min-width: 0;
   flex: 1 1 auto;
   box-sizing: border-box;
   border-radius: var(--radius-images);
@@ -70,40 +77,29 @@
   overflow: hidden;
   color: var(--fg);
 }
-.fm-line {
-  display: block;
-  height: 8px;
-  border-radius: 9999px;
-  background: rgba(var(--fg-rgb), 0.16);
-}
-.fm-line--strong {
-  background: rgba(var(--fg-rgb), 0.34);
-}
-.fm-chip {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  height: 24px;
-  padding: 0 10px;
-  border-radius: 9999px;
-  background: rgba(var(--fg-rgb), 0.1);
-  border: 1px solid var(--card-line);
-  font-size: 11px;
-  line-height: 1;
-  white-space: nowrap;
-}
 
-/* ---------- Schedule */
+/* ---------- Schedule (card 1): date · title / detail */
 .feature-mock--schedule {
-  justify-content: center;
-  padding: 8px 16px;
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  column-gap: 16px;
+  align-content: center;
+  padding: 8px 20px;
+}
+@supports (grid-template-columns: subgrid) {
+  .feature-mock--schedule {
+    /* the date column sizes to the longest label in either locale ("Sep 15", "Жақында") */
+    grid-template-columns: max-content minmax(0, 1fr);
+  }
 }
 .fm-row {
-  display: flex;
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  column-gap: 16px;
   align-items: center;
-  gap: 12px;
-  min-height: 44px;
-  padding: 6px 0;
+  min-height: 56px;
+  padding: 8px 0;
   border-top: 1px solid rgba(var(--fg-rgb), 0.1);
   opacity: 0;
   translate: 0 8px;
@@ -111,118 +107,142 @@
     opacity 0.8s var(--ease) var(--d, 0ms),
     translate 0.8s var(--ease) var(--d, 0ms);
 }
+@supports (grid-template-columns: subgrid) {
+  .fm-row {
+    grid-template-columns: subgrid;
+  }
+}
 .fm-row:first-child {
   border-top: 0;
 }
-.fm-row__time {
-  flex: 0 0 48px;
+.fm-row__date {
   font-size: 12px;
   line-height: 1.5;
-  color: rgba(var(--fg-rgb), 0.8);
+  white-space: nowrap;
+  color: rgba(var(--fg-rgb), 0.7);
+}
+.fm-row__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 .fm-row__title {
-  flex: 1 1 0;
-  min-width: 0;
   font-size: 13px;
-  line-height: 1.5;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+.fm-row__detail {
+  font-size: 12px;
+  line-height: 1.4;
+  color: rgba(var(--fg-rgb), 0.8);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* the next event reads first: full-strength date */
+.fm-row.is-next .fm-row__date {
+  color: var(--fg);
+}
+@media (max-width: 420px) {
+  .feature-mock--schedule {
+    column-gap: 12px;
+    padding: 6px 14px;
+  }
+  .fm-row {
+    column-gap: 12px;
+  }
+}
+
+/* ---------- Chart (card 2): HackAlem AI label + four rising steps */
+.feature-mock--chart {
+  gap: 16px;
+  min-height: 200px;
+  padding: 18px 20px 16px;
+}
+.fm-chart__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: rgba(var(--fg-rgb), 0.8);
+}
+.fm-chart__head svg {
+  flex-shrink: 0;
+}
+.fm-chart__label {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-@media (max-width: 420px) {
-  .fm-row__time {
-    flex-basis: 42px;
-  }
-  .fm-chip {
-    max-width: 96px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: block;
-    line-height: 22px;
-  }
-}
-
-/* ---------- Chart */
-.feature-mock--chart {
-  flex-direction: row;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 8px;
-  min-height: 176px;
-  padding: 24px;
+.fm-chart__bars {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  flex: 1 1 auto;
+  min-height: 132px;
 }
 .fm-bar {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex: 1 1 0;
   min-width: 0;
-  width: 24px;
-  max-width: 32px;
 }
 .fm-bar__track {
-  position: relative;
   display: flex;
   align-items: flex-end;
-  width: clamp(12px, 100%, 24px);
-  height: 108px;
+  justify-content: center;
+  flex: 1 1 auto;
+  min-height: 80px;
+  border-bottom: 1px solid var(--card-line);
 }
 .fm-bar__fill {
   display: block;
-  width: 100%;
+  width: min(100%, 44px);
   height: var(--h, 50%);
   border-radius: 4px 4px 0 0;
-  background: rgba(var(--fg-rgb), 0.85);
+  background: rgba(var(--fg-rgb), var(--o, 0.85));
   transform-origin: bottom;
   transform: scaleY(0);
   transition: transform 1s var(--ease) var(--d, 0ms);
 }
-.fm-bar__val {
-  position: absolute;
-  left: 50%;
-  bottom: calc(var(--h, 50%) + 6px);
-  translate: -50% 0;
-  font-size: 11px;
-  line-height: 1;
+.fm-bar__label {
+  /* two lines reserved so every bar shares one baseline in both locales */
+  min-height: 2.6em;
+  font-size: 12px;
+  line-height: 1.3;
+  text-align: center;
+  overflow-wrap: anywhere;
   color: rgba(var(--fg-rgb), 0.8);
   opacity: 0;
-  transition: opacity 0.6s var(--ease) calc(var(--d, 0ms) + 500ms);
-}
-.fm-bar__tile {
-  display: block;
-  width: 20px;
-  height: 20px;
-  border-radius: 4px;
-  background: rgba(var(--fg-rgb), 0.12);
-  border: 1px solid var(--card-line);
-  box-sizing: border-box;
+  transition: opacity 0.6s var(--ease) calc(var(--d, 0ms) + 400ms);
 }
 @media (max-width: 420px) {
   .feature-mock--chart {
-    gap: 4px;
-    padding: 16px 12px;
-    min-height: 150px;
+    padding: 14px 14px 12px;
+    min-height: 180px;
   }
-  .fm-bar__track {
-    height: 88px;
-  }
-  .fm-bar__tile {
-    width: 16px;
-    height: 16px;
+  .fm-chart__bars {
+    gap: 8px;
+    min-height: 116px;
   }
 }
 
-/* ---------- Links */
+/* ---------- Links (card 3): platform address + three destinations */
 .feature-mock--links {
   justify-content: center;
-  gap: 12px;
+  gap: 10px;
   padding: 16px;
 }
 .fm-search {
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
   height: 36px;
   padding: 0 14px;
   border-radius: 9999px;
@@ -230,11 +250,23 @@
   border: 1px solid var(--card-line);
   color: rgba(var(--fg-rgb), 0.8);
 }
+.fm-search svg {
+  flex-shrink: 0;
+}
+.fm-search__text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  line-height: 1;
+}
 .fm-link {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px;
+  min-width: 0;
+  padding: 10px 12px;
   border-radius: var(--radius-buttons);
   background: rgba(var(--fg-rgb), 0.08);
   border: 1px solid var(--card-line);
@@ -246,30 +278,35 @@
 }
 .fm-link__thumb {
   flex-shrink: 0;
-  width: 40px;
-  height: 40px;
-  border-radius: 4px;
-  background: rgba(var(--fg-rgb), 0.16);
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-buttons);
+  background: rgba(var(--fg-rgb), 0.1);
   border: 1px solid var(--card-line);
   box-sizing: border-box;
+  color: var(--fg);
 }
-.fm-link__lines {
+.fm-link__label {
   flex: 1 1 0;
   min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  font-size: 13px;
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .fm-link__arrow {
   flex-shrink: 0;
   color: rgba(var(--fg-rgb), 0.8);
 }
 
-/* ---------- Timeline */
+/* ---------- Timeline (card 4): Idea → Team → Demo → Demo Day */
 .feature-mock--timeline {
   justify-content: center;
-  gap: 16px;
-  min-height: 120px;
+  gap: 18px;
+  min-height: 132px;
   padding: 24px 24px 32px;
 }
 .fm-tl__labels {
@@ -286,11 +323,9 @@
   white-space: nowrap;
   color: rgba(var(--fg-rgb), 0.8);
   opacity: 0;
-  transition:
-    opacity 0.8s var(--ease) calc(var(--d, 0ms) + 200ms),
-    color 0.6s var(--ease);
+  transition: opacity 0.8s var(--ease) calc(var(--d, 0ms) + 200ms);
 }
-.fm-tl__label.is-done {
+.fm-tl__label.is-stage {
   color: var(--fg);
 }
 .fm-tl__label[data-edge='start'] {
@@ -307,10 +342,7 @@
 }
 .fm-tl__fill {
   position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
-  width: var(--w, 0%);
+  inset: 0;
   border-radius: inherit;
   background: rgba(var(--fg-rgb), 0.85);
   transform-origin: left;
@@ -322,11 +354,13 @@
   left: var(--x, 0%);
   top: 50%;
   translate: -50% -50%;
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 9999px;
   background: rgba(var(--fg-rgb), 0.3);
-  transition: background-color 0.6s var(--ease) var(--d, 0ms);
+  transition:
+    background-color 0.6s var(--ease) var(--d, 0ms),
+    border-color 0.6s var(--ease) var(--d, 0ms);
 }
 .fm-tl__dot.is-milestone {
   width: 12px;
@@ -334,30 +368,18 @@
   border: 2px solid rgba(var(--fg-rgb), 0.3);
   box-sizing: border-box;
   background: rgba(var(--fg-rgb), 0.16);
-  transition:
-    background-color 0.6s var(--ease) var(--d, 0ms),
-    border-color 0.6s var(--ease) var(--d, 0ms);
 }
-.fm-tl__dot.is-done {
-  background: rgba(var(--fg-rgb), 0.9);
+.fm-tl__dot.is-stage {
+  width: 16px;
+  height: 16px;
 }
-.fm-tl__dot.is-milestone.is-done {
-  background: var(--fg);
-  border-color: var(--fg);
-}
-/* keep dots in their initial (unfilled) tint until the grid has been seen */
-.features:not(.is-in) .fm-tl__dot.is-done {
-  background: rgba(var(--fg-rgb), 0.3);
-}
-.features:not(.is-in) .fm-tl__dot.is-milestone.is-done {
-  background: rgba(var(--fg-rgb), 0.16);
-  border-color: rgba(var(--fg-rgb), 0.3);
-}
-.features:not(.is-in) .fm-tl__label.is-done {
-  color: rgba(var(--fg-rgb), 0.8);
+@media (max-width: 420px) {
+  .feature-mock--timeline {
+    padding: 20px 16px 28px;
+  }
 }
 
-/* ---------- Armed state: mocks animate in once the grid is seen */
+/* ---------- Armed state: mocks animate in once the grid has been seen */
 .features.is-in .fm-row,
 .features.is-in .fm-link {
   opacity: 1;
@@ -366,12 +388,23 @@
 .features.is-in .fm-bar__fill {
   transform: scaleY(1);
 }
-.features.is-in .fm-bar__val,
+.features.is-in .fm-bar__label,
 .features.is-in .fm-tl__label {
   opacity: 1;
 }
 .features.is-in .fm-tl__fill {
   transform: scaleX(1);
+}
+.features.is-in .fm-tl__dot {
+  background: rgba(var(--fg-rgb), 0.9);
+}
+.features.is-in .fm-tl__dot.is-milestone {
+  background: var(--fg);
+  border-color: var(--fg);
+}
+.features.is-in .fm-tl__dot.is-stage {
+  background: rgba(var(--fg-rgb), 0.16);
+  border-color: var(--fg);
 }
 
 /* ---------- Reduced motion: everything static in its final state */
@@ -380,7 +413,7 @@
   .fm-row,
   .fm-link,
   .fm-bar__fill,
-  .fm-bar__val,
+  .fm-bar__label,
   .fm-tl__label,
   .fm-tl__fill,
   .fm-tl__dot {
@@ -388,7 +421,7 @@
   }
   .fm-row,
   .fm-link,
-  .fm-bar__val,
+  .fm-bar__label,
   .fm-tl__label {
     opacity: 1;
     translate: 0 0;

@@ -1,6 +1,7 @@
 /* =============================================================================
    Storytelling triptych (reference StorytellingTriptych)
-   Sticky 100lvh stage inside a 4.5×viewport-tall runway. Three stacked items share
+   Sticky 100lvh stage inside a 6×viewport-tall runway (1.5×100lvh per item, N = 4:
+   LEARN · BUILD · LAUNCH · MEET). The stacked items share
    grid cell 1/1; a rAF loop (Storytelling.tsx) drives opacity / translate / scale
    from scroll progress. Reduced motion: normal flow + <Reveal>.
    Headline 200px (u-h1-small), body 16 centred ≤560px — both sit on the raw sky
@@ -10,8 +11,8 @@
 .triptych {
   position: relative;
   width: 100%;
-  height: calc(100vh * 4.5);
-  height: calc(100lvh * 4.5);
+  height: calc(100vh * 6);
+  height: calc(100lvh * 6);
   margin-top: -50vh;
 }
 

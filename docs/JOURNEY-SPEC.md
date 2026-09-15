@@ -1,11 +1,115 @@
-# ⚠️ MANDATORY v2.1 CHECKLIST (user requests, 2026-09-14 02:50) — every reviewer must report each unmet item as a HIGH finding against the named file; every builder/fixer touching these files must implement them
+# ⚠️ MANDATORY CHECKLIST (v2.1 user requests 2026-09-14, updated for v3 on 2026-09-15). Every reviewer must report each unmet item as a HIGH finding against the named file; every builder/fixer touching these files must implement them
 
-1. **Wordmark text is lowercase `qairuhub`** — the 3D glass lettering AND the DOM wordmark (header/footer) render `brand.wordmark` from `src/content.ts` (= `qairuhub`), never `brand.name`. (`src/sections/sky/GlassWordmark.tsx`, `src/components/ui/Wordmark.tsx`)
-2. **Legible wordmark font: Courgette** (`/fonts/Courgette-Regular.ttf`, medium-weight friendly script; fallback `/fonts/DancingScript-Variable.ttf`). The thin Mr Dafoe / Sacramento faces are NOT legible enough — replace them everywhere: the 3D typeface source in `GlassWordmark.tsx` (`useTTFFont('/fonts/Courgette-Regular.ttf', …)`), the `@font-face` + `--font-script: "Courgette", "Dancing Script", cursive` in `src/styles/global.css`, the preload in `index.html`. Header wordmark ≈ 28px.
-3. **Smaller 3D wordmark**: the hero run spans ≈ 0.70 × the visible width at z 0 (≤ 0.78 on mobile), the footer run ≈ 0.42 × (0.7 on mobile). It must never touch the header buttons; extrusion height ≈ 0.14 × size, bevel rounded (tube-like), readable letters. (`GlassWordmark.tsx`)
-4. **360° rotation on scroll**: in the hero `rotation.y = (1 − journey.wordmarkHero) × 2π` (one full turn as the user scrolls it away, tied to scroll, eased by the journey smoothstep), in the footer `rotation.y = (1 − journey.wordmarkFooter) × 2π` (a full turn as it descends into place); the mouse parallax (±0.06 / ±0.03) and the slow float are added on top. Under reduced motion: no rotation. (`GlassWordmark.tsx`)
-5. **Lower scroll sensitivity**: Lenis `wheelMultiplier: 0.65`, `touchMultiplier: 1.3`, `lerp: 0.09` so a small wheel tick moves less and sections do not fly past; keyboard/anchor scrolling unchanged. (`src/lib/SmoothScroll.tsx`)
-6. Everything else in this document still applies (space start, frosted glass, readability, performance, "everything works").
+1. **Wordmark text is lowercase `qairuhub`**: the 3D glass lettering AND the DOM wordmark (header/footer) render `brand.wordmark` from `src/i18n/shared.ts` (= `qairuhub`, Latin in both locales), never `brand.name`. (`src/sections/sky/GlassWordmark.tsx`, `src/components/ui/Wordmark.tsx`)
+2. **Legible wordmark font: Courgette** (`/fonts/Courgette-Regular.ttf`, fallback `/fonts/DancingScript-Variable.ttf`), for the 3D typeface source in `GlassWordmark.tsx` and for `--font-script: "Courgette", "Dancing Script", cursive` in `src/styles/global.css`. The TTF is preloaded on home only (`fonts.preload.json` `home`); sub-pages never fetch it. Header wordmark ≈ 28px. The thin Mr Dafoe / Sacramento faces are not legible enough.
+3. **v3 thinner, smaller 3D wordmark** (DECISIONS §9): the hero run spans 0.60 × the visible width at its start depth (0.66 on ≤ 768 px), the footer run 0.42 × (0.70 on mobile). It must never touch the header buttons. Extrusion 0.08 × size, rounded bevel pulled inside the outline (net stroke ≈ 0.09 × size), readable letters through the full turn. Exact numbers: "v3 constants" below. (`GlassWordmark.tsx`)
+4. **360° rotation on scroll**: hero `rotation.y = (1 − journey.wordmarkHero) × 2π`, footer `rotation.y = (1 − journey.wordmarkFooter) × 2π`; mouse parallax (hero ±0.06 / ±0.03, footer ±0.03 / ±0.03) and the slow float on top. **v3:** while the hero run turns and rises it also **recedes into depth** (z 0 → −5) and visibly shrinks before it leaves the frame by 1.4 vh. Reduced motion: no rotation, float, parallax or recede. (`GlassWordmark.tsx`)
+5. **Lower scroll sensitivity**: Lenis `wheelMultiplier: 0.65`, `touchMultiplier: 1.3`, `lerp: 0.09`; keyboard/anchor scrolling unchanged. (`src/lib/SmoothScroll.tsx`)
+6. **Sub-pages have no journey** (v3): `/members` and `/handbook` freeze the sky on the `night` preset, 404 on `space`, with no wordmark, no field and no Courgette request. (`SkyScene.tsx`, `journey.ts` `setStaticJourney`)
+7. Everything else in this document still applies (space start, frosted glass, readability, performance, "everything works").
+
+# v3 constants (source of truth: the code; this table mirrors it)
+
+Read from `src/sections/sky/journey.ts`, `src/sections/sky/GlassWordmark.tsx`, `src/components/three/GlassText.tsx` and `src/sections/sky/quality.ts` on 2026-09-15 (WP1 landed). When a number changes in code, change it here in the same commit. The v2 narrative sections further down keep their rationale; where their numbers differ from this table, **this table wins**.
+
+## Hero wordmark geometry and motion (`GlassWordmark.tsx`)
+
+| Constant | v2 | v3 (in code) | Notes |
+|---|---|---|---|
+| `BEVEL` | `{ thickness .04, size .04, segments 5 }` | `{ thickness 0.025, size 0.02, offset −0.03, segments 5 }` | `offset` pulls the rounded profile inside the outline; it is part of GlassText's geometry cache key |
+| net stroke | ≈ 0.19 × size | ≈ 0.09 × size (−53 %) | Courgette median stroke ≈ 0.11 × size + 2 × (size + offset) |
+| fallback bevel (not active) | — | `{ thickness 0.022, size 0.012, offset 0, segments 4 }` with `HEIGHT` 0.06 | only if the run reads bold or shows artefacts again |
+| `HEIGHT` (extrusion) | `GLASS_HEIGHT` 0.14 | **0.08** | passed to both `getGlassGeometry` and `<GlassText height>` |
+| `CURVE_SEGMENTS` | 8 | 8 | |
+| geometry builder | three `TextGeometry` | `components/three/extrudeGlyphs.ts` | clamps inset bevels so thin Courgette exit strokes collapse to a hairline instead of folding |
+| `HERO.z` | 0 | 0 | start depth |
+| `HERO.fit` / `fitMobile` | 0.70 / 0.78 | **0.60 / 0.66** | share of the visible width at the start depth; mobile = viewport ≤ 768 px |
+| fit distance | live `dist` | **fixed `baseDist = cam.z − HERO.z`** (camera z 10, fov 40) | so receding shrinks the run instead of the fit re-growing it |
+| `HERO.exitDepth` | — | **5** | world units toward −z (the mid cloud deck sits at z −6) |
+| `HERO.recedeFrom` | — | 0.05 | `recede = smoothstep(0.05, 1, 1 − wordmarkHero)`; `z = HERO.z − recede × exitDepth` |
+| `HERO.exitScale` | 0.9 | **1** | the perspective does the shrink (10 / 15 ≈ 0.67 apparent size at full recede) |
+| `HERO.exitLift` | 6 | 6 × `dist / baseDist` | exit timing holds while the run recedes |
+| `HERO.floatAmp` / `floatPeriod` | 0.12 / 6 s | 0.12 / 6 s | |
+| `HERO.rotY` / `rotX` / `rotLerp` | 0.06 / 0.03 / 0.05 | same | mouse parallax |
+| spin | `(1 − wh) · 2π` | same | one full turn by `HERO_EXIT_VH` |
+| `aboveFrame()` | uses `dist` | uses the receding `dist`, nearest yawed point, 1.15 × half height | skips draw + transmission once the run is above the frame |
+| `PRESENCE_MIN` | 0.005 | 0.005 | below it: `mesh.visible = material.visible = false` |
+
+## Footer wordmark (`GlassWordmark.tsx`)
+
+Shares the thinner geometry (same cache key). `FOOTER = { z 0.5, fit 0.42, fitMobile 0.70, yStart 4.5 → yEnd 1.15, floatAmp 0.08, floatPeriod 7 s, yawAmp 0.03, yawPeriod 11 s, rotY 0.03, rotX 0.03 }`; spin `(1 − wf) · 2π`.
+
+## Glass material (the drift fix)
+
+The v2 prose below ("Frosted glass wordmark") described an earlier `transmission 0.62` + sheen recipe. The code moved on; these are the values that ship.
+
+**`GLASS_MATERIAL`** (`GlassText.tsx`, frosted mode, high + medium tiers): `transmission 1`, `roughness 0.42`, `thickness 0.6`, `ior 1.4`, `color #f3f7ff`, `attenuationColor #dbe6ff`, `attenuationDistance 2`, `chromaticAberration 0.02`, `anisotropicBlur 0.35`, `distortion 0`, `distortionScale 0.5`, `temporalDistortion 0`, `samples 6`, `resolution 512`, `backside false`, `clearcoat 1`, `clearcoatRoughness 0.15`, `envMapIntensity 1.2`, `emissive #9db4ff` @ `0.08`, `toneMapped true`. **No sheen** (its velvet edge term read as plastic; the rims are specular).
+
+**Wordmark overrides** (`GlassWordmark.tsx`, merged over `GLASS_MATERIAL`):
+
+| Prop | Base | Wordmark v3 | Why |
+|---|---|---|---|
+| `thickness` | 0.6 | **0.3** | a 0.09 × size tube stays milky and bright |
+| `attenuationDistance` | 2 | **3** | same |
+| `resolution` / `samples` | 512 / 6 | `QUALITY[tier].glassResolution` / `glassSamples`: high 512 / 6, medium 384 / 3 | |
+| `chromaticAberration` | 0.02 | 0.02 on high, **0** on medium | > 0 triples the bicubic taps; invisible under the roughness blur |
+| `backsideResolution` | drei default | **32** | the unused backside pass would otherwise allocate a full FBO |
+
+**Why `transmission 1` works over black space:** `GLASS_BACKLIGHT = { top #9db4ff, bottom #1b3a8a, strength 1 }` is a fullscreen additive gradient drawn only inside drei's transmission pass (render order −9, toggled visible by a priority −1 `useFrame`, hidden again in `onAfterRender`), so the strokes always refract something lit while the main render never sees it.
+
+**`GLASS_PHYSICAL`** (low tier, no transmission): `transparent`, `opacity 0.9`, `color #eef3ff`, `roughness 0.5`, `metalness 0`, `clearcoat 1`, `clearcoatRoughness 0.15`, `sheen 0.4` (white, `sheenRoughness 0.6`), `envMapIntensity 1.3`, `emissive #9db4ff` @ `0.12`.
+
+## Journey keyframes (`journey.ts`)
+
+All in viewport heights; `end` = (document height − viewport) / viewport, min 4. Every weight is smoothstep-eased.
+
+| Weight | v2 | v3 (in code) |
+|---|---|---|
+| `space` | `1 − ss(0.9, 1.7)` | `1 − ss(0.85, 1.6)` |
+| `descent` | in 0.9 → 1.4, out 1.9 → 2.4 | `ss(0.85, 1.3) × (1 − ss(1.8, 2.3))` |
+| `whiteout` | bell 1.15 → 1.6 → 2.1, peak 1 | **`0.6 × ss(1.0, 1.3) × (1 − ss(1.3, 1.55))`**: peak 0.6 at 1.3 vh, gone by 1.55 (the plan's 0.8 × with a 1.75 tail left white copy at ≈ 3.4 : 1; 0.6 keeps 1.2 / 1.5 / 1.8 vh at ≥ 4.7 : 1) |
+| `day` | in 1.7 → 2.3 | `ss(1.55, 2.1) × (1 − ss(duskStart, duskStart + 0.9))` |
+| `dusk` | — | `ss(duskStart, duskStart + 0.7) × (1 − ss(duskEnd − 0.3, duskEnd + 0.5))` |
+| `night` | — | `ss(duskEnd − 0.5, end − 0.4)` |
+| `ground` | — | `ss(end − 1.5, end − 0.05)` |
+| `stars` | out 1.2 → 1.8 | `min(1, 1 − ss(1.15, 1.7) + ss(duskStart + 0.3, duskEnd + 0.2))` |
+| `clouds` | in 0.9 → 1.6 | `ss(0.85, 1.5) × (1 − 0.6 × night)` |
+| `pal.t0` / `t1` | 0.9 → 1.5 / 1.5 → 2.2 | `ss(0.85, 1.4)` / `ss(1.4, 2.05)` |
+| `pal.t2` / `t3` | — | `ss(duskStart, duskStart + 0.9)` / `ss(duskEnd − 0.4, duskEnd + 0.5)` |
+| `wordmarkHero` | `1 − ss(0, 1.4)` | `heroWordmarkWeight(y) = 1 − ss(0, HERO_EXIT_VH)`, `HERO_EXIT_VH = 1.4` (exported) |
+| `wordmarkFooter` | `ss(end − 1.4, end − 0.3)` | `footerWordmarkWeight(y, end)`, same curve (exported) |
+
+with `duskStart = end − 2.5`, `duskEnd = end − 1.2`.
+
+**Palette** (`PALETTE`): space `#03040c / #050818 / #070c24`; descent `#071a4a / #0b3f9a / #1670c8` (v3: bottom darkened from `#1a7be0`, ≈ 5 : 1 for white copy, because the Launchpad is read through the descent); day `#082a64 / #0a48a6 / #1875d0`; dusk `#0d2a66 / #164a9c / #5d5f9c`, glow `#b7707a`; night `#061a3d / #08234d / #0b2c5c`.
+
+**Page height.** v3 desktop `end` is planned at ≈ 18.2 vh (plan estimate, v2 14.7; re-measure with `perf.mjs`, which reads every section top from the DOM): Ask bar, Platform CTA row, Projects, News and the 6 × lvh storytelling runway add height; the compact form removes some. Top-anchored phases use absolute vh; bottom-anchored phases use `end − k`, so `#join` reads in dusk → night and the triptych's MEET frame lands at dusk start.
+
+## Static sky for sub-pages (`setStaticJourney`)
+
+| Preset | Used by | Values |
+|---|---|---|
+| `night` | `/members`, `/handbook` (+ KK) | `vh 4`, `end 4`, `night 1`, `stars 1`, `clouds 0.3`, `ground 0`, `space 0`, both wordmark weights 0, `pal.t0..t3 = 1` |
+| `space` | 404 | `vh 0`, `end 4`, `space 1`, `stars 1`, `clouds 0`, everything else 0 |
+
+SkyScene calls it once and never `updateJourney`; it does not mount `GlassWordmark` or `Field` and does not call `preloadGlassWordmark()`. `time` still advances for twinkle and drift.
+
+## Quality tiers (`quality.ts`, unchanged in v3)
+
+| Tier | stars | cloud sprites | cloud texture | blades | transmission | glass res / samples | DPR cap < 1280 px / ≥ 1280 px |
+|---|---|---|---|---|---|---|---|
+| high | 1800 | 26 | 512 | 14000 | on | 512 / 6 | 1.5 / 1.25 |
+| medium | 900 | 20 | 512 | 6000 | on | 384 / 3 | 1.5 / 1.0 |
+| low | 500 | 14 | 256 | 3000 | off (`GLASS_PHYSICAL`) | 256 / 2 | 1.25 / 1.25 |
+
+## v3 acceptance (WP1, checked with `scripts/shots.mjs` / `scripts/perf.mjs`)
+
+- Hero stroke at the "h" stem at y = 0 ≤ 55 % of v2 in a same-viewport screenshot.
+- No self-intersection artefacts at y = 0.2, 0.5, 0.8, 1.1 vh through the full turn.
+- The run's apparent size falls ≈ 30 % before exit; it leaves the frame top by y ≤ 1.4 vh, and the header DOM logo appears after it.
+- Launchpad title, Ask bar and chips ≥ 4.5 : 1 at y = 1.2, 1.5, 1.8 vh.
+- `/members` and `/handbook` request no `Courgette-Regular.ttf` and show a steady night sky.
+- FPS (§5 of the build plan, headed, Intel UHD, medium tier): hero ≥ 55, mid-page (`#offer`, `#projects`, `#news`) ≥ 60, footer ≥ 52.
 
 # The Journey — space → sky → night (backdrop concept v2)
 
@@ -34,6 +138,9 @@ comes back down and hovers above the valley. Starts under the stars, ends under 
 - The camera never moves through geometry; instead a scroll-driven "altitude" uniform/value
   `alt ∈ [0,1]` (0 = space at the top of the page, 1 = ground at the very bottom) drives every
   layer. `alt` is derived from `scrollState.y` with these keyframes (in viewport heights, vh):
+
+> **v2 table.** The phase order and intent still hold; the v3 boundaries, the softer whiteout (peak 0.6
+> at 1.3 vh) and the palette values are in "v3 constants: Journey keyframes" at the top of this file.
 
 | scroll (vh) | phase | sky top → bottom | stars | clouds | wordmark |
 |---|---|---|---|---|---|
@@ -142,8 +249,13 @@ inside it, edges catch a rim highlight; the letters read as bright, legible shap
 night sky (never a dark silhouette). Implementation guidance:
 
 - **The recipe lives in `GLASS_MATERIAL` / `GLASS_PHYSICAL` (`src/components/three/GlassText.tsx`)**;
-  `GlassWordmark.tsx` only layers the tier's `resolution` / `samples` and the chromatic fringe on top.
-  The values below mirror the code and are updated together with it.
+  `GlassWordmark.tsx` layers the tier's `resolution` / `samples`, the chromatic fringe and the v3 thin-tube
+  overrides (`thickness 0.3`, `attenuationDistance 3`) on top.
+- **Drift note (v3):** the high/medium paragraph below is the v2.1 history (`transmission 0.62` + sheen).
+  The shipped recipe is `transmission 1` + the `GLASS_BACKLIGHT` gradient inside the transmission pass,
+  `roughness 0.42`, `thickness 0.6`, `attenuationDistance 2`, `clearcoatRoughness 0.15`,
+  `envMapIntensity 1.2`, no sheen: see "v3 constants: Glass material" at the top of this file, which wins.
+  The low-tier paragraph still matches the code.
 - High/medium tiers: `MeshTransmissionMaterial` with `transmission 0.62` — not 1: three mixes the body
   as `mix(diffuse, transmitted, transmission)`, and at 1 the body IS the blurred backdrop, which over
   the near-black space / night sky is a dark glass silhouette (measured on the Intel UHD laptop: navy
@@ -172,8 +284,9 @@ night sky (never a dark silhouette). Implementation guidance:
 ## "Everything must work" (v2 requirement)
 
 Every link, menu, tab, form, button and hover state must function: header anchors scroll (through Lenis)
-to the right section ids (`#agentic #logos #accelerator #supersize #demo #features #cta #integrations
-#story #join #footer` — align content.ts hrefs and section ids), mega menus open/close with mouse and
+to the right section ids (v3: `#top #launchpad #ecosystem #accelerator #supersize #platform #offer #projects
+#news #cta #tools #story #join #footer`, from `sectionIds` in `src/i18n/shared.ts`; anchors carry the locale
+base, `/#offer` or `/kk/#offer`), mega menus open/close with mouse and
 keyboard, the mobile menu opens/closes and locks scroll, tabs switch and auto-advance, both forms validate
 and show their success states, the waitlist form accepts an email, no console errors or React warnings at
 any viewport, and the page never scrolls horizontally.

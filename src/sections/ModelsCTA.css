@@ -39,13 +39,12 @@
     0 2px 24px rgba(6, 18, 58, 0.55),
     0 0 2px rgba(6, 18, 58, 0.25);
 }
-/* Reference "One plan. Every model." is fully cursive: bump to the u-h3 size scale
-   (cursive class sets 1.18em relative to its parent; parent here is body 16px). */
-.ctacard__content .u-h3.cursive {
-  font-size: clamp(30px, 2.7vw, 38px);
-  line-height: 1;
-  margin-right: 0;
+/* Headline: Inter 500 at the u-h3 scale with ONE Caveat accent word (global `.u-h3 i`). */
+.ctacard__content .ctacard__title {
+  margin: 0;
+  text-wrap: balance;
 }
+
 /* Body copy stays a touch under the headline but close to solid: at .85 the 16px text on the
    lime orb's edge computes to ~3.4:1; .92 (+ the glow) clears 4.5:1. The orb cores themselves
    are now spread to the card's corners so no core sits under the copy. */
@@ -199,9 +198,6 @@
   }
   .ctacard__content {
     max-width: 100%;
-  }
-  .ctacard__content .u-h3.cursive {
-    font-size: 30px;
   }
   .ctacard__action {
     align-self: flex-start;

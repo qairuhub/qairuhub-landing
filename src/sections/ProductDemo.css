@@ -1,45 +1,61 @@
 /* =============================================================================
-   ProductDemo — light "app window" mock on the sky + sliding tab bar with a
-   9s timer line that auto-advances. Tokens from global.css; no shadows,
-   no UI gradients. Colours: tokens / translucent black-white only.
-   The window is a two-pane app (sidebar · main with a rows/kanban block, a
-   second block per screen, and a right-hand details panel) so it fills its
-   16/10 card like the reference product video.
+   Platform showcase (#platform) — "This is the Hub".
+   A light app-window mock on the sky (the landing's own window style, not the
+   platform's visual design) + a glass tab bar with a sliding indicator and a
+   9 s timer line. Tokens from global.css; no shadows, no UI gradients;
+   radii 4 / 8 / 12 plus fully rounded chips. Screens adapt to the width of the
+   window's main pane through container queries, so the table collapses to
+   stacked rows wherever the pane is narrow (390 px phones, tablet rails).
    ========================================================================== */
 
-/* ---------- Stage: three stacked panels, cross-fade .8s ------------------- */
+/* ---------- Stage: the four windows share one grid cell, cross-fade ------- */
+.pd-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
 .pd-stage {
-  position: relative;
+  display: grid;
   width: 100%;
-  aspect-ratio: 16 / 10;
-  overflow: clip;
 }
 .pd-stage__item {
-  position: absolute;
-  inset: 0;
+  grid-area: 1 / 1;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  min-width: 0;
   opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.8s var(--ease);
+  visibility: hidden;
+  /* outgoing screen leaves quickly, the incoming one follows: two dense windows never read as
+     one muddled overlay mid-fade */
+  transition:
+    opacity 0.22s ease-out,
+    visibility 0s linear 0.22s;
 }
 .pd-stage__item.is-active {
   opacity: 1;
-  pointer-events: auto;
+  visibility: visible;
+  transition:
+    opacity 0.5s var(--ease) 0.12s,
+    visibility 0s;
+}
+.pd-stage__item:focus-visible {
+  outline: 2px solid rgba(var(--white-rgb), 0.9);
+  outline-offset: 4px;
+  border-radius: 12px;
 }
 
 /* ---------- App window ----------------------------------------------------- */
 .pd-app {
-  --line: rgba(0, 0, 0, 0.08);
+  --line: rgba(0, 0, 0, 0.09);
   --line-soft: rgba(0, 0, 0, 0.06);
-  --ink-2: rgba(27, 27, 27, 0.55);
+  --ink-2: rgba(27, 27, 27, 0.6);
+  --side-bg: #fafafa;
+  --blue-ink: #1c5fd0;
+  --blue-tint: rgba(43, 127, 255, 0.1);
   display: flex;
   flex-direction: column;
   width: 100%;
-  aspect-ratio: 16 / 10;
-  max-height: 100%;
-  border-radius: 10px;
+  min-width: 0;
+  border-radius: 12px;
   overflow: hidden;
   background: var(--white);
   color: var(--black);
@@ -48,6 +64,12 @@
   text-align: left;
   user-select: none;
   -webkit-user-select: none;
+  contain: layout paint;
+}
+@media (min-width: 769px) {
+  .pd-stage {
+    aspect-ratio: 16 / 9;
+  }
 }
 
 /* Top bar */
@@ -55,9 +77,9 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  height: 40px;
+  height: 44px;
   flex-shrink: 0;
-  padding: 0 12px;
+  padding: 0 12px 0 14px;
   border-bottom: 1px solid var(--line);
   box-sizing: border-box;
 }
@@ -65,15 +87,27 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  flex-shrink: 0;
+  min-width: 0;
+  flex-shrink: 1;
   white-space: nowrap;
 }
-.pd-app__avatar {
-  width: 18px;
-  height: 18px;
-  border-radius: 9999px;
-  background: var(--signal-blue);
+.pd-app__logo {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
   flex-shrink: 0;
+  border-radius: 4px;
+  background: var(--black);
+  color: var(--white);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+}
+.pd-app__name {
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .pd-app__search {
   display: flex;
@@ -82,10 +116,10 @@
   flex: 1 1 0;
   min-width: 0;
   max-width: 280px;
-  height: 24px;
+  height: 28px;
   margin: 0 auto;
   padding: 0 10px;
-  border-radius: 9999px;
+  border-radius: 8px;
   background: var(--haze);
   color: var(--ink-2);
   font-size: 11px;
@@ -103,19 +137,50 @@
   flex-shrink: 0;
   margin-left: auto;
 }
-.pd-app__btn {
+
+/* "Sample data" badge: always visible, on every tab and width */
+.pd-sample {
   display: inline-flex;
   align-items: center;
-  height: 24px;
-  padding: 0 10px;
+  gap: 6px;
+  height: 22px;
+  padding: 0 9px;
   border-radius: 9999px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  font-size: 11px;
+  border: 1px dashed rgba(27, 27, 27, 0.32);
+  color: rgba(27, 27, 27, 0.78);
+  font-size: 10.5px;
+  font-weight: 500;
   line-height: 1;
   white-space: nowrap;
   box-sizing: border-box;
 }
-.pd-app__btn--dark {
+.pd-sample__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--signal-blue);
+  flex-shrink: 0;
+}
+
+/* Mock buttons (decorative) */
+.pd-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--white);
+  color: var(--black);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+.pd-btn--dark {
   background: var(--black);
   border-color: var(--black);
   color: var(--white);
@@ -131,450 +196,652 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  width: 180px;
+  width: 184px;
   flex-shrink: 0;
-  padding: 8px;
-  background: #fafafa;
+  padding: 10px 8px;
+  background: var(--side-bg);
   border-right: 1px solid var(--line-soft);
   box-sizing: border-box;
 }
 .pd-app__nav {
   display: flex;
   align-items: center;
-  gap: 8px;
-  height: 28px;
-  padding: 0 8px;
-  border-radius: 6px;
-  color: rgba(27, 27, 27, 0.65);
+  gap: 9px;
+  height: 30px;
+  padding: 0 9px;
+  border-radius: 8px;
+  color: rgba(27, 27, 27, 0.66);
   white-space: nowrap;
+  overflow: hidden;
 }
 .pd-app__nav svg {
   flex-shrink: 0;
 }
-.pd-app__nav.is-active {
-  background: var(--haze);
-  color: var(--black);
+.pd-app__nav span {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.pd-app__side-foot {
+.pd-app__nav.is-active {
+  background: var(--white);
+  color: var(--black);
+  font-weight: 500;
+  outline: 1px solid var(--line);
+  outline-offset: -1px;
+}
+.pd-app__me {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 8px;
   margin-top: auto;
-  padding: 12px 8px 4px;
+  padding: 10px 6px 2px;
   border-top: 1px solid var(--line-soft);
+  min-width: 0;
+}
+.pd-app__me-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-size: 11px;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+.pd-app__me-text > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .pd-app__main {
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
   flex: 1 1 auto;
   min-width: 0;
-  min-height: 0;
-  padding: 16px;
-  overflow: hidden;
-}
-.pd-app__title {
-  font-size: 14px;
-  line-height: 1.4;
-  font-weight: 500;
-  flex-shrink: 0;
+  padding: 18px 20px 20px;
+  box-sizing: border-box;
 }
 
-/* Main: primary block (rows / kanban + second block) and a details panel on the right */
-.pd-app__content {
+/* ---------- Shared screen parts ------------------------------------------- */
+.pd-head {
   display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
   gap: 16px;
-  flex: 1 1 auto;
-  min-height: 0;
 }
-.pd-app__primary {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  flex: 1 1 auto;
-  min-width: 0;
-  min-height: 0;
-}
-.pd-app__aside {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  flex: 0 0 216px;
-  width: 216px;
-  padding: 12px;
-  border-radius: 8px;
-  background: var(--haze);
-  box-sizing: border-box;
-  min-height: 0;
-  overflow: hidden;
-}
-.pd-aside__head {
+.pd-head__text {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
 }
-.pd-aside__title {
-  font-size: 13px;
-  line-height: 1.4;
+.pd-head__title {
+  font-size: 16px;
+  line-height: 1.3;
   font-weight: 500;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  letter-spacing: -0.01em;
 }
-.pd-aside__meta {
-  font-size: 11px;
+.pd-head__sub {
   color: var(--ink-2);
-  overflow: hidden;
-  text-overflow: ellipsis;
+}
+.pd-head__count {
+  flex-shrink: 0;
+  color: var(--ink-2);
+  font-size: 11px;
   white-space: nowrap;
 }
-.pd-aside__chip {
-  align-self: flex-start;
-  background: var(--white);
-  border: 1px solid var(--line-soft);
+.pd-muted {
+  color: var(--ink-2);
 }
-.pd-aside__row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.pd-aside__row .pd-bar {
-  flex: 1 1 auto;
-  width: auto;
-}
-.pd-aside__lines {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding-top: 4px;
-}
-.pd-aside__foot {
+
+.pd-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-top: auto;
-  padding-top: 12px;
-  border-top: 1px solid var(--line-soft);
-}
-.pd-aside__foot .pd-app__btn {
-  background: var(--white);
-}
-
-/* Legend (cohort details): label · bar · count */
-.pd-legend {
-  display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   gap: 8px;
 }
-.pd-legend__row {
-  display: flex;
+.pd-seg {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 8px;
+  background: var(--haze);
+}
+.pd-seg__item {
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  height: 22px;
+  padding: 0 10px;
+  border-radius: 6px;
   font-size: 11px;
-}
-.pd-legend__label {
-  flex: 0 0 56px;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  color: var(--ink-2);
   white-space: nowrap;
 }
-.pd-legend__track {
-  flex: 1 1 auto;
-  height: 4px;
-  border-radius: 9999px;
-  background: var(--line);
-  overflow: hidden;
-}
-.pd-legend__fill {
-  display: block;
-  height: 100%;
-  width: var(--w, 50%);
-  border-radius: inherit;
-  background: var(--black);
-}
-.pd-legend__count {
-  flex: 0 0 16px;
-  text-align: right;
-  color: var(--ink-2);
+.pd-seg__item.is-on {
+  background: var(--white);
+  color: var(--black);
+  font-weight: 500;
+  outline: 1px solid var(--line);
+  outline-offset: -1px;
 }
 
-/* Avatars (three overlapping circles) */
-.pd-avatars {
-  display: inline-flex;
-  flex-shrink: 0;
+.pd-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
-.pd-avatars > span {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: rgba(27, 27, 27, 0.18);
-  border: 2px solid var(--white);
+.pd-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 9999px;
+  border: 1px solid var(--line);
+  color: rgba(27, 27, 27, 0.75);
+  font-size: 11px;
+  line-height: 1;
+  white-space: nowrap;
   box-sizing: border-box;
 }
-.pd-avatars > span + span {
-  margin-left: -6px;
+.pd-filter.is-on {
+  background: var(--black);
+  border-color: var(--black);
+  color: var(--white);
 }
-.pd-avatars > span:nth-child(2) {
-  background: rgba(27, 27, 27, 0.3);
+.pd-filter--select {
+  border-radius: 8px;
 }
-.pd-avatars > span:nth-child(3) {
-  background: var(--signal-blue);
+.pd-filter svg {
+  color: var(--ink-2);
 }
 
-/* Rows (schedule + leaderboard) */
-.pd-rows {
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
-}
-.pd-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 0;
-  border-top: 1px solid var(--line-soft);
-  min-width: 0;
-}
-.pd-row__date {
-  width: 48px;
-  flex-shrink: 0;
-  font-size: 11px;
-  color: var(--ink-2);
-  white-space: nowrap;
-}
-.pd-row__rank {
-  width: 16px;
-  flex-shrink: 0;
-  font-size: 11px;
-  color: var(--ink-2);
-  text-align: right;
-}
-.pd-row__title {
-  flex: 1 1 auto;
-  min-width: 0;
-  font-size: 12px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.pd-row__team {
-  width: 110px;
-  flex-shrink: 0;
-  font-size: 12px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.pd-row__project {
-  flex: 1 1 auto;
-  min-width: 0;
-  color: var(--ink-2);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.pd-bar {
-  display: block;
-  width: 90px;
-  height: 4px;
-  flex-shrink: 0;
-  border-radius: 9999px;
-  background: var(--line);
-  overflow: hidden;
-}
-.pd-bar__fill {
-  display: block;
-  height: 100%;
-  width: var(--w, 50%);
-  border-radius: inherit;
-  background: var(--black);
-}
-.pd-chip {
+.pd-tag {
   display: inline-flex;
   align-items: center;
+  height: 20px;
+  padding: 0 7px;
+  border-radius: 4px;
+  background: var(--haze);
+  font-size: 10.5px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* Status / availability badges: blue = recruiting / open to projects,
+   ink = in progress / open to collaboration, outline = idea. */
+.pd-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   height: 20px;
   flex-shrink: 0;
   padding: 0 8px;
   border-radius: 9999px;
   background: var(--haze);
-  font-size: 10px;
+  color: var(--black);
+  font-size: 10.5px;
+  font-weight: 500;
   line-height: 1;
   white-space: nowrap;
+  box-sizing: border-box;
+}
+.pd-status__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+.pd-status--recruiting,
+.pd-status--projects {
+  background: var(--blue-tint);
+  color: var(--blue-ink);
+}
+.pd-status--idea {
+  background: transparent;
+  outline: 1px solid var(--line);
+  outline-offset: -1px;
+  color: rgba(27, 27, 27, 0.72);
+}
+.pd-status--idea .pd-status__dot {
+  background: transparent;
+  border: 1.5px solid currentColor;
+  box-sizing: border-box;
+}
+.pd-status--demoShown {
+  background: var(--black);
+  color: var(--white);
 }
 
-/* Month grid (schedule's second block) */
-.pd-cal {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  flex: 1 1 auto;
-  min-height: 0;
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid var(--line-soft);
-  box-sizing: border-box;
-}
-.pd-cal__head {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 4px;
-  padding: 0 6px;
-}
-.pd-cal__head .pd-skel {
-  width: 14px;
-  height: 4px;
-  margin: 0 auto;
-}
-.pd-cal__grid {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  grid-auto-rows: minmax(22px, 1fr);
-  gap: 4px;
-  flex: 1 1 auto;
-  min-height: 0;
-}
-.pd-cal__cell {
-  position: relative;
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
-  padding: 6px;
-  font-size: 10px;
-  line-height: 1;
-  color: var(--ink-2);
-  border-radius: 6px;
-  box-sizing: border-box;
-}
-/* a scheduled day: haze cell, black number and a small black "event" bar under it */
-.pd-cal__cell.is-on {
+.pd-avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 50%;
   background: var(--haze);
   color: var(--black);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
 }
-.pd-cal__cell.is-on::after {
-  content: "";
-  position: absolute;
-  left: 6px;
-  right: 6px;
-  top: 20px;
-  height: 4px;
-  border-radius: 9999px;
-  background: var(--black);
+.pd-avatar--blue {
+  background: var(--signal-blue);
+  color: var(--white);
+}
+.pd-avatar--sm {
+  width: 26px;
+  height: 26px;
+  font-size: 10px;
 }
 
-/* Mini chart (leaderboard's second block) */
-.pd-chart {
-  display: flex;
-  align-items: flex-end;
-  gap: 16px;
-  flex: 1 1 auto;
-  min-height: 96px;
-  padding: 12px 12px 8px;
-  border-radius: 8px;
-  border: 1px solid var(--line-soft);
+.pd-team {
+  display: inline-flex;
+  align-items: center;
+}
+.pd-team__dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--white);
+  background: rgba(27, 27, 27, 0.16);
   box-sizing: border-box;
 }
-.pd-chart__col {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  flex: 1 1 0;
-  min-width: 0;
-  height: 100%;
+.pd-team__dot + .pd-team__dot {
+  margin-left: -6px;
 }
-.pd-chart__track {
-  display: flex;
-  align-items: flex-end;
-  width: 100%;
-  max-width: 48px;
-  flex: 1 1 auto;
-  min-height: 48px;
-  border-radius: 4px 4px 0 0;
-  background: var(--haze);
+.pd-team__dot--1 {
+  background: rgba(27, 27, 27, 0.3);
+}
+.pd-team__dot--2 {
+  background: var(--signal-blue);
+}
+.pd-team__dot--3 {
+  background: rgba(27, 27, 27, 0.5);
+}
+
+ul.pd-tbody,
+ul.pd-cards,
+ul.pd-events {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* ---------- Team Finder: table ------------------------------------------- */
+.pd-table {
+  border: 1px solid var(--line);
+  border-radius: 8px;
   overflow: hidden;
 }
-.pd-chart__fill {
-  display: block;
-  width: 100%;
-  height: var(--h, 50%);
-  background: var(--black);
+.pd-tr {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1.25fr) minmax(0, 1.35fr) minmax(0, 0.85fr) minmax(0, 0.9fr)
+    minmax(0, 0.75fr) 92px;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 8px 12px 8px 14px;
+  border-top: 1px solid var(--line-soft);
+  box-sizing: border-box;
 }
-.pd-chart__label {
-  max-width: 100%;
-  font-size: 10px;
+.pd-tbody .pd-tr:first-child {
+  border-top: 0;
+}
+.pd-tr--head {
+  min-height: 32px;
+  padding-block: 0;
+  border-top: 0;
+  border-bottom: 1px solid var(--line-soft);
+  background: var(--side-bg);
   color: var(--ink-2);
+  font-size: 11px;
+}
+.pd-tr--head span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pd-td {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-
-/* Kanban (cohort) */
-.pd-kanban {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-  flex: 1 1 auto;
-  min-height: 0;
-  align-items: start;
+.pd-td--role {
+  font-weight: 500;
 }
-.pd-kanban__col {
+.pd-td--project,
+.pd-td--hours {
+  color: rgba(27, 27, 27, 0.72);
+}
+.pd-td--action {
+  display: flex;
+  justify-content: flex-end;
+}
+.pd-td__label {
+  display: none;
+}
+
+/* ---------- Projects: 2×2 cards ------------------------------------------ */
+.pd-cards--projects {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.pd-card {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 8px;
-  border-radius: 8px;
-  background: var(--haze);
+  gap: 8px;
   min-width: 0;
-  min-height: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
   box-sizing: border-box;
 }
-.pd-kanban__label {
+.pd-card__top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 6px;
-  font-size: 11px;
-  margin-bottom: 2px;
+  gap: 8px;
+  min-width: 0;
+}
+.pd-card__name {
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
-.pd-kanban__label span:last-child {
-  color: var(--ink-2);
+.pd-card__body {
+  color: rgba(27, 27, 27, 0.72);
+  min-height: 2.8em;
 }
-.pd-kanban__card {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 8px;
-  border-radius: 6px;
-  border: 1px solid var(--line-soft);
-  background: var(--white);
-}
-.pd-kanban__foot {
+.pd-card__foot {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-  padding-top: 2px;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid var(--line-soft);
+  font-size: 11px;
 }
-.pd-kanban__foot .pd-avatars > span {
-  width: 14px;
-  height: 14px;
+
+/* ---------- Events: list -------------------------------------------------- */
+.pd-events {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
 }
-.pd-skel {
+.pd-event {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) minmax(120px, 0.55fr) 96px;
+  align-items: center;
+  gap: 14px;
+  padding: 9px 12px 9px 10px;
+  border-top: 1px solid var(--line-soft);
+}
+.pd-event:first-child {
+  border-top: 0;
+}
+.pd-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background: var(--haze);
+  box-sizing: border-box;
+}
+.pd-date__month {
+  font-size: 9.5px;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-2);
+}
+.pd-date__day {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1;
+}
+.pd-event__main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.pd-event__title {
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pd-event__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: var(--ink-2);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.pd-event__meta > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pd-event__cap {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.pd-event__cap .pd-muted {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pd-meter {
   display: block;
-  height: 6px;
-  border-radius: 3px;
-  background: var(--line);
-}
-.pd-skel--short {
-  width: 60%;
-}
-.pd-skel--tag {
-  width: 28px;
-  height: 10px;
+  height: 4px;
   border-radius: 9999px;
+  background: var(--line);
+  overflow: hidden;
+}
+.pd-meter__fill {
+  display: block;
+  width: var(--w, 50%);
+  height: 100%;
+  border-radius: inherit;
+  background: var(--black);
+}
+.pd-event__action {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ---------- People: cards ------------------------------------------------- */
+.pd-cards--people {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.pd-person {
+  gap: 10px;
+  padding: 14px;
+}
+.pd-person__id {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.pd-person__id .pd-muted {
+  font-size: 11px;
+}
+.pd-person__skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.pd-person .pd-status {
+  align-self: flex-start;
+}
+.pd-person__action {
+  margin-top: auto;
+  width: 100%;
+}
+
+/* ---------- Container queries: narrow main pane --------------------------- */
+@container (max-width: 640px) {
+  /* Table → stacked rows: role + action, project, then skill · hours · deadline */
+  .pd-tr--head {
+    display: none;
+  }
+  .pd-tr {
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      "role role role action"
+      "project project project action"
+      "skill hours deadline deadline";
+    column-gap: 10px;
+    row-gap: 3px;
+    padding: 10px 12px;
+  }
+  .pd-td--role {
+    grid-area: role;
+  }
+  .pd-td--project {
+    grid-area: project;
+  }
+  .pd-td--skill {
+    grid-area: skill;
+    margin-top: 5px;
+  }
+  .pd-td--hours {
+    grid-area: hours;
+    margin-top: 5px;
+    font-size: 11px;
+  }
+  .pd-td--deadline {
+    grid-area: deadline;
+    margin-top: 5px;
+    font-size: 11px;
+    text-align: right;
+  }
+  .pd-td__label {
+    display: inline;
+    margin-right: 4px;
+    color: var(--ink-2);
+  }
+  .pd-td--action {
+    grid-area: action;
+    align-self: start;
+  }
+
+  /* Events: capacity moves under the title */
+  .pd-event {
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+    grid-template-areas:
+      "date main action"
+      "date cap cap";
+    row-gap: 6px;
+    column-gap: 12px;
+  }
+  .pd-date {
+    grid-area: date;
+    align-self: start;
+  }
+  .pd-event__main {
+    grid-area: main;
+  }
+  .pd-event__meta {
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+  .pd-event__cap {
+    grid-area: cap;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+  }
+  .pd-event__cap .pd-meter {
+    flex: 1 1 auto;
+    max-width: 120px;
+  }
+  .pd-event__action {
+    grid-area: action;
+    align-self: start;
+  }
+
+  /* People: one row per person */
+  .pd-cards--people {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .pd-person {
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr) auto;
+    grid-template-areas:
+      "avatar id action"
+      "avatar skills skills"
+      "avatar status status";
+    column-gap: 12px;
+    row-gap: 6px;
+    padding: 12px;
+  }
+  .pd-person .pd-avatar {
+    grid-area: avatar;
+  }
+  .pd-person__id {
+    grid-area: id;
+  }
+  .pd-person__skills {
+    grid-area: skills;
+  }
+  .pd-person .pd-status {
+    grid-area: status;
+    justify-self: start;
+  }
+  .pd-person__action {
+    grid-area: action;
+    width: auto;
+    margin-top: 0;
+    align-self: start;
+  }
+}
+@container (max-width: 460px) {
+  .pd-head__count {
+    display: none;
+  }
+  .pd-cards--projects {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .pd-cards--projects {
+    gap: 8px;
+  }
+  .pd-card {
+    gap: 6px;
+    padding: 10px 12px;
+  }
+  .pd-card__body {
+    min-height: 0;
+  }
+  .pd-card__foot {
+    padding-top: 2px;
+    border-top: 0;
+  }
+  .pd-toolbar .pd-filters {
+    display: none;
+  }
 }
 
 /* ---------- Tab bar -------------------------------------------------------- */
@@ -612,8 +879,13 @@
     opacity 0.5s var(--ease),
     color 0.5s var(--ease);
 }
+.pd-tab__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 /* Touch target: the tab itself is 30px inside the 36px bar; extend the hit
-   area 5px above and below (40px tall) without changing the reference look. */
+   area 5px above and below (40px tall) without changing the look. */
 .pd-tab::before {
   content: "";
   position: absolute;
@@ -655,7 +927,9 @@
   bottom: 0;
   left: 0;
   height: 3px;
-  width: 0;
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: left center;
   background: rgba(0, 0, 0, 0.14);
   animation: pd-timer var(--pd-dur, 9000ms) linear forwards;
 }
@@ -664,42 +938,77 @@
 }
 @keyframes pd-timer {
   from {
-    width: 0%;
+    transform: scaleX(0);
   }
   to {
-    width: 100%;
+    transform: scaleX(1);
   }
 }
 
-/* ---------- Responsive ----------------------------------------------------- */
-@media (max-width: 1024px) {
-  .pd-row__team {
-    width: 96px;
-  }
-  .pd-app__aside {
-    flex-basis: 192px;
-    width: 192px;
-  }
+/* Caption under the tab bar: all four stacked in one cell (no height jump) */
+.pd-captions {
+  display: grid;
+  margin-top: 16px;
+  text-align: center;
 }
-@media (max-width: 768px) {
-  /* Tablet: landscape card so the mock content fills it; phones go taller below. */
-  .pd-stage {
-    aspect-ratio: 4 / 3;
+.pd-caption {
+  grid-area: 1 / 1;
+  max-width: 60ch;
+  margin: 0 auto;
+  opacity: 0;
+  transition: opacity 0.5s var(--ease);
+}
+.pd-caption.is-active {
+  opacity: 1;
+}
+
+/* ---------- CTA row -------------------------------------------------------- */
+.pd-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+}
+.pd-cta__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+/* global .btn--primary colours its label but not an icon (the arrow would be white on the white
+   fill until hover): match the label here. */
+.pd-cta .btn--primary svg {
+  color: var(--bg);
+}
+.pd-cta .btn--primary:hover svg {
+  color: var(--fg);
+  filter: none;
+}
+.pd-cta .btn svg {
+  width: 14px;
+  height: 14px;
+}
+.pd-cta__note {
+  max-width: 56ch;
+  opacity: 0.9;
+}
+
+/* ---------- Responsive (viewport) ------------------------------------------ */
+@media (max-width: 1024px) {
+  .pd-app__side {
+    width: 164px;
   }
-  .pd-app {
-    width: 100%;
-    height: 100%;
-    aspect-ratio: auto;
-  }
-  .pd-app__search {
-    max-width: 160px;
-  }
-  .pd-app__btn:not(.pd-app__btn--dark) {
+  .pd-app__secondary {
     display: none;
   }
+}
+@media (max-width: 900px) {
+  /* Icon rail */
   .pd-app__side {
-    width: 44px;
-    padding: 8px 6px;
+    width: 48px;
+    padding: 10px 6px;
+    align-items: stretch;
   }
   .pd-app__nav {
     justify-content: center;
@@ -708,57 +1017,52 @@
   .pd-app__nav span {
     display: none;
   }
-  .pd-app__side-foot {
+  .pd-app__me {
+    justify-content: center;
+    padding: 10px 0 2px;
+  }
+  .pd-app__me-text {
+    display: none;
+  }
+}
+@media (max-width: 640px) {
+  .pd-app__search {
+    display: none;
+  }
+  .pd-app__bar {
+    justify-content: space-between;
+  }
+  .pd-app__primary {
+    display: none;
+  }
+  .pd-app__side {
     display: none;
   }
   .pd-app__main {
-    padding: 12px;
+    padding: 14px 12px 14px;
+    gap: 12px;
   }
-  .pd-app__aside {
-    display: none;
-  }
-  .pd-row {
-    gap: 8px;
-  }
-  .pd-row__date {
-    width: 40px;
-  }
-  .pd-row__team {
-    flex: 1 1 auto;
-    width: auto;
-  }
-  .pd-row__project {
-    display: none;
-  }
-  .pd-bar {
-    width: 56px;
-  }
-  .pd-kanban {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .pd-kanban__col {
-    min-height: 0;
+  .pd-wrap {
+    gap: 24px;
   }
 }
 @media (max-width: 480px) {
-  /* Phones: tall enough for the AI Fridays month grid (≈399px of app at
-     320–375px wide): 343 × 1.2 = 412, and 288 × 1.4 = 403 at 320. */
-  .pd-stage {
-    aspect-ratio: 1 / 1.2;
+  .pd-tab {
+    padding: 0 4px;
   }
-  .pd-chart {
+  .pd-tab svg {
     display: none;
   }
-}
-@media (max-width: 360px) {
-  .pd-stage {
-    aspect-ratio: 1 / 1.4;
+  .pd-tab.u-body-3 {
+    font-size: 11px;
   }
 }
 
 /* ---------- Reduced motion ------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   .pd-stage__item,
+  .pd-stage__item.is-active,
+  .pd-caption,
   .pd-tab,
   .pd-indicator {
     transition: none;

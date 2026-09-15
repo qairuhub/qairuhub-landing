@@ -1,5 +1,6 @@
 import clsx from 'clsx'
 import type { CSSProperties, ReactNode } from 'react'
+import { useReducedMotion } from '../../lib/media'
 import { useInView } from './Reveal'
 
 export interface AutoCarouselProps {
@@ -15,14 +16,31 @@ export interface AutoCarouselProps {
   /** fade the edges (reference default: on) */
   mask?: boolean
   paused?: boolean
+  /**
+   * How many times the item list is laid out inside ONE loop set (default 1). Raise it for short
+   * lists, so a set is always wider than the row and the loop never shows an empty tail. Only the
+   * first pass is exposed to assistive tech.
+   */
+  repeat?: number
   className?: string
   itemClassName?: string
+  /** Accessible name of the marquee (localized by the caller). */
   ariaLabel?: string
 }
 
+/** Static style for a paused track: drop the compositor layer while nothing moves. */
+const IDLE_TRACK: CSSProperties = { willChange: 'auto' }
+
 /**
  * Reference AutoCarousel: an infinite, linear marquee. The item set is rendered twice and the
- * track translates by -50% per loop, so it is seamless at any item widths. Pauses offscreen.
+ * track translates by -50% per loop, so it is seamless at any item widths.
+ *
+ * Motion rules (V3-BUILD-PLAN §5):
+ * - paused whenever the row is offscreen (IntersectionObserver, re-arms when it scrolls back);
+ * - never animates under `prefers-reduced-motion` (the hook below, plus the global.css rule);
+ * - a paused track gives up its `will-change` layer.
+ * The duplicate set (and any `repeat` pass) is `aria-hidden`, so assistive tech reads every name
+ * exactly once.
  */
 export function AutoCarousel({
   items,
@@ -33,11 +51,16 @@ export function AutoCarousel({
   tint = 'none',
   mask = true,
   paused,
+  repeat = 1,
   className,
   itemClassName,
   ariaLabel,
 }: AutoCarouselProps) {
+  const passes = Math.max(1, Math.floor(repeat))
   const { ref, inView } = useInView<HTMLDivElement>({ once: false, threshold: 0, rootMargin: '0px' })
+  const reduced = useReducedMotion()
+  const idle = Boolean(paused) || reduced || !inView
+
   return (
     <div
       ref={ref}
@@ -46,7 +69,7 @@ export function AutoCarousel({
         mask && 'carousel--mask',
         tint === 'white' && 'carousel--tint-white',
         tint === 'black' && 'carousel--tint-black',
-        (paused || !inView) && 'u-animation-paused',
+        idle && 'u-animation-paused',
         className,
       )}
       style={
@@ -59,15 +82,22 @@ export function AutoCarousel({
       }
       role="marquee"
       aria-label={ariaLabel}
+      data-paused={idle || undefined}
     >
-      <div className="carousel__track">
+      <div className="carousel__track" style={idle ? IDLE_TRACK : undefined}>
         {[0, 1].map((copy) => (
           <div className="carousel__set" key={copy} aria-hidden={copy === 1 || undefined}>
-            {items.map((item, i) => (
-              <div className={clsx('carousel__item', itemClassName)} key={i}>
-                {item}
-              </div>
-            ))}
+            {Array.from({ length: passes }, (_, pass) =>
+              items.map((item, i) => (
+                <div
+                  className={clsx('carousel__item', itemClassName)}
+                  key={`${pass}-${i}`}
+                  aria-hidden={(copy === 0 && pass > 0) || undefined}
+                >
+                  {item}
+                </div>
+              )),
+            )}
           </div>
         ))}
       </div>

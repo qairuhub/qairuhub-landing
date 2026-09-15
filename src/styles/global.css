@@ -8,34 +8,91 @@
    Tokens are the single source of truth. Components use tokens, never raw hex.
    ========================================================================== */
 
-/* ---------- Fonts (self-hosted substitutes for the proprietary Control family) */
+/* ---------- Fonts (self-hosted substitutes for the proprietary Control family)
+   WOFF2 subsets built by `python fonts-src/build-fonts.py` from the OFL source TTFs in fonts-src/
+   (kept out of public/, so they never ship). Each family is split by `unicode-range`: the browser
+   downloads a file only when the page contains a glyph from its range, so EN pages never fetch the
+   Cyrillic files. The two ranges below MUST match LATIN / CYRILLIC in fonts-src/build-fonts.py;
+   `node scripts/check-fonts.mjs` fails if any Kazakh letter is missing from the face that claims it.
+   Preloads per route live in src/styles/fonts.preload.json. */
+
+/* Inter (UI) — variable wght 100–900 + opsz 14–32, full Kazakh coverage. */
 @font-face {
   font-family: "Inter";
-  src: url("/fonts/Inter-Variable.ttf") format("truetype");
+  src: url("/fonts/Inter-latin.woff2") format("woff2");
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
+  unicode-range:
+    U+0000-00FF, U+0100-017F, U+0192, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2190-2199, U+2212, U+2215, U+2248, U+2260, U+2264-2265, U+FEFF,
+    U+FFFD;
 }
 @font-face {
+  font-family: "Inter";
+  src: url("/fonts/Inter-cyrillic.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0400-04FF, U+2116, U+20B8;
+}
+
+/* "Anton" (compressed display) — Anton itself has no Kazakh letters, so the Cyrillic range of
+   the same family is Oswald 600 (docs/V3-BUILD-PLAN.md D6): English keeps Anton pixel-for-pixel,
+   Kazakh display text switches per glyph. `size-adjust` scales Oswald so its cap height matches
+   Anton's (0.859 / 0.810 em ≈ 106%) — display text is uppercase, so mixed "QAIRUHUB ҚҰР" lines
+   share one cap line. */
+@font-face {
   font-family: "Anton";
-  src: url("/fonts/Anton-Regular.ttf") format("truetype");
+  src: url("/fonts/Anton-latin.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
+  unicode-range:
+    U+0000-00FF, U+0100-017F, U+0192, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2190-2199, U+2212, U+2215, U+2248, U+2260, U+2264-2265, U+FEFF,
+    U+FFFD;
 }
 @font-face {
+  font-family: "Anton";
+  src: url("/fonts/Oswald-600-cyrillic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  size-adjust: 106%;
+  unicode-range: U+0400-04FF, U+2116, U+20B8;
+}
+
+/* Caveat (cursive accent word) — variable wght 400–700, full Kazakh coverage. */
+@font-face {
   font-family: "Caveat";
-  src: url("/fonts/Caveat-Variable.ttf") format("truetype");
+  src: url("/fonts/Caveat-latin.woff2") format("woff2");
   font-weight: 400 700;
   font-style: normal;
   font-display: swap;
+  unicode-range:
+    U+0000-00FF, U+0100-017F, U+0192, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2190-2199, U+2212, U+2215, U+2248, U+2260, U+2264-2265, U+FEFF,
+    U+FFFD;
 }
+@font-face {
+  font-family: "Caveat";
+  src: url("/fonts/Caveat-cyrillic.woff2") format("woff2");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0400-04FF, U+2116, U+20B8;
+}
+
 /* DOM wordmark (header / footer / mobile menu) — JOURNEY-SPEC v2.1 checklist #2: Courgette, a
    medium-weight friendly script that stays legible at 28px over clouds; Dancing Script is the
-   declared fallback. The 3D sculpture loads its own TTF via src/lib/ttf.ts (see GlassWordmark). */
+   declared fallback. The DOM face is a 6 KB lowercase WOFF2 subset (the wordmark is always the
+   Latin "qairuhub", in every locale). The 3D sculpture fetches the full Courgette-Regular.ttf
+   itself (src/lib/ttf.ts parses glyf; home preloads it as="fetch"), so /members, /handbook and
+   the 404, which have no sculpture, never download the 119 KB TTF. */
 @font-face {
   font-family: "Courgette";
-  src: url("/fonts/Courgette-Regular.ttf") format("truetype");
+  src: url("/fonts/Courgette-wordmark.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -316,6 +373,28 @@ p {
   /* Courgette carries its own weight, so no edge glow is needed — only the soft contrast halo
      every free-standing element on the moving sky gets (JOURNEY-SPEC "Readability"). */
   text-shadow: var(--text-glow-soft);
+}
+
+/* ---------- Kazakh typography (docs/V3-BUILD-PLAN.md D6 · WP11). `<html lang>` is set per route
+   by src/main.tsx, so every rule here is scoped to the /kk/ pages and English is untouched.
+   Cyrillic display glyphs come from Oswald 600 inside the "Anton" family (see @font-face above);
+   Oswald is a little wider and tighter-set than Anton, so the compressed display sizes get a hair
+   of tracking back. Browsers ship no Kazakh hyphenation dictionary: long agglutinative words must
+   never be split by an `hyphens: auto` inherited from a component — only soft hyphens (U+00AD)
+   placed in the copy may break them. */
+:lang(kk) .u-h1,
+:lang(kk) .u-h1-small {
+  letter-spacing: 0.01em;
+}
+/* Measured bleed (WP11, 375px): the Members title's cursive accent «жүргізетін» is 395px wide at
+   the 64px `u-h1-small` floor, against 327px of column. Only the floor drops — 13.9vw wins from
+   ~460px up, so tablet/desktop sizes are identical to English. `:where` keeps this at the base
+   class's specificity, so a component that sets its own font-size still wins. */
+:where(:lang(kk)) .u-h1-small {
+  font-size: clamp(50px, 13.9vw, 200px);
+}
+:lang(kk) .triptych__title {
+  hyphens: manual;
 }
 
 /* Free-standing text placed directly on the moving sky gets a soft contrast glow (not a drop

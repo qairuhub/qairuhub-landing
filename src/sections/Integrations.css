@@ -1,12 +1,19 @@
 /* =============================================================================
-   Integrations — a single marquee row of 80×80 wordmark tiles.
-   The tile itself (box, border, type hints, real-logo swap) lives in the shared
-   src/components/ui/LogoMark.css (`.logo-mark--tile`: radius 12, fill .08,
-   hairline .18); this file only guards the section against horizontal bleed
-   from the masked marquee. The cursive "whole" / "ecosystem" gap is handled by
-   the global `<i>` margin in global.css; the title glow comes from SectionText.
+   Tools row (#tools) — one marquee row of flat wordmark chips and a small caption.
+   The chip itself (fill, hairline, radius 12, type hints) lives in the shared
+   src/components/ui/LogoMark.css (`.logo-mark--tile`); this file only guards the
+   section against horizontal bleed and sets the caption.
    ========================================================================== */
 
 .integrations {
   overflow-x: clip;
+}
+
+.integrations__note {
+  margin: 0 auto;
+  padding: 0 var(--row-margin, 24px);
+  max-width: 62ch;
+  text-align: center;
+  color: rgba(var(--fg-rgb), 0.8);
+  text-wrap: balance;
 }

@@ -6,17 +6,16 @@
     <title>QairuHub — Learn it. Build it. Launch it.</title>
     <meta
       name="description"
-      content="QairuHub is the student-driven builder community at Qazaq AI Research University (QAIRU), Astana. Learn it, build it, launch it."
+      content="A Kazakhstan tech community, born at QAIRU. Events, hackathons, mentorship, teams on our platform, QairuHub Demo Day and Accelerator."
     />
     <meta name="color-scheme" content="dark" />
     <meta name="theme-color" content="#03040c" />
-    <!-- Self-hosted fonts: UI (Inter), display (Anton), cursive accent (Caveat), and the
-         wordmark (Courgette) shared by the DOM header/footer marks and the 3D glass sculpture.
-         Dancing Script is only the parse fallback for Courgette and is fetched on demand. -->
-    <link rel="preload" href="/fonts/Inter-Variable.ttf" as="font" type="font/ttf" crossorigin />
-    <link rel="preload" href="/fonts/Anton-Regular.ttf" as="font" type="font/ttf" crossorigin />
-    <link rel="preload" href="/fonts/Caveat-Variable.ttf" as="font" type="font/ttf" crossorigin />
-    <link rel="preload" href="/fonts/Courgette-Regular.ttf" as="font" type="font/ttf" crossorigin />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!--qh:head
+      Build template. scripts/build-html.mjs rewrites this file per route (/, /kk/, /members,
+      /kk/members, /handbook, /kk/handbook, 404): lang, title, description, and at this marker
+      canonical + hreflang + og:* + the per-route font preloads from src/styles/fonts.preload.json.
+    -->
   </head>
   <body>
     <div id="root"></div>

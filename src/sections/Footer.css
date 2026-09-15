@@ -40,8 +40,13 @@
   gap: 16px;
   min-width: 0;
 }
+.footer__col--links {
+  flex: 1 1 520px;
+  gap: 8px;
+}
 .footer__col--right {
   align-items: flex-end;
+  gap: 12px;
 }
 
 /* Link row: 16px/500, external links carry a 14px ↗.
@@ -82,10 +87,39 @@
   flex-shrink: 0;
 }
 
+/* Quiet open-source row (DECISIONS §1): 14px at .75, 12px ↗ */
+.footer__nav--quiet {
+  gap: 0 20px;
+}
+.footer__link--quiet {
+  min-height: 32px;
+  font-size: 14px;
+  color: rgba(var(--fg-rgb), 0.75);
+}
+.footer__link--quiet svg {
+  width: 12px;
+  height: 12px;
+}
+.footer__link[aria-current="page"] {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 6px;
+}
+
+/* Switch + socials share one row */
+.footer__tools {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 /* Social icon buttons: 38×38 ghost circles */
 .footer__socials {
   display: flex;
   gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 .btn.footer__social {
   border: 1px solid rgba(var(--fg-rgb), 0.3);
@@ -98,6 +132,19 @@
   border-color: rgba(var(--fg-rgb), 0.6);
 }
 
+/* The segmented switch sits on the raw night sky: labels get the same glow */
+.footer__lsw .lsw__opt:not(.is-current) {
+  text-shadow: var(--text-glow);
+}
+
+.footer__tagline {
+  color: var(--fg);
+  text-shadow: var(--text-glow);
+}
+.footer__tagline--inline {
+  color: rgba(var(--fg-rgb), 0.75);
+}
+
 /* 12px copyright: .75 (readability floor for secondary text on the sky) */
 .footer__copy {
   color: rgba(var(--fg-rgb), 0.75);
@@ -106,7 +153,66 @@
     0 0 2px rgba(6, 18, 58, 0.25);
 }
 
+/* Desktop: the KK copyright is ~530px on one line and pushed the primary link row
+   onto two lines at 1440. Let it wrap to two right-aligned lines instead, and give
+   the link row a slightly tighter gap so both locales stay on one baseline. */
+@media (min-width: 769px) {
+  .footer__copy {
+    max-width: 400px;
+    text-align: right;
+  }
+  .footer__col--links .footer__nav {
+    gap: 0 20px;
+  }
+}
+
+/* ---------- Compact variant (sub-pages): normal flow, no 150lvh spacer ---- */
+.footer--compact {
+  height: auto;
+  display: block;
+  overflow: visible;
+  padding-block: 96px var(--row-margin);
+}
+.footer--compact .footer__content {
+  position: relative;
+  bottom: auto;
+}
+.footer__brand {
+  width: 100%;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding-bottom: 24px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--card-line);
+}
+.footer__brand-link {
+  display: inline-flex;
+  color: var(--fg);
+}
+.footer__brand .footer__tagline {
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
 @media (max-width: 768px) {
+  .footer--compact {
+    padding-block: 64px var(--row-margin);
+  }
+  .footer__brand {
+    justify-content: center;
+    text-align: center;
+  }
+  .footer__tools {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .footer__col--links {
+    flex-basis: auto;
+    width: 100%;
+  }
   .footer__row {
     flex-direction: column;
     align-items: center;

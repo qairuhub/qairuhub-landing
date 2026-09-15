@@ -2,19 +2,20 @@ import { useEffect, useRef } from 'react'
 import clsx from 'clsx'
 import { Section } from '../components/ui/Section'
 import { Reveal } from '../components/ui/Reveal'
-import { story } from '../content'
+import { useT } from '../i18n/LocaleProvider'
 import { scrollState } from '../lib/scroll'
 import { addTick } from '../lib/ticker'
 import { clamp } from '../lib/ease'
 import { useReducedMotion } from '../lib/media'
 import { smoothstep } from './sky/journey'
+import { text } from './story.i18n'
 import './Storytelling.css'
 
-const N = story.items.length
 const SHIFT_PX = 120
 
 /**
- * Storytelling triptych (reference StorytellingTriptych). A 4.5×viewport runway with a
+ * Storytelling triptych LEARN · BUILD · LAUNCH · MEET (reference StorytellingTriptych). A 6×viewport
+ * runway (1.5×100lvh per item: the v2 per-frame length, now with N = 4) with a
  * sticky 100lvh stage; item i owns the slice t ∈ [0,1] of P·N and rises in from +120px
  * (enter: smoothstep −0.15→0.3) then drifts up to −120px and fades (exit: 0.7→1.15).
  * All per-frame work is imperative — refs + style writes from the shared page ticker
@@ -22,6 +23,9 @@ const SHIFT_PX = 120
  * runway within one viewport of the screen.
  */
 export default function Storytelling() {
+  const t = useT(text)
+  // Read from the locale dictionary inside the component, never at module scope.
+  const N = t.items.length
   // Follows the OS setting live (src/lib/media.ts).
   const reduced = useReducedMotion()
   const rootRef = useRef<HTMLDivElement | null>(null)
@@ -144,14 +148,14 @@ export default function Storytelling() {
         el.style.pointerEvents = ''
       }
     }
-  }, [reduced])
+  }, [reduced, N])
 
   return (
-    <Section id="story" spacing="none" aria-label="How QairuHub works">
+    <Section id="story" spacing="none" aria-label={t.a11yLabel}>
       <div ref={rootRef} className={clsx('triptych', reduced && 'triptych--static')}>
         <div className="triptych__inner">
           <div className="triptych__content">
-            {story.items.map((item, i) => {
+            {t.items.map((item, i) => {
               const content = (
                 <>
                   <h2 className="u-h1-small triptych__title">{item.title}</h2>
