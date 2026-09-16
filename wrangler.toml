@@ -29,8 +29,8 @@ SUBMISSION_RETENTION_DAYS = "180"
 # Accelerator waitlist emails must survive until applications open (~13 months).
 WAITLIST_RETENTION_DAYS = "400"
 # Comma-separated. Preview deployments (*.qairuhub-landing.pages.dev) are matched by suffix in code.
-ALLOWED_ORIGINS = "https://qairuhub-landing.pages.dev"
-SITE_ORIGIN = "https://qairuhub-landing.pages.dev"
+ALLOWED_ORIGINS = "https://qairuhub.com,https://www.qairuhub.com,https://qairuhub-landing.pages.dev"
+SITE_ORIGIN = "https://qairuhub.com"
 # Public Turnstile site key, returned by GET /api/config. Empty until the user creates the widget;
 # the server enforces Turnstile only once the TURNSTILE_SECRET_KEY secret is set.
 TURNSTILE_SITE_KEY = ""

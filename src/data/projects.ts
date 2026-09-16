@@ -73,14 +73,14 @@ export const projects: readonly ProjectItem[] = [
     links: [{ label: { en: 'Open', kk: 'Ашу' }, href: links.platform, external: true }],
   },
   {
-    id: 'qairuhub-com',
-    name: 'qairuhub.com',
+    id: 'qairuhub-web',
+    name: 'qairuhub-web',
     tagline: {
-      en: "QairuHub's open-source website.",
-      kk: 'QairuHub-тың ашық кодты сайты.',
+      en: 'Our first website, built with Astro. Open source under MIT.',
+      kk: 'Astro-мен жасалған алғашқы сайтымыз. MIT лицензиясымен ашық код.',
     },
     status: 'inProgress',
-    badges: ['live', 'openSource'],
+    badges: ['openSource'],
     tags: ['Astro', 'Cloudflare'],
     links: [{ label: { en: 'Source code', kk: 'Бастапқы код' }, href: links.websiteSource, external: true }],
   },
@@ -98,14 +98,14 @@ export const projects: readonly ProjectItem[] = [
   },
   {
     id: 'landing',
-    name: 'This landing + Q',
-    localName: { en: 'This landing + Q', kk: 'Осы сайт + Q' },
+    name: 'qairuhub.com + Q',
+    localName: { en: 'qairuhub.com + Q', kk: 'qairuhub.com + Q' },
     tagline: {
       en: 'A WebGL journey from space to night, with Q, an assistant that answers from the QairuHub Handbook.',
       kk: 'Ғарыштан түнге дейінгі WebGL сапар және The QairuHub Handbook бойынша жауап беретін Q көмекшісі.',
     },
     status: 'inProgress',
-    badges: ['live'],
+    badges: ['live', 'openSource'],
     tags: ['React', 'three.js', 'OpenAI'],
     links: [
       { label: { en: 'Source code', kk: 'Бастапқы код' }, href: links.landingSource, external: true },

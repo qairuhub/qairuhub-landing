@@ -1,4 +1,4 @@
-<!-- Published copy of github.com/qairuhub/.github profile/README.md (commit fbf7e27). Edit it there; banners live in that repo under profile/assets/. -->
+<!-- Published copy of github.com/qairuhub/.github profile/README.md. Edit it there; banners live in that repo under profile/assets/. -->
 
 <!--
   Org profile for github.com/qairuhub (repo qairuhub/.github, file profile/README.md).
@@ -113,7 +113,7 @@ These rules are for new repos inside the qairuhub org. **New to GitHub?** A **re
 
 | Project | What it is |
 |:---|:---|
-| **Community platform**<br><sub>Live · first version</sub><br>[Open](https://community.qairuhub.com) | Team Finder, projects, events, people and clubs in one place.<br><sub>Next.js · Supabase · private repo</sub> |
+| **Community platform**<br><sub>Live · first version</sub><br>[Open](https://community.qairuhub.com) · [Source](https://github.com/qairuhub/community.qairuhub.com) <sub>(org members)</sub> | Team Finder, projects, events, people and clubs in one place.<br><sub>Next.js · Supabase · private repo</sub> |
 | **QairuHub site + Q**<br><sub>Live · public source</sub><br>[Site](https://qairuhub-landing.pages.dev) · [Source](https://github.com/tairqaldy/qairuhub-landing-clean) | A WebGL space-to-night journey in English and Kazakh, with the Handbook and **Q**, the snail assistant.<br><sub>React · three.js · Cloudflare</sub> |
 | **qairuhub.com**<br><sub>Live · MIT</sub><br>[Site](https://qairuhub.com) · [Source](https://github.com/qairuhub/qairuhub-web) | The organisation website. Still early, mostly placeholders: for now, use the site above.<br><sub>Astro · Tailwind · Cloudflare</sub> |
 | **theqairubook**<br><sub>Live · public source</sub><br>[App](https://theqairubook-app-production.up.railway.app) · [Source](https://github.com/tairqaldy/theqairubook) | A 2004-thefacebook-style network for QAIRU students. A personal project by member Tair Kaldybayev, featured by QairuHub.<br><sub>Hono · PostgreSQL · Railway</sub> |

@@ -41,9 +41,11 @@ export const links = {
   github: 'https://github.com/qairuhub',
 
   /* QairuHub web properties and source code */
+  /** qairuhub.com serves this site (the landing) since 16 Sep 2026. */
   website: 'https://qairuhub.com',
+  /** The first qairuhub.com website (Astro), kept as an open-source project. */
   websiteSource: 'https://github.com/qairuhub/qairuhub-web',
-  /** "Source code of this site" (private repo for now; no "private" label on the site, DECISIONS §1). */
+  /** "Source code of this site" (qairuhub.com since 16 Sep 2026; public repo). */
   landingSource: 'https://github.com/tairqaldy/qairuhub-landing-clean',
 
   /* theqairubook (Highlighted projects card, DECISIONS §1) */

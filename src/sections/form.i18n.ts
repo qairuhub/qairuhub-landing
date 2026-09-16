@@ -18,6 +18,9 @@ export interface FormText {
   titleLine2Cursive: string
   titleLine2After: string
   body: string
+  /** Primary registration: the platform sign-up (same tab). */
+  signUpCta: string
+  signUpNote: string
   fields: {
     name: FormFieldText
     email: FormFieldText
@@ -40,6 +43,7 @@ export interface FormText {
   legalAfter: string
   successTitle: string
   successBody: string
+  successCta: string
   sendAnother: string
   errors: {
     required: string
@@ -60,7 +64,9 @@ export const text = {
     titleLine2Before: 'a place to ',
     titleLine2Cursive: '*ship*',
     titleLine2After: '.',
-    body: "Tell us who you are and what you want to build. We'll get back to you on Telegram.",
+    body: "Create your profile on the platform to join teams and projects. Or tell us here who you are and what you want to build, and we'll get back to you on Telegram.",
+    signUpCta: 'Create your account',
+    signUpNote: 'On community.qairuhub.com, with your @qairu.edu.kz email.',
     fields: {
       name: { label: 'Full name*' },
       email: { label: 'Email*' },
@@ -89,6 +95,7 @@ export const text = {
     legalAfter: '.',
     successTitle: 'Got it. Welcome aboard.',
     successBody: "We'll reach out on Telegram. Meanwhile, follow t.me/qairuhub for events.",
+    successCta: 'Create your platform profile',
     sendAnother: 'Send another',
     errors: {
       required: 'This field is required',
@@ -106,7 +113,9 @@ export const text = {
     titleLine2Before: 'іске асатын ',
     titleLine2Cursive: '*орын*',
     titleLine2After: ' осында.',
-    body: 'Өзің туралы және не құрғың келетінін айт. Telegram арқылы хабарласамыз.',
+    body: 'Командалар мен жобаларға қосылу үшін платформада профиль аш. Немесе осында өзің туралы және не құрғың келетінін айт, Telegram арқылы хабарласамыз.',
+    signUpCta: 'Аккаунт ашу',
+    signUpNote: 'community.qairuhub.com сайтында, @qairu.edu.kz поштасымен.',
     fields: {
       name: { label: 'Толық аты*' },
       email: { label: 'Электрондық пошта*' },
@@ -135,6 +144,7 @@ export const text = {
     legalAfter: ' келісесің.',
     successTitle: 'Қабылдадық. Қош келдің!',
     successBody: 'Telegram арқылы хабарласамыз. Әзірге іс-шаралардан хабардар болу үшін t.me/qairuhub арнасына жазыл.',
+    successCta: 'Платформада профиль ашу',
     sendAnother: 'Тағы жіберу',
     errors: {
       required: 'Бұл өрісті толтыру міндетті',

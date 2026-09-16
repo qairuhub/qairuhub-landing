@@ -74,7 +74,7 @@ export const DEFAULTS = {
   contextChars: 9000,
   joinPerIpPer10Min: 5,
   retentionDays: 180,
-  siteOrigin: 'https://qairuhub-landing.pages.dev',
+  siteOrigin: 'https://qairuhub.com',
 } as const
 
 const warned = new Set<string>()

@@ -468,7 +468,7 @@ QairuHub is a builder community, so the team builds its own tools in the open. A
 
 - **community.qairuhub.com.** The community platform for profiles, Team Finder, projects, events, clubs and resources. MVP deployed in September 2026.
 - **core.qairuhub.com.** Internal tools for the core team: planning, tasks, progress and a visual schedule of everyone's time. In progress; the schedule feature was built in September 2026.
-- **qairuhub.com.** The organisation's website, built with Astro and Cloudflare. It is open source under the MIT licence at github.com/qairuhub/qairuhub-web.
+- **qairuhub.com.** This site: the QairuHub website with a WebGL journey from space to night, this Handbook and Q, in English and Kazakh. Signing up on it takes you to community.qairuhub.com. Source code: github.com/tairqaldy/qairuhub-landing-clean. Our first website, built with Astro, stays open source under the MIT licence at github.com/qairuhub/qairuhub-web.
 - **This landing page.** Built with React and WebGL, with a space-to-sky-to-night scroll journey and Q, the assistant. Source code of this site: github.com/tairqaldy/qairuhub-landing-clean.
 - **QairuHub iOS app.** Planned. Planning started in the week of 14 September 2026, with development planned right after.
 - **Team bots.** Telegram tools for the core team, such as an ideas bot that collects ideas from the team chat and sends a daily digest. Internal.
@@ -655,7 +655,7 @@ These are tools QairuHub teams use. Listing them does not mean the companies beh
 - **Telegram:** the announcement channel, team chats and bots.
 - **Cloudflare:** hosting, DNS and spam protection for QairuHub sites.
 - **Supabase and Next.js:** the community platform's database, sign-in and app.
-- **Astro:** the qairuhub.com website.
+- **Astro:** our first website, qairuhub-web.
 - **React and three.js:** this landing page.
 - **OpenAI:** the API behind Q, and Codex for coding.
 - **Anthropic Claude:** coding and writing help.
@@ -674,6 +674,7 @@ These are tools QairuHub teams use. Listing them does not mean the companies beh
 - **3 Sep 2026:** QAIRU takes its first students.
 - **5 Sep 2026:** the QairuHub GitHub organisation is created.
 - **6 Sep 2026:** qairuhub.com goes live.
+- **16 Sep 2026:** qairuhub.com moves to this site; sign-up leads to community.qairuhub.com.
 - **7 Sep 2026:** Founding Session at QAIRU. 15 founders elect a five-seat executive board and agree the four promises.
 - **8 Sep 2026:** the registration form opens, and the logo is redrawn.
 - **9 Sep 2026:** QairuHub at the QAIRU Club Fair, its first public appearance. The tagline "Learn it. Build it. Launch it." is adopted, 56 students register that evening, the Telegram channel launches and the first Instagram post goes out.
@@ -724,7 +725,7 @@ This landing page is QairuHub's front door. It explains what QairuHub is, shows 
 - **Hosting:** Cloudflare.
 - **The scroll journey:** starts in space among the stars, descends through the clouds into a day sky, and ends at night over a grass field.
 
-The source code of this site is at **github.com/tairqaldy/qairuhub-landing-clean**. QairuHub's organisation website, qairuhub.com, is already open source at github.com/qairuhub/qairuhub-web.
+The source code of this site, qairuhub.com, is at **github.com/tairqaldy/qairuhub-landing-clean**. Our first website, built with Astro, is open source at github.com/qairuhub/qairuhub-web.
 
 <!-- kw: this website, landing, source code, repository, github, who made this site, open source; сайт, бастапқы код, репозиторий; сайт, исходный код, репозиторий -->
 
@@ -869,8 +870,7 @@ Posts and this site are in English and Kazakh. The platform is also available in
 
 ### Official QairuHub links
 
-- **Website:** https://qairuhub.com
-- **This landing:** https://qairuhub-landing.pages.dev (Kazakh: /kk/)
+- **Website (this site):** https://qairuhub.com (Kazakh: https://qairuhub.com/kk/)
 - **Community platform:** https://community.qairuhub.com
   - Sign up: https://community.qairuhub.com/sign-up
   - Public project showcase: https://community.qairuhub.com/showcase
@@ -879,7 +879,7 @@ Posts and this site are in English and Kazakh. The platform is also available in
 - **Telegram channel (announcements):** https://t.me/qairuhub
 - **Instagram:** https://instagram.com/qairuhub
 - **GitHub organisation:** https://github.com/qairuhub
-- **Website source code (open source, MIT):** https://github.com/qairuhub/qairuhub-web
+- **First website source code (Astro, open source, MIT):** https://github.com/qairuhub/qairuhub-web
 - **Source code of this site:** https://github.com/tairqaldy/qairuhub-landing-clean
 - **theqairubook (live app):** https://theqairubook-app-production.up.railway.app
 - **theqairubook source code:** https://github.com/tairqaldy/theqairubook

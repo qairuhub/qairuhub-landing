@@ -332,6 +332,12 @@ export default function DemoForm() {
               <Accent text={`${t.titleLine2Before}${t.titleLine2Cursive}${t.titleLine2After}`} />
             </h2>
             <p className="u-body-1 join__body">{t.body}</p>
+            <div className="join__signup">
+              <Button variant="primary" href={links.platformSignUp} iconRight={<ArrowRight size={16} />}>
+                {t.signUpCta}
+              </Button>
+              <p className="u-body-3 join__signup-note">{t.signUpNote}</p>
+            </div>
           </RevealGroup>
         </Col>
 
@@ -488,9 +494,14 @@ export default function DemoForm() {
                   <p className="joincard__success-body">
                     <WithTelegramLink body={t.successBody} />
                   </p>
-                  <Button variant="secondary" onClick={reset}>
-                    {t.sendAnother}
-                  </Button>
+                  <div className="joincard__success-actions">
+                    <Button variant="primary" href={links.platformSignUp}>
+                      {t.successCta}
+                    </Button>
+                    <Button variant="secondary" onClick={reset}>
+                      {t.sendAnother}
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>

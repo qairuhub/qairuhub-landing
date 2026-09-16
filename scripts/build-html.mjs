@@ -18,7 +18,7 @@
  * og:* (og:locale en_US / kk_KZ) and per-route font preloads.
  *
  * Inputs: src/i18n/meta.json (titles/descriptions), src/styles/fonts.preload.json (WP11; optional,
- * falls back to the v2 TTF set), env SITE_ORIGIN (default https://qairuhub-landing.pages.dev).
+ * falls back to the v2 TTF set), env SITE_ORIGIN (default https://qairuhub.com).
  * Idempotent: running it twice on the same dist gives the same output.
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
@@ -27,7 +27,7 @@ import { fileURLToPath } from 'node:url'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const dist = resolve(root, 'dist')
-const SITE_ORIGIN = (process.env.SITE_ORIGIN || 'https://qairuhub-landing.pages.dev').replace(/\/+$/, '')
+const SITE_ORIGIN = (process.env.SITE_ORIGIN || 'https://qairuhub.com').replace(/\/+$/, '')
 
 const HEAD_START = '<!--qh:head:start-->'
 const HEAD_END = '<!--qh:head:end-->'

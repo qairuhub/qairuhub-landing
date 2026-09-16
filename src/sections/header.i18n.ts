@@ -65,7 +65,8 @@ export const NAV_ORDER: readonly NavKey[] = ['programs', 'platform', 'projects',
 /** Right-side actions (CONTENT-V3 §2.5). */
 export const ACTIONS = {
   members: route('members'),
-  join: route('#join'),
+  /** Registration lives on the platform (same tab). */
+  join: ext(links.platformSignUp),
   openPlatform: ext(links.platform),
 } as const
 

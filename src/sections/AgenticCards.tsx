@@ -7,9 +7,8 @@ import { Reveal } from '../components/ui/Reveal'
 import { Section, SectionText } from '../components/ui/Section'
 import { Check } from '../components/ui/icons'
 import { Accent } from '../i18n/Accent'
-import { useRoute, useT } from '../i18n/LocaleProvider'
-import { href } from '../i18n/locale'
-import { sectionIds } from '../i18n/shared'
+import { useT } from '../i18n/LocaleProvider'
+import { links, sectionIds } from '../i18n/shared'
 import { text, type LaunchpadVisual } from './launchpad.i18n'
 import './AgenticCards.css'
 
@@ -151,7 +150,6 @@ function CardVisual({ visual, bentoLabels }: { visual: LaunchpadVisual; bentoLab
 
 /* ------------------------------------------------------------------ Section */
 export default function AgenticCards() {
-  const route = useRoute()
   const t = useT(text)
 
   const [promptIdx, setPromptIdx] = useState(0)
@@ -169,7 +167,7 @@ export default function AgenticCards() {
         title={<Accent text={t.title} />}
         body={t.subtitle}
         ctas={
-          <Button variant="primary" href={href(route, `#${sectionIds.join}`)}>
+          <Button variant="primary" href={links.platformSignUp}>
             {t.cta.label}
           </Button>
         }
