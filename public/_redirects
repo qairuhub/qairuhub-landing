@@ -1,1 +1,3 @@
+# www is an alias; the canonical host is the apex.
+https://www.qairuhub.com/* https://qairuhub.com/:splat 301
 /kk /kk/ 301
