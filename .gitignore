@@ -28,3 +28,6 @@ perf/v3.1/visual/
 perf/v3.1/mac-safari/
 perf/v3.1/tmp-dist/
 perf/v3.1/tmp-dist-maps/
+
+# Claude Code worktrees for parallel agents (they carry their own git metadata).
+.claude/worktrees/

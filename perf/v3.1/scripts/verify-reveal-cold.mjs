@@ -56,6 +56,13 @@ const INIT = () => {
   requestAnimationFrame(tick)
   new PerformanceObserver((l) => { for (const e of l.getEntries()) if (e.name === 'first-contentful-paint') window.__r.fcp = e.startTime })
     .observe({ type: 'paint', buffered: true })
+  // Main-thread blocking on a REAL GPU: Lighthouse runs headless on SwiftShader, where every sky
+  // frame is software-rasterised, so its TBT says nothing about what a reader with a GPU feels.
+  window.__longtasks = []
+  try {
+    new PerformanceObserver((l) => { for (const e of l.getEntries()) window.__longtasks.push([Math.round(e.startTime), Math.round(e.duration)]) })
+      .observe({ type: 'longtask', buffered: true })
+  } catch { /* not supported */ }
 }
 
 const out = []
@@ -81,6 +88,8 @@ for (let i = 0; i < runs; i++) {
       const e = performance.getEntriesByName(name)[0]
       if (e) o[name === 'qh-sky-ready' ? 'skyReady' : 'wordmarkReady'] = Math.round(e.startTime)
     }
+    o.longtasks = window.__longtasks ?? []
+    o.blockingMs = o.longtasks.reduce((sum, [, d]) => sum + Math.max(0, d - 50), 0)
     return o
   })
   out.push({ run: i, ...r, errors })
@@ -103,6 +112,7 @@ console.log(
         firstDefaultDraw: med('firstDefaultDraw'),
         skyVisible: med('skyVisible'),
         wordmarkReady: med('wordmarkReady'),
+        blockingMs: med('blockingMs'),
       },
     },
     null,

@@ -66,6 +66,34 @@ class Boundary extends Component<{ fallback: ReactNode; children: ReactNode }, {
 /** drei <Environment resolution> in SceneLights: the PMREM programs are sized from it. */
 const ENV_RESOLUTION = 64
 
+/** Software rasterisers: SwiftShader (headless Chrome, so every Lighthouse run), Mesa, Windows WARP. */
+const SOFTWARE_GL = /swiftshader|llvmpipe|software\s*rasteriz|basic render|\bwarp\b/i
+
+/**
+ * Whether the reveal may be split (audit item L15). It only pays off where the driver really links
+ * programs off the main thread AND draws on a GPU:
+ *
+ *   - no `KHR_parallel_shader_compile`: linking blocks, so the wordmark's link would stall the
+ *     very frames the early reveal starts;
+ *   - a software rasteriser: the extension IS advertised, but every frame is drawn on the CPU.
+ *     Revealing the sky 0.7 s sooner there does not make the frames cheaper, it only moves one
+ *     ~465 ms software frame earlier — measured as Lighthouse desktop home 99 → 82, with the same
+ *     frame simply falling outside the trace before. docs/PERFORMANCE.md has the numbers.
+ *
+ * Both cases keep the single gate, i.e. exactly the behaviour of the build before L15.
+ */
+function canSplitReveal(gl: THREE.WebGLRenderer): boolean {
+  try {
+    const ctx = gl.getContext()
+    if (!ctx.getExtension('KHR_parallel_shader_compile')) return false
+    const info = ctx.getExtension('WEBGL_debug_renderer_info')
+    const renderer = info ? ctx.getParameter(info.UNMASKED_RENDERER_WEBGL) : ctx.getParameter(ctx.RENDERER)
+    return !SOFTWARE_GL.test(String(renderer))
+  } catch {
+    return false
+  }
+}
+
 /**
  * Links every program of the first frames in the background before the canvas renders at all
  * (audit-loading L1). Order matters: three converts `scene.environment` with its PMREM programs
@@ -117,10 +145,7 @@ function Warmup({ withWordmark, gateKey, onReady }: { withWordmark: boolean; gat
       // 1b. the sky can be revealed now: everything it draws in the first frames is linked.
       await Promise.all(pending)
       if (cancelled) return
-      // Only where linking really happens off the main thread. Without the extension (SwiftShader,
-      // old drivers) the wordmark's link would block the frames this reveal starts, so there the
-      // canvas keeps waiting for the single gate below — the same behaviour as before.
-      if (gl.getContext().getExtension('KHR_parallel_shader_compile')) onReady()
+      if (canSplitReveal(gl)) onReady()
       // 2. the lit wordmark once its mesh exists and the PMREM programs are linked (its first
       //    compile converts scene.environment with them)
       if (withWordmark) {

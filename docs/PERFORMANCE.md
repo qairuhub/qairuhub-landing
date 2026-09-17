@@ -13,7 +13,7 @@ machine (Intel UHD Graphics, ANGLE/D3D11) against a local `wrangler pages dev` s
 
 | # | Change | Where |
 |---|---|---|
-| L1 | Shader warm-up: the canvas stays on `frameloop="never"` until every program of the first frames reports `COMPLETION_STATUS_KHR`, then fades in over 700 ms. three otherwise links each program synchronously on first use, which blocked the main thread for ~1 s. | `src/sections/sky/warmup.ts`, `src/sections/SkyScene.tsx` |
+| L1 | Shader warm-up: the canvas stays on `frameloop="never"` until the programs of the first frames report `COMPLETION_STATUS_KHR` (since L15, the sky's programs — the wordmark has its own gate), then fades in over 700 ms. three otherwise links each program synchronously on first use, which blocked the main thread for ~1 s. | `src/sections/sky/warmup.ts`, `src/sections/SkyScene.tsx` |
 | L2 | The sky chunk (three + r3f, ~260 KB) is requested only after the first contentful paint, so it is no longer an LCP dependency. Sub-pages wait for `load` **and** the paint. The wordmark TTF moved to its own chunk. | `src/App.tsx`, `src/lib/schedule.ts`, `src/sections/sky/wordmarkFont.ts` |
 | L3 | Sections below the fold mount in 8 batches, one task each, at `background` priority until the reader shows intent to move. A deep link or a reload renders everything at once so the anchor target exists immediately. | `src/App.tsx`, `src/lib/schedule.ts` |
 | L4 | The sub-page backdrop placeholder uses the night palette, so there is no light→dark step before the canvas appears. | `src/sections/sky/fallback.ts` |
@@ -22,6 +22,8 @@ machine (Intel UHD Graphics, ANGLE/D3D11) against a local `wrangler pages dev` s
 | L10 | Per-page font preloads. The EN home preload budget went from 287 KB to 116.6 KB; `members` / `handbook` / `404` now preload the Courgette wordmark face, which is their LCP element. | `src/styles/fonts.preload.json`, `scripts/build-html.mjs` |
 | L19 | The sub-page Suspense fallback is a heading-block skeleton, revealed only after 300 ms so a fast chunk never flashes it. | `src/components/ui/PageSkeleton.tsx` |
 | L22 | One shared `IntersectionObserver` per option set instead of one per revealed element. | `src/components/ui/Reveal.tsx` |
+| L15 | The reveal is split in two: the sky (dome, stars, clouds) is revealed as soon as its programs are linked, and the glass wordmark switches on when its transmission + PMREM programs are. Two user-timing marks, `qh-sky-ready` and `qh-wordmark-ready`, make both stages readable in DevTools and in RUM. | `src/sections/SkyScene.tsx`, `src/sections/sky/warmup.ts`, `src/sections/sky/GlassWordmark.tsx` |
+| A2-01b | If a sub-page chunk never arrives, the boundary now shows a sentence and a Reload button instead of the loading skeleton, which was indistinguishable from "still loading". EN/KK. | `src/components/ui/PageLoadFailed.tsx`, `src/components/ui/pageError.i18n.ts`, `src/App.tsx` |
 | A2-01 | Every lazy island — the sky canvas, the sub-page, `ProductDemo`, the join form and the assistant panel — sits in a `ChunkBoundary`, so a chunk that fails to load replaces only that island instead of blanking the page. Verified with `perf/v3.1/scripts/audit-chunk-failure.mjs`: blocking the `three`, `r3f`, `MembersPage`, `HandbookPage`, `ProductDemo` or `Assistant` chunk leaves the header, footer and launcher alive in every case. A sub-page chunk error can reload the tab at most once per 5 minutes and never in the first 30 s. | `src/App.tsx`, `src/components/ui/ChunkBoundary.tsx`, `src/components/ui/chunkReload.ts` |
 | A2-04/10 | `Answer`, `AskBar` and each Markdown block are memoised, and the store exposes a selector hook, so a streaming answer no longer re-renders the whole panel. | `src/assistant/*` |
 | A2-05 | `/api/ask` does the per-IP and global rate-limit counters in **one** D1 batch instead of two round trips. | `functions/_lib/ratelimit.ts`, `functions/api/ask.ts` |
@@ -56,7 +58,10 @@ brotli-compressed — see the warning under *Re-measuring*.
 | members | **72 → 99** | 556 → 471 | 815 → 748 | 769 → 76 | 976 → 762 | 1830 → 1041 |
 | handbook | **78 → 98** | 687 → 498 | 1071 → 1058 | 453 → 18 | 899 → 724 | 1476 → 1058 |
 
-CLS stays 0.000 everywhere. Transfer grows by ~6 KiB per page (the wordmark font chunk and the
+Spot-checked again after the L15 split reveal (`--tag=-split`, then `--tag=-guard` for the two
+desktop cells that changed): mobile 91 / 93 / 77 / 68 and desktop 100 / 99 / 99 / 99 — no cell moved
+outside run-to-run noise. The first spot check *did* show desktop home and kk at 82; that is what
+led to the software-renderer guard described under *Wordmark reveal*. CLS stays 0.000 everywhere. Transfer grows by ~6 KiB per page (the wordmark font chunk and the
 skeleton). The mobile home LCP is now the header's "Open platform" label with a 2566 ms render
 delay, down from 5285 ms.
 
@@ -82,43 +87,72 @@ CLS is 0.000 in all 16 verification runs.
 
 ## Wordmark reveal
 
-Real Chrome, real GPU (Intel UHD / ANGLE D3D11), a **fresh browser profile per run** so the shader
-cache and `qh.gpu` are cold, medians of 3 runs, `node perf/v3.1/scripts/measure-reveal.mjs`.
+| | before (`f1e323a`, local) | one-gate v3.1 (local) | split gate, shipped (local) |
+|---|---|---|---|
+| laptop 1440×900 — FCP | 536 ms | 484 ms | 376–424 ms |
+| laptop 1440×900 — canvas in the DOM | 550 ms | 1027 ms | 979–1056 ms |
+| laptop 1440×900 — sky programs linked (`qh-sky-ready`) | — | — | 1502–1658 ms |
+| laptop 1440×900 — first on-screen frame | 1174 ms | 2361 ms | **1563–1731 ms** |
+| laptop 1440×900 — canvas fully opaque | 1174 ms (hard pop) | 3046 ms | 2224–2393 ms |
+| laptop 1440×900 — wordmark on screen (`qh-wordmark-ready`) | 1174 ms | ~2625 ms (at 50 % opacity) | **2328–2569 ms** |
+| laptop 1440×900 — long tasks / total blocking | — | 60–76 ms / 18 ms | 51–101 ms / 40–58 ms |
+| phone 390×844, 4× CPU — FCP | 1396 ms | 644 ms | |
+| phone 390×844, 4× CPU — first on-screen frame | 2993 ms | 2458 ms | |
 
-Both builds are served the same way here — `wrangler pages dev` on this machine, the old build
-from a copy of its `dist/` — so this is a like-for-like A/B. (An earlier version of this table
-compared the local new build against production **over the network**, which flattered the new
-build; those numbers are superseded.)
-
-| | before (`f1e323a` build, local) | after (this build, local) |
-|---|---|---|
-| laptop 1440×900 — FCP | 536 ms | 484 ms |
-| laptop 1440×900 — canvas in the DOM | 550 ms | 1027 ms |
-| laptop 1440×900 — first on-screen frame | 1174 ms | 2361 ms |
-| laptop 1440×900 — scene readable (opacity ≥ 0.5) | 1174 ms (hard pop) | 2625 ms |
-| laptop 1440×900 — fully opaque | 1174 ms | 3046 ms (700 ms fade) |
-| phone 390×844, 4× CPU — FCP | 1396 ms | 644 ms |
-| phone 390×844, 4× CPU — first on-screen frame | 2993 ms | 2458 ms |
-| phone 390×844, 4× CPU — scene readable | 2993 ms (hard pop) | 2851 ms |
-| phone 390×844, 4× CPU — fully opaque | 2993 ms | 3212 ms |
+Medians of 3 runs, real GPU (Intel UHD / ANGLE D3D11), a **fresh browser profile per run** so the
+shader cache and `qh.gpu` are cold, both builds served by `wrangler pages dev` on this machine —
+`node perf/v3.1/scripts/verify-reveal-cold.mjs http://127.0.0.1:8805 1440x900 3`. (An earlier
+version of this table compared the local new build against production **over the network**, which
+flattered the new build; those numbers are superseded.) The two reveal stages are user-timing
+marks, so they can also be read in DevTools or from RUM: `qh-sky-ready`, `qh-wordmark-ready`.
 
 Reading it: **on the phone the new build wins outright** — first paint at 0.6 s instead of 1.4 s,
-and the sky appears a little sooner too. **On a fast laptop the hero appears about 1.4 s later
-than before.** Two independent causes, both deliberate:
+and the sky appears sooner too. On a fast laptop the sky is ~0.4 s later than the old build and the
+wordmark ~1.2 s later; that is what the L2 trade (the sky chunk is requested only after the first
+contentful paint) buys, and it is why the same page went from a mobile Lighthouse score of 41 to 91.
+Nothing is blank in the meantime: the CSS gradient in the page's own first palette is painted from
+the first frame.
 
-- ~480 ms because the sky chunk is only requested after the first contentful paint (L2). That is
-  what buys the LCP and TBT wins above.
-- ~700 ms because `<Warmup>` holds `frameloop="never"` until *every* program of the first frames
-  is linked, including the wordmark's transmission variant and the PMREM programs
-  (`SkyScene.tsx`, the `<Warmup … onReady>` gate). Measured split: the unlit layers alone are
-  ready ~720–910 ms after the canvas mounts (`/members`, no wordmark); with the wordmark it is
-  ~1120 ms.
+**L15, the split reveal, is now implemented** (`src/sections/SkyScene.tsx` `<Warmup>`,
+`src/sections/sky/warmup.ts` `openWordmarkGate`). The single gate used to hold `frameloop="never"`
+until *every* program was linked, including drei's transmission material — the slowest by far. Now:
 
-Nothing is blank in the meantime — the CSS gradient in the page's own first palette is painted
-from the first frame — but the 3D wordmark is the hero of the home page, so this is a visible
-trade, not a free win. Audit item **L15** (reveal the dome/stars/clouds as soon as their programs
-link, fade the wordmark in separately) would give roughly the second 700 ms back and is still
-open; it needs design sign-off because it changes the choreography of the reveal.
+1. the dome, the stars and the clouds link → the canvas starts drawing and fades in over 700 ms;
+2. the wordmark's transmission program (plus the PMREM programs its first compile needs) link →
+   the run switches on, right as that fade ends.
+
+That recovered **~700 ms on the sky and ~100–300 ms on the wordmark itself** (the five medians
+above span 1502–1731 ms and 2328–2569 ms across separate 3-run rounds, so read the ranges, not a
+single figure), measured same-machine.
+Two deliberate details:
+
+- The split only applies where the driver links off the main thread *and* draws on a GPU
+  (`canSplitReveal`, below). Everywhere else the canvas keeps waiting for the single gate.
+- PMREM stays inside the *sky* gate even though only the wordmark needs it. Dropping it was measured:
+  the sky then draws 247 ms sooner (1448 ms) but the wordmark lands 338 ms **later** (2739 ms),
+  because its link then polls against a running render loop. The wordmark is the hero, so it wins.
+
+**Where the split is switched off, and why.** Lighthouse runs Chrome headless, i.e. on
+SwiftShader, where every sky frame is rasterised on the CPU. SwiftShader *does* advertise
+`KHR_parallel_shader_compile`, so the extension check alone let the split through, and drawing the
+sky 0.7 s sooner moved one ~465 ms software frame inside the measured window: desktop **home and kk
+fell from 99 to 82** (TBT 0 → ~400 ms). It was not new work — the same frame happened in the old
+build 0.7 s later, after the trace had ended — but it is not a win either, because a software frame
+does not get cheaper by being drawn earlier. `canSplitReveal()` in `<Warmup>` therefore also rejects
+a software renderer (`swiftshader`, `llvmpipe`, `software rasteriz…`, `basic render`, `warp`), which restores
+desktop home to **100** and kk to **99** and leaves those machines with exactly the pre-L15
+behaviour. Phones are unaffected: they have a real GPU, and mobile scores are 91 / 93 / 77 / 68,
+within noise of 92 / 93 / 77 / 65.
+
+On a real GPU the split costs one 53–75 ms frame — total main-thread blocking 18 ms → ~42 ms —
+for ~0.7 s of hero. `verify-reveal-cold.mjs` reports `longtasks` and `blockingMs` alongside the
+milestones, so that stays measurable.
+
+The wordmark switches on in one frame rather than fading. `material.transparent` is part of three's
+program cache key (`#define OPAQUE` pins the fragment alpha to 1), so an opacity fade on the frosted
+material would either do nothing or link a second program on the main thread mid-reveal — the exact
+stall the gate exists to remove. The low tier's `MeshPhysicalMaterial` stand-in is already
+transparent, so there it does fade, over 500 ms.
 
 ## GPU buffer budget (the Intel Mac bug)
 
@@ -204,15 +238,13 @@ Notes for whoever runs these:
   script here passes `--host-resolver-rules=MAP qairuhub.com 188.114.97.1` so production runs work.
 - Lighthouse on Windows exits `1` with an `EPERM` while deleting its temp profile *after* the
   report has been written. The JSON is complete; ignore the exit code.
-- **Check the matrix before you believe it.** `wrangler pages dev` can die part-way through a
-  16-run matrix; Lighthouse then writes a report whose only content is
-  `runtimeError.code = "CHROME_INTERSTITIAL_ERROR"`. `run-lighthouse.mjs` skips any output file
-  that already exists, so a re-run will not replace it, and `summarize-lighthouse.mjs` folds it
-  into the medians as a 0. After a matrix, run:
-
-  ```sh
-  node -e "for(const p of['home','kk','members','handbook'])for(const f of['mobile','desktop'])for(const r of[1,2]){const n='perf/v3.1/lighthouse/'+p+'-'+f+'-<tag>-r'+r+'.json';const j=require('./'+n);if(j.runtimeError)console.log('BROKEN',n,j.runtimeError.code)}"
-  ```
-
-  and delete whatever it names before re-running.
+- **A crashed Lighthouse run can no longer poison the numbers.** `wrangler pages dev` can die
+  part-way through a 16-run matrix; Lighthouse then still writes a report whose only content is
+  `runtimeError.code = "CHROME_INTERSTITIAL_ERROR"` and a null score. That used to be kept (the
+  runner skipped any output path that already existed) and averaged into the medians as a 0 — a
+  home-mobile median of 45.5 for a build that actually scored 91. Both scripts now handle it:
+  `run-lighthouse.mjs` re-runs any report that carries a `runtimeError` or no performance score and
+  says `rerun (runtimeError …)`, and `summarize-lighthouse.mjs` prints `skipping failed run …` and
+  leaves it out of the median. A cell with no usable run comes out **empty**, never 0 — if a row is
+  blank, the matrix did not finish; re-run it rather than reading the blank as a result.
 - Kill the server when you are done (`npx wrangler pages dev` holds the port).
