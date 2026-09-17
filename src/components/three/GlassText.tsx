@@ -11,7 +11,9 @@ import { extrudeGlyphShapes } from './extrudeGlyphs'
  *
  *   - geometry: extruded glyph outlines (./extrudeGlyphs, three's ExtrudeGeometry with clamped
  *     inset bevels) with a ROUNDED bevel that turns every script stroke into a tube-like rounded
- *     bar, optionally pulled inside the outline (`offset`). Built once per (font, text, shape)
+ *     bar, optionally pulled inside the outline (`offset`). Indexed and position-only (every GPU
+ *     buffer stays under 512 KB — larger uploads came out corrupted on an Intel iMac), so both
+ *     materials run with `flatShading`, which draws the same per-face facets. Built once per (font, text, shape)
  *     and kept in a module-level cache, so a sculpture can mount/unmount for free (the
  *     transmission pass only exists while it is on screen). Disposed on full page unload only.
  *   - material: `frosted` = drei MeshTransmissionMaterial with blurred transmission (the matte
@@ -391,7 +393,12 @@ export default function GlassText({
   const light = backlight === false ? null : { ...GLASS_BACKLIGHT, ...backlight }
   return (
     <mesh ref={ref} geometry={geometry} {...mesh}>
-      {frosted ? <MeshTransmissionMaterial {...GLASS_MATERIAL} {...material} /> : <meshPhysicalMaterial {...GLASS_PHYSICAL} {...physical} />}
+      {/* flatShading is not a style choice: the geometry carries no normals (see ./extrudeGlyphs.ts). */}
+      {frosted ? (
+        <MeshTransmissionMaterial {...GLASS_MATERIAL} {...material} flatShading />
+      ) : (
+        <meshPhysicalMaterial {...GLASS_PHYSICAL} {...physical} flatShading />
+      )}
       {frosted && light && <TransmissionBacklight top={light.top} bottom={light.bottom} strength={light.strength} />}
     </mesh>
   )

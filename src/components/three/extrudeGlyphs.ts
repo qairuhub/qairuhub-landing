@@ -4,7 +4,7 @@ import * as THREE from 'three'
  * Extruded, bevelled glyph geometry that stays clean when the bevel is pulled INSIDE the outline.
  *
  * A port of three's ExtrudeGeometry (r186, MIT; straight extrusion only, one step, the same
- * vertex / face / UV layout and groups) with two changes for the thin v3 wordmark:
+ * vertex rings, faces, winding and groups) with three changes for the thin v3 wordmark:
  *
  *   1. Clamped contraction. three moves every outline vertex by `bs × m` where `m` is its bevel
  *      vector (≈ unit normal, capped at √2 in sharp corners). With a negative `bevelOffset` the
@@ -16,7 +16,19 @@ import * as THREE from 'three'
  *      unclamped, exactly like three.
  *   2. Sliver holes are dropped. Overlapping font contours can leave a tiny "hole" at a join
  *      (the q has one of 9 points at its stem); an inset bevel grows it into a visible notch.
+ *   3. Indexed, position-only output. three de-indexes every face and adds per-corner UVs and
+ *      normals: for "qairuhub" that was 176k vertices, i.e. a 2.1 MB position buffer, a 2.1 MB
+ *      normal buffer and a 1.4 MB UV buffer. Chrome uploads anything above its ~1 MB transfer
+ *      buffer in chunks, and on an Intel iMac (ANGLE-Metal) the data past the first chunk arrived
+ *      corrupted: "qair" rendered, "uhub" shattered (the 1 MiB mark falls 22 % into the first u).
+ *      The ring vertices are shared instead (≈ 29k vertices → a 352 KB position buffer and a
+ *      352 KB Uint16 index), the materials never sample a UV, and the per-face normals come
+ *      from `flatShading` in the fragment shader — the same facets the old per-corner normals
+ *      drew. Keep every buffer this module produces under `MAX_BUFFER_BYTES`.
  */
+
+/** Largest vertex / index buffer this module may hand to the GPU (see change 3 above). */
+export const MAX_BUFFER_BYTES = 512 * 1024
 
 export interface GlyphExtrudeOptions {
   /** extrusion depth between the two bevels */
@@ -156,8 +168,9 @@ function contractionLimits(rings: Vec[][], movements: Vec[][], maxContract: numb
   return limits
 }
 
-function addShape(shape: THREE.Shape, o: GlyphExtrudeOptions, geometry: THREE.BufferGeometry, positions: number[], uvs: number[]) {
-  const placeholder: number[] = []
+function addShape(shape: THREE.Shape, o: GlyphExtrudeOptions, geometry: THREE.BufferGeometry, positions: number[], indices: number[]) {
+  /** index of this shape's first vertex in the shared position list */
+  const base = positions.length / 3
   const { depth, bevelThickness, bevelSize, bevelOffset, bevelSegments } = o
   const steps = 1
 
@@ -199,7 +212,7 @@ function addShape(shape: THREE.Shape, o: GlyphExtrudeOptions, geometry: THREE.Bu
     return new THREE.Vector2(pt.x + vec.x * s, pt.y + vec.y * s)
   }
   const v = (x: number, y: number, z: number) => {
-    placeholder.push(x, y, z)
+    positions.push(x, y, z)
   }
 
   // Front bevel rings (the first one, t = 0, is the cap that gets triangulated).
@@ -257,38 +270,16 @@ function addShape(shape: THREE.Shape, o: GlyphExtrudeOptions, geometry: THREE.Bu
     }
   }
 
-  const addVertex = (index: number) => {
-    positions.push(placeholder[index * 3], placeholder[index * 3 + 1], placeholder[index * 3 + 2])
-  }
   const f3 = (a: number, b: number, c: number) => {
-    addVertex(a)
-    addVertex(b)
-    addVertex(c)
-    // WorldUVGenerator.generateTopUV: uv = (x, y)
-    const next = positions.length / 3
-    for (let k = next - 3; k < next; k++) uvs.push(positions[k * 3], positions[k * 3 + 1])
+    indices.push(base + a, base + b, base + c)
   }
+  // three splits the quad (a, b, c, d) into (a, b, d) + (b, c, d).
   const f4 = (a: number, b: number, c: number, d: number) => {
-    addVertex(a)
-    addVertex(b)
-    addVertex(d)
-    addVertex(b)
-    addVertex(c)
-    addVertex(d)
-    // WorldUVGenerator.generateSideWallUV on (a, b, c, d) = the vertices at next-6, next-3, next-2, next-1
-    const next = positions.length / 3
-    const ia = next - 6
-    const ib = next - 3
-    const ic = next - 2
-    const id = next - 1
-    const useX = Math.abs(positions[ia * 3 + 1] - positions[ib * 3 + 1]) < Math.abs(positions[ia * 3] - positions[ib * 3])
-    const uv = (index: number): [number, number] => [positions[index * 3 + (useX ? 0 : 1)], 1 - positions[index * 3 + 2]]
-    const [ua, ub, uc, ud] = [uv(ia), uv(ib), uv(ic), uv(id)]
-    uvs.push(...ua, ...ub, ...ud, ...ub, ...uc, ...ud)
+    indices.push(base + a, base + b, base + d, base + b, base + c, base + d)
   }
 
   // Lids.
-  let start = positions.length / 3
+  let start = indices.length
   if (bevelSegments > 0) {
     let offset = 0
     for (let i = 0; i < flen; i++) f3(faces[i][2] + offset, faces[i][1] + offset, faces[i][0] + offset)
@@ -298,10 +289,10 @@ function addShape(shape: THREE.Shape, o: GlyphExtrudeOptions, geometry: THREE.Bu
     for (let i = 0; i < flen; i++) f3(faces[i][2], faces[i][1], faces[i][0])
     for (let i = 0; i < flen; i++) f3(faces[i][0] + vlen * steps, faces[i][1] + vlen * steps, faces[i][2] + vlen * steps)
   }
-  geometry.addGroup(start, positions.length / 3 - start, 0)
+  geometry.addGroup(start, indices.length - start, 0)
 
   // Side walls.
-  start = positions.length / 3
+  start = indices.length
   const sidewalls = (ring: Vec[], layerOffset: number) => {
     for (let i = ring.length - 1; i >= 0; i--) {
       const j = i
@@ -320,17 +311,28 @@ function addShape(shape: THREE.Shape, o: GlyphExtrudeOptions, geometry: THREE.Bu
     sidewalls(hole, layerOffset)
     layerOffset += hole.length
   }
-  geometry.addGroup(start, positions.length / 3 - start, 1)
+  geometry.addGroup(start, indices.length - start, 1)
 }
 
-/** Extrudes `shapes` (e.g. `Font.generateShapes(text, size)`) into one non-indexed, flat-normal BufferGeometry. */
+/**
+ * Extrudes `shapes` (e.g. `Font.generateShapes(text, size)`) into one indexed, position-only
+ * BufferGeometry (no normals, no UVs: render it with a `flatShading` material). Throws if a
+ * buffer would exceed `MAX_BUFFER_BYTES`, so a longer text or a finer tessellation cannot quietly
+ * bring the Mac corruption back.
+ */
 export function extrudeGlyphShapes(shapes: THREE.Shape[], options: GlyphExtrudeOptions): THREE.BufferGeometry {
   const geometry = new THREE.BufferGeometry()
   const positions: number[] = []
-  const uvs: number[] = []
-  for (const shape of shapes) addShape(shape, options, geometry, positions, uvs)
-  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
-  geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2))
-  geometry.computeVertexNormals()
+  const indices: number[] = []
+  for (const shape of shapes) addShape(shape, options, geometry, positions, indices)
+  const position = new THREE.Float32BufferAttribute(positions, 3)
+  const vertexCount = positions.length / 3
+  const index = vertexCount > 65535 ? new THREE.Uint32BufferAttribute(indices, 1) : new THREE.Uint16BufferAttribute(indices, 1)
+  const largest = Math.max(position.array.byteLength, index.array.byteLength)
+  if (largest > MAX_BUFFER_BYTES) {
+    throw new Error(`extrudeGlyphShapes: ${largest} B buffer exceeds ${MAX_BUFFER_BYTES} B (${vertexCount} vertices, ${indices.length} indices); lower curveSegments / bevelSegments`)
+  }
+  geometry.setAttribute('position', position)
+  geometry.setIndex(index)
   return geometry
 }

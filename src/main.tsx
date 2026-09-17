@@ -5,6 +5,7 @@ import App from './App'
 import { LOCALE_STORAGE_KEY, parseRoute, type Locale } from './i18n/locale'
 import { RouteProvider } from './i18n/LocaleProvider'
 import meta from './i18n/meta.json'
+import { installDomGuard } from './lib/domGuard'
 
 function storedLocale(): Locale | null {
   try {
@@ -40,6 +41,8 @@ if (shouldRedirectToKk()) {
   // 404.html is served for every unknown path, so its head is EN; give /kk/* misses the KK title.
   if (route.page === 'notFound') document.title = meta.pages.notFound[route.locale].title
 
+  // Browser translators (Chrome → Russian on a Mac) move text nodes React still owns.
+  installDomGuard()
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
       <RouteProvider route={route}>

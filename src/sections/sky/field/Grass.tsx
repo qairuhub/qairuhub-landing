@@ -7,15 +7,23 @@ import { grassFragment, grassVertex } from './grassShaders'
 const TRANSMISSION_BLADE_DIVISOR = 4
 
 /**
- * The grass: one InstancedMesh of `count` tapered blades (PlaneGeometry 0.07 × 0.9, 1 × 4
+ * Blades per InstancedMesh. Each instance carries a mat4 (64 B), so 8000 keeps the instance
+ * matrix buffer at 512 KB — the per-buffer GPU budget (uploads above ~1 MB came out corrupted on
+ * an Intel iMac, see components/three/extrudeGlyphs.ts). The high tier's 14000 blades become two
+ * draws (8000 + 6000) instead of one 896 KB upload.
+ */
+const MAX_BLADES_PER_MESH = 8000
+
+/**
+ * The grass: `count` tapered blades in InstancedMesh chunks of ≤ MAX_BLADES_PER_MESH (PlaneGeometry 0.07 × 0.9, 1 × 4
  * segments, tapered through the vertex positions) placed on the hill surface — denser toward the
  * camera, random yaw, height 0.6–1.3 (× FIELD.bladeScale), per-instance tint (darker in the
  * valley and right in front of the lens). Wind, moonlight and the distance fade live in the
- * ShaderMaterial (grassShaders.ts). One draw call per pass; the glass transmission FBO pass draws
- * only a quarter of the instances (see onBeforeRender below).
+ * ShaderMaterial (grassShaders.ts). One draw call per chunk per pass; the glass transmission FBO
+ * pass draws only a quarter of each chunk's instances (see onBeforeRender below).
  */
 export default function Grass({ count, uniforms }: { count: number; uniforms: FieldUniforms }) {
-  const mesh = useMemo(() => {
+  const field = useMemo(() => {
     const geometry = new THREE.PlaneGeometry(0.07, 0.9, 1, 4)
     geometry.translate(0, 0.45, 0) // base at y = 0
     {
@@ -44,22 +52,26 @@ export default function Grass({ count, uniforms }: { count: number; uniforms: Fi
       side: THREE.DoubleSide,
     })
 
-    const m = new THREE.InstancedMesh(geometry, material, count)
-
     // The frosted wordmark's transmission pass (drei MeshTransmissionMaterial) re-renders the
     // whole scene into a small FBO that roughness 0.5 then blurs beyond recognition, so the
     // footer frame was two full field renders (~48k double-sided blade triangles each). The
     // main pass renders to the default framebuffer (null); any other target is that FBO, where
     // a quarter of the blades reads identically after the blur. Instances are placed in random
-    // order (z, x and tint all come from the rng per index), so the first quarter is a uniform
-    // random subset of the field, not a spatial band. Bakes (nebula, cloud atlas) render their
-    // own private scenes and never see this mesh.
-    const fboCount = Math.ceil(count / TRANSMISSION_BLADE_DIVISOR)
-    m.onBeforeRender = (renderer) => {
-      if (renderer.getRenderTarget() !== null) m.count = fboCount
-    }
-    m.onAfterRender = () => {
-      m.count = count
+    // order (z, x and tint all come from the rng per index), so the first quarter of every chunk
+    // is a uniform random subset of the field, not a spatial band. Bakes (nebula, cloud atlas)
+    // render their own private scenes and never see these meshes.
+    const meshes: THREE.InstancedMesh[] = []
+    for (let first = 0; first < count; first += MAX_BLADES_PER_MESH) {
+      const n = Math.min(MAX_BLADES_PER_MESH, count - first)
+      const chunk = new THREE.InstancedMesh(geometry, material, n)
+      const fboCount = Math.ceil(n / TRANSMISSION_BLADE_DIVISOR)
+      chunk.onBeforeRender = (renderer) => {
+        if (renderer.getRenderTarget() !== null) chunk.count = fboCount
+      }
+      chunk.onAfterRender = () => {
+        chunk.count = n
+      }
+      meshes.push(chunk)
     }
 
     const rng = createRng(4242 + count)
@@ -93,28 +105,34 @@ export default function Grass({ count, uniforms }: { count: number; uniforms: Fi
       const ws = (0.8 + rng() * 0.5) * (1 + 0.6 * THREE.MathUtils.clamp((2 - z) / 18, 0, 1))
       scale.set(ws * FIELD.bladeScale, hs * FIELD.bladeScale, ws * FIELD.bladeScale)
       matrix.compose(position, quaternion, scale)
-      m.setMatrixAt(i, matrix)
+      const m = meshes[Math.floor(i / MAX_BLADES_PER_MESH)]
+      const j = i % MAX_BLADES_PER_MESH
+      m.setMatrixAt(j, matrix)
 
       const lift = THREE.MathUtils.smoothstep(hillProfile(x), 0.1, 1.5)
       const near = THREE.MathUtils.smoothstep(z, 4, FIELD.grassNear)
       const l = (0.72 + 0.28 * lift) * (1 - 0.25 * near) * (0.85 + rng() * 0.25)
       color.setRGB(l, l * (0.97 + rng() * 0.06), l)
-      m.setColorAt(i, color)
+      m.setColorAt(j, color)
     }
-    m.instanceMatrix.needsUpdate = true
-    if (m.instanceColor) m.instanceColor.needsUpdate = true
-    m.computeBoundingSphere()
-    return m
+    const group = new THREE.Group()
+    for (const m of meshes) {
+      m.instanceMatrix.needsUpdate = true
+      if (m.instanceColor) m.instanceColor.needsUpdate = true
+      m.computeBoundingSphere()
+      group.add(m)
+    }
+    return { group, meshes, geometry, material }
   }, [count, uniforms])
 
   useEffect(
     () => () => {
-      mesh.geometry.dispose()
-      ;(mesh.material as THREE.Material).dispose()
-      mesh.dispose()
+      field.geometry.dispose()
+      field.material.dispose()
+      for (const m of field.meshes) m.dispose()
     },
-    [mesh],
+    [field],
   )
 
-  return <primitive object={mesh} />
+  return <primitive object={field.group} />
 }
