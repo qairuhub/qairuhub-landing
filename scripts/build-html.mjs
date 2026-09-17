@@ -28,6 +28,8 @@ import { fileURLToPath } from 'node:url'
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const dist = resolve(root, 'dist')
 const SITE_ORIGIN = (process.env.SITE_ORIGIN || 'https://qairuhub.com').replace(/\/+$/, '')
+/** Google Search Console "HTML tag" token (the content="…" value), optional. */
+const GOOGLE_SITE_VERIFICATION = (process.env.GOOGLE_SITE_VERIFICATION || '').trim()
 
 const HEAD_START = '<!--qh:head:start-->'
 const HEAD_END = '<!--qh:head:end-->'
@@ -126,6 +128,40 @@ function headBlock({ page, locale }) {
   lines.push(`<meta property="og:locale:alternate" content="${esc(meta.ogLocale[other])}" />`)
   lines.push(`<meta name="twitter:card" content="summary" />`)
 
+  // Search Console ownership proof, only when the token is provided at build time.
+  if (GOOGLE_SITE_VERIFICATION) {
+    lines.push(`<meta name="google-site-verification" content="${esc(GOOGLE_SITE_VERIFICATION)}" />`)
+  }
+
+  // Organization + WebSite structured data on the home pages: gives search engines the name,
+  // logo and social profiles to show in a knowledge panel / sitelinks.
+  if (page === 'home') {
+    const graph = {
+      '@context': 'https://schema.org',
+      '@graph': [
+        {
+          '@type': 'Organization',
+          '@id': `${SITE_ORIGIN}/#organization`,
+          name: meta.siteName,
+          url: `${SITE_ORIGIN}/`,
+          logo: `${SITE_ORIGIN}${meta.logo}`,
+          description: entry.description,
+          sameAs: meta.sameAs,
+        },
+        {
+          '@type': 'WebSite',
+          '@id': `${SITE_ORIGIN}/#website`,
+          name: meta.siteName,
+          url: `${SITE_ORIGIN}/`,
+          inLanguage: ['en', 'kk'],
+          publisher: { '@id': `${SITE_ORIGIN}/#organization` },
+        },
+      ],
+    }
+    // `<` never appears raw inside a script element, whatever the JSON holds.
+    lines.push(`<script type="application/ld+json">${JSON.stringify(graph).replace(/</g, '\\u003c')}</script>`)
+  }
+
   for (const href of preloadsFor(page, locale)) {
     // The 3D wordmark reads its TTF with fetch() (src/lib/ttf.ts), not through @font-face: a
     // font-typed preload would never be consumed (unused-preload warning + a second request).
@@ -173,3 +209,29 @@ for (const { route, html } of outputs) {
   console.log(`build-html: dist/${route.out}  (${route.page} · ${route.locale})`)
 }
 for (const href of missingFonts) console.warn(`build-html: preload ${href} not found in dist, skipped.`)
+
+/* ------------------------------------------------------------------ sitemap.xml */
+// One <url> per indexable route with its hreflang alternates. lastmod is the build day: the
+// site is rebuilt on every content change, so the build date is the honest "last modified".
+const lastmod = new Date().toISOString().slice(0, 10)
+const indexable = ROUTES.filter(({ page, locale }) => meta.pages[page][locale].path)
+const sitemap = [
+  '<?xml version="1.0" encoding="UTF-8"?>',
+  '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">',
+  ...indexable.map(({ page, locale }) => {
+    const url = (loc) => `${SITE_ORIGIN}${meta.pages[page][loc].path}`
+    return [
+      '  <url>',
+      `    <loc>${esc(url(locale))}</loc>`,
+      `    <lastmod>${lastmod}</lastmod>`,
+      `    <xhtml:link rel="alternate" hreflang="en" href="${esc(url('en'))}" />`,
+      `    <xhtml:link rel="alternate" hreflang="kk" href="${esc(url('kk'))}" />`,
+      `    <xhtml:link rel="alternate" hreflang="x-default" href="${esc(url('en'))}" />`,
+      '  </url>',
+    ].join('\n')
+  }),
+  '</urlset>',
+  '',
+].join('\n')
+writeFileSync(resolve(dist, 'sitemap.xml'), sitemap)
+console.log(`build-html: dist/sitemap.xml  (${indexable.length} urls)`)

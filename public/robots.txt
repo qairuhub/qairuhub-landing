@@ -1,0 +1,6 @@
+# qairuhub.com — everything public is crawlable; the API is not a page.
+User-agent: *
+Allow: /
+Disallow: /api/
+
+Sitemap: https://qairuhub.com/sitemap.xml

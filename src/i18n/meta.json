@@ -1,6 +1,8 @@
 {
   "siteName": "QairuHub",
   "ogLocale": { "en": "en_US", "kk": "kk_KZ" },
+  "logo": "/favicon.svg",
+  "sameAs": ["https://instagram.com/qairuhub", "https://t.me/qairuhub", "https://github.com/qairuhub"],
   "pages": {
     "home": {
       "en": {
