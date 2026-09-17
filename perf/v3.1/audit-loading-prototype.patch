@@ -1,0 +1,1318 @@
+diff --git a/scripts/build-html.mjs b/scripts/build-html.mjs
+index f5405e6..70a3398 100644
+--- a/scripts/build-html.mjs
++++ b/scripts/build-html.mjs
+@@ -59,7 +59,7 @@ function loadPreloads() {
+     return FALLBACK_PRELOADS
+   }
+   const json = JSON.parse(readFileSync(file, 'utf8'))
+-  return { common: json.common ?? [], home: json.home ?? [], kk: json.kk ?? [] }
++  return { common: json.common ?? [], home: json.home ?? [], pages: json.pages ?? {}, kk: json.kk ?? [] }
+ }
+ 
+ const preloads = loadPreloads()
+@@ -78,6 +78,7 @@ function fontType(href) {
+ function preloadsFor(page, locale) {
+   const list = [...preloads.common]
+   if (page === 'home') list.push(...preloads.home)
++  list.push(...(preloads.pages?.[page] ?? []))
+   if (locale === 'kk') list.push(...preloads.kk)
+   return [...new Set(list)].filter((href) => {
+     const onDisk = existsSync(resolve(dist, href.replace(/^\/+/, '')))
+diff --git a/src/App.tsx b/src/App.tsx
+index 8f1da71..d80b2fd 100644
+--- a/src/App.tsx
++++ b/src/App.tsx
+@@ -1,7 +1,8 @@
+-import { Suspense, lazy, useEffect, type CSSProperties } from 'react'
++import { Suspense, lazy, useEffect, useState, type CSSProperties } from 'react'
+ import { SmoothScroll } from './lib/SmoothScroll'
++import { afterFirstContentfulPaint, onFirstIntent, postTask, type TaskPriority } from './lib/schedule'
+ import { useRoute } from './i18n/LocaleProvider'
+-import { FALLBACK_GRADIENT } from './sections/sky/fallback'
++import { fallbackGradientFor, presetForPage } from './sections/sky/fallback'
+ import { sectionIds } from './i18n/shared'
+ import Header from './sections/Header'
+ import Hero from './sections/Hero'
+@@ -62,12 +63,86 @@ function useWarmHomeChunks() {
+   }, [])
+ }
+ 
+-const SPACE_FALLBACK: CSSProperties = {
+-  position: 'fixed',
+-  inset: 0,
+-  zIndex: 0,
+-  pointerEvents: 'none',
+-  background: FALLBACK_GRADIENT,
++/** The sky placeholder in the page's own first palette (night on /members and /handbook). */
++function skyFallback(page: string): CSSProperties {
++  return {
++    position: 'fixed',
++    inset: 0,
++    zIndex: 0,
++    pointerEvents: 'none',
++    background: fallbackGradientFor(presetForPage(page) ?? 'space'),
++  }
++}
++
++/**
++ * First paint = header + hero only; the sections below the fold mount in a few batches, one task
++ * each, right after that paint (audit-loading L3). A deep link or a reload / back-forward (scroll
++ * restoration) renders everything at once, so the target position exists immediately.
++ */
++function renderAllAtOnce(): boolean {
++  if (window.location.hash && window.location.hash !== '#') return true
++  const nav = performance.getEntriesByType?.('navigation')[0] as PerformanceNavigationTiming | undefined
++  return (nav?.type ?? 'navigate') !== 'navigate'
++}
++
++function useStagedMount(total: number): number {
++  const [stage, setStage] = useState(() => (renderAllAtOnce() ? total : 0))
++  // Background until the reader shows intent to move; then the rest mounts ahead of the sky.
++  const [priority, setPriority] = useState<TaskPriority>('background')
++  useEffect(() => onFirstIntent(() => setPriority('user-blocking')), [])
++  useEffect(() => {
++    if (stage >= total) return
++    let done = false
++    const go = () => {
++      if (done) return
++      done = true
++      setStage((s) => s + 1)
++    }
++    const cancel = stage === 0 ? afterFirstContentfulPaint(go, priority) : postTask(go, priority)
++    // Hidden tabs get no frames: never wait more than a second per batch.
++    const timer = window.setTimeout(go, stage === 0 ? 4000 : 1000)
++    return () => {
++      done = true
++      cancel()
++      window.clearTimeout(timer)
++    }
++  }, [stage, total, priority])
++  return stage
++}
++
++/**
++ * The sky chunk (three + r3f, ~260 KB) is requested only after the first frame has been painted:
++ * before that it would compete with the critical CSS / JS / Inter on a slow link, and Lighthouse
++ * counts every request started before the LCP paint as an LCP dependency. The wordmark TTF
++ * starts downloading at the same moment (its own small chunk) on the home page.
++ */
++function useAfterFirstPaint(page: string): boolean {
++  const [ready, setReady] = useState(false)
++  useEffect(() => {
++    const start = () => {
++      setReady(true)
++      if (page === 'home') void import('./sections/sky/wordmarkFont').then((m) => m.preloadWordmarkFont())
++    }
++    if (page === 'home') {
++      // Home: the sky IS the hero, request it right after the first paint.
++      return afterFirstContentfulPaint(start, 'user-visible')
++    }
++    // Sub-pages: a static backdrop; wait until the page content has loaded and painted.
++    let idle = 0
++    let timer = 0
++    const later = () => {
++      if (typeof window.requestIdleCallback === 'function') idle = window.requestIdleCallback(start, { timeout: 1500 })
++      else timer = window.setTimeout(start, 300)
++    }
++    if (document.readyState === 'complete') later()
++    else window.addEventListener('load', later, { once: true })
++    return () => {
++      window.removeEventListener('load', later)
++      if (idle) window.cancelIdleCallback(idle)
++      window.clearTimeout(timer)
++    }
++  }, [page])
++  return ready
+ }
+ 
+ /** Keeps the footer below the fold while a sub-page chunk loads (no footer flash at the top). */
+@@ -75,25 +150,44 @@ const PAGE_FALLBACK: CSSProperties = { minHeight: '100lvh' }
+ 
+ function HomeSections() {
+   useWarmHomeChunks()
++  const stage = useStagedMount(8)
+   return (
+     <>
+       <Hero />
+-      <AgenticCards />
+-      <Logos />
+-      <Waitlist />
+-      <Supersize />
+-      <Suspense fallback={<section id={sectionIds.platform} style={PLATFORM_FALLBACK} />}>
+-        <ProductDemo />
+-      </Suspense>
+-      <Features />
+-      <Projects />
+-      <News />
+-      <ModelsCTA />
+-      <Integrations />
+-      <Storytelling />
+-      <Suspense fallback={<section id="join" style={JOIN_FALLBACK} />}>
+-        <DemoForm />
+-      </Suspense>
++      {stage >= 1 && <AgenticCards />}
++      {stage >= 2 && (
++        <>
++          <Logos />
++          <Waitlist />
++        </>
++      )}
++      {stage >= 3 && <Supersize />}
++      {stage >= 4 && (
++        <Suspense fallback={<section id={sectionIds.platform} style={PLATFORM_FALLBACK} />}>
++          <ProductDemo />
++        </Suspense>
++      )}
++      {stage >= 5 && <Features />}
++      {stage >= 6 && (
++        <>
++          <Projects />
++          <News />
++        </>
++      )}
++      {stage >= 7 && (
++        <>
++          <ModelsCTA />
++          <Integrations />
++        </>
++      )}
++      {stage >= 8 && (
++        <>
++          <Storytelling />
++          <Suspense fallback={<section id="join" style={JOIN_FALLBACK} />}>
++            <DemoForm />
++          </Suspense>
++        </>
++      )}
+     </>
+   )
+ }
+@@ -107,12 +201,13 @@ function HomeSections() {
+  */
+ export default function App() {
+   const { page } = useRoute()
++  const skyOn = useAfterFirstPaint(page)
+ 
+   return (
+     <SmoothScroll>
+       {/* Fixed full-viewport WebGL backdrop. z-0, lazy. SkyScene reads the route itself. */}
+-      <Suspense fallback={<div aria-hidden="true" style={SPACE_FALLBACK} />}>
+-        <SkyScene />
++      <Suspense fallback={<div aria-hidden="true" style={skyFallback(page)} />}>
++        {skyOn ? <SkyScene /> : <div aria-hidden="true" style={skyFallback(page)} />}
+       </Suspense>
+       {/* Fixed 72px header. z-100 */}
+       <Header />
+diff --git a/src/assistant/AskBar.tsx b/src/assistant/AskBar.tsx
+index 5363f59..1ec01d9 100644
+--- a/src/assistant/AskBar.tsx
++++ b/src/assistant/AskBar.tsx
+@@ -4,7 +4,6 @@ import {
+   lazy,
+   useCallback,
+   useEffect,
+-  useLayoutEffect,
+   useRef,
+   useState,
+   type CSSProperties,
+@@ -60,7 +59,8 @@ function Typewriter({
+   const textRef = useRef<HTMLSpanElement | null>(null)
+   const n = prompts.length
+ 
+-  useLayoutEffect(() => {
++  // Passive: measured after the paint, never as a forced layout inside the page's first commit.
++  useEffect(() => {
+     const el = textRef.current
+     if (el) setWidth(el.offsetWidth)
+   }, [idx, prompts])
+diff --git a/src/components/three/GlassText.tsx b/src/components/three/GlassText.tsx
+index 5c95d94..2031c29 100644
+--- a/src/components/three/GlassText.tsx
++++ b/src/components/three/GlassText.tsx
+@@ -4,7 +4,7 @@ import { MeshTransmissionMaterial, type MeshTransmissionMaterialProps } from '@r
+ import * as THREE from 'three'
+ import { Font } from 'three/examples/jsm/loaders/FontLoader.js'
+ import type { TypefaceData } from '../../lib/ttf'
+-import { extrudeGlyphShapes } from './extrudeGlyphs'
++import { extrudeGlyphShapes, extrudeGlyphShapesAsync } from './extrudeGlyphs'
+ 
+ /**
+  * The one frosted-glass lettering recipe (docs/JOURNEY-SPEC.md "Frosted glass wordmark").
+@@ -292,52 +292,86 @@ function disposeAll() {
+   geometries.clear()
+ }
+ 
+-/**
+- * Extruded + rounded-bevel glyph run, centred on the origin (bounding box and sphere computed).
+- * Cached per font file (`familyName` is the TTF's file name, see lib/ttf.ts), text and shape
+- * parameters; the same instance is handed to every mount, so never dispose it yourself.
+- */
+-export function getGlassGeometry(font: TypefaceData, text: string, opts: GlassGeometryOptions = {}): THREE.BufferGeometry {
++function glassKey(font: TypefaceData, text: string, opts: GlassGeometryOptions) {
+   const size = opts.size ?? 1
+   const height = opts.height ?? GLASS_HEIGHT * size
+   const curveSegments = opts.curveSegments ?? GLASS_CURVE_SEGMENTS
+   const bevel: GlassTextBevel = { ...GLASS_BEVEL, ...opts.bevel }
+   const bevelOffset = bevel.offset ?? 0
+   const key = [font.familyName, text, size, height, curveSegments, bevel.thickness, bevel.size, bevelOffset, bevel.segments].join('|')
+-  let geometry = geometries.get(key)
+-  if (!geometry) {
+-    let typeface = fonts.get(font)
+-    if (!typeface) {
+-      typeface = new Font(font)
+-      fonts.set(font, typeface)
+-    }
+-    // Same shapes and parameters as three's TextGeometry; the extruder clamps an inset bevel so
+-    // thin tails collapse to a hairline instead of folding (see extrudeGlyphs.ts).
+-    geometry = extrudeGlyphShapes(typeface.generateShapes(text, size), {
+-      depth: height,
+-      curveSegments,
+-      bevelThickness: bevel.thickness * size,
+-      bevelSize: bevel.size * size,
+-      bevelOffset: bevelOffset * size,
+-      bevelSegments: bevel.segments,
+-      minHoleArea: MIN_HOLE_AREA * size * size,
+-    })
+-    // Centre from the BEVELLED bounds (the bevel swells the outline), so the visual centre of the
+-    // run is the origin whatever the viewport does — the fit is then pure scale.
+-    geometry.computeBoundingBox()
+-    const bb = geometry.boundingBox
+-    if (bb) geometry.translate(-(bb.min.x + bb.max.x) / 2, -(bb.min.y + bb.max.y) / 2, -(bb.min.z + bb.max.z) / 2)
+-    geometry.computeBoundingBox()
+-    geometry.computeBoundingSphere()
+-    geometries.set(key, geometry)
+-    if (!unloadHooked && typeof window !== 'undefined') {
+-      unloadHooked = true
+-      window.addEventListener('pagehide', disposeAll, { once: true })
+-    }
++  const extrude = {
++    depth: height,
++    curveSegments,
++    bevelThickness: bevel.thickness * size,
++    bevelSize: bevel.size * size,
++    bevelOffset: bevelOffset * size,
++    bevelSegments: bevel.segments,
++    minHoleArea: MIN_HOLE_AREA * size * size,
++  }
++  return { key, size, extrude }
++}
++
++function shapesOf(font: TypefaceData, text: string, size: number) {
++  let typeface = fonts.get(font)
++  if (!typeface) {
++    typeface = new Font(font)
++    fonts.set(font, typeface)
++  }
++  return typeface.generateShapes(text, size)
++}
++
++function store(key: string, geometry: THREE.BufferGeometry) {
++  // Centre from the BEVELLED bounds (the bevel swells the outline), so the visual centre of the
++  // run is the origin whatever the viewport does: the fit is then pure scale.
++  geometry.computeBoundingBox()
++  const bb = geometry.boundingBox
++  if (bb) geometry.translate(-(bb.min.x + bb.max.x) / 2, -(bb.min.y + bb.max.y) / 2, -(bb.min.z + bb.max.z) / 2)
++  geometry.computeBoundingBox()
++  geometry.computeBoundingSphere()
++  geometries.set(key, geometry)
++  if (!unloadHooked && typeof window !== 'undefined') {
++    unloadHooked = true
++    window.addEventListener('pagehide', disposeAll, { once: true })
+   }
+   return geometry
+ }
+ 
++/**
++ * Extruded + rounded-bevel glyph run, centred on the origin (bounding box and sphere computed).
++ * Cached per font file (`familyName` is the TTF's file name, see lib/ttf.ts), text and shape
++ * parameters; the same instance is handed to every mount, so never dispose it yourself.
++ */
++export function getGlassGeometry(font: TypefaceData, text: string, opts: GlassGeometryOptions = {}): THREE.BufferGeometry {
++  const { key, size, extrude } = glassKey(font, text, opts)
++  const cached = geometries.get(key)
++  if (cached) return cached
++  // Same shapes and parameters as three's TextGeometry; the extruder clamps an inset bevel so
++  // thin tails collapse to a hairline instead of folding (see extrudeGlyphs.ts).
++  return store(key, extrudeGlyphShapes(shapesOf(font, text, size), extrude))
++}
++
++const building = new Map<string, Promise<void>>()
++
++/**
++ * Builds the same geometry as `getGlassGeometry` one glyph per task and caches it, so the render
++ * that follows (`getGlassGeometry`) is a cache hit. Idempotent.
++ */
++export function prebuildGlassGeometry(font: TypefaceData, text: string, opts: GlassGeometryOptions, yieldTask: () => Promise<void>): Promise<void> {
++  const { key, size, extrude } = glassKey(font, text, opts)
++  if (geometries.has(key)) return Promise.resolve()
++  let p = building.get(key)
++  if (!p) {
++    p = (async () => {
++      await yieldTask()
++      const shapes = shapesOf(font, text, size)
++      await yieldTask()
++      store(key, await extrudeGlyphShapesAsync(shapes, extrude, yieldTask))
++    })()
++    building.set(key, p)
++  }
++  return p
++}
++
+ /* ------------------------------------------------------------------ component */
+ 
+ export interface GlassTextProps extends Omit<ThreeElements['mesh'], 'ref' | 'children' | 'material' | 'geometry' | 'args'> {
+diff --git a/src/components/three/extrudeGlyphs.ts b/src/components/three/extrudeGlyphs.ts
+index e4b6338..47eb72c 100644
+--- a/src/components/three/extrudeGlyphs.ts
++++ b/src/components/three/extrudeGlyphs.ts
+@@ -325,12 +325,36 @@ export function extrudeGlyphShapes(shapes: THREE.Shape[], options: GlyphExtrudeO
+   const positions: number[] = []
+   const indices: number[] = []
+   for (const shape of shapes) addShape(shape, options, geometry, positions, indices)
++  return finish(geometry, positions, indices)
++}
++
++/**
++ * Same output as `extrudeGlyphShapes` (identical vertex / index order and groups), one shape per
++ * task: `yieldTask` is awaited between glyphs so no single task carries the whole run
++ * (about 25 ms per glyph on a 4x-throttled phone instead of one 200 ms task).
++ */
++export async function extrudeGlyphShapesAsync(
++  shapes: THREE.Shape[],
++  options: GlyphExtrudeOptions,
++  yieldTask: () => Promise<void>,
++): Promise<THREE.BufferGeometry> {
++  const geometry = new THREE.BufferGeometry()
++  const positions: number[] = []
++  const indices: number[] = []
++  for (const shape of shapes) {
++    addShape(shape, options, geometry, positions, indices)
++    await yieldTask()
++  }
++  return finish(geometry, positions, indices)
++}
++
++function finish(geometry: THREE.BufferGeometry, positions: number[], indices: number[]): THREE.BufferGeometry {
+   const position = new THREE.Float32BufferAttribute(positions, 3)
+   const vertexCount = positions.length / 3
+   const index = vertexCount > 65535 ? new THREE.Uint32BufferAttribute(indices, 1) : new THREE.Uint16BufferAttribute(indices, 1)
+   const largest = Math.max(position.array.byteLength, index.array.byteLength)
+   if (largest > MAX_BUFFER_BYTES) {
+-    throw new Error(`extrudeGlyphShapes: ${largest} B buffer exceeds ${MAX_BUFFER_BYTES} B (${vertexCount} vertices, ${indices.length} indices); lower curveSegments / bevelSegments`)
++    throw new Error('extrudeGlyphShapes: ' + largest + ' B buffer exceeds ' + MAX_BUFFER_BYTES + ' B; lower curveSegments / bevelSegments')
+   }
+   geometry.setAttribute('position', position)
+   geometry.setIndex(index)
+diff --git a/src/lib/schedule.ts b/src/lib/schedule.ts
+new file mode 100644
+index 0000000..e297f74
+--- /dev/null
++++ b/src/lib/schedule.ts
+@@ -0,0 +1,97 @@
++/**
++ * Task scheduling helpers for the load sequence (audit-loading L3/L4).
++ * `postTask` uses the Prioritized Task Scheduling API where it exists (Chromium) so below-the-fold
++ * section batches (`background`) never delay the sky's user-visible work; elsewhere it degrades
++ * to a macrotask.
++ */
++export type TaskPriority = 'user-blocking' | 'user-visible' | 'background'
++
++interface SchedulerLike {
++  postTask?: (cb: () => void, opts?: { priority?: TaskPriority; signal?: AbortSignal }) => Promise<unknown>
++}
++
++export function postTask(cb: () => void, priority: TaskPriority): () => void {
++  const s = (globalThis as { scheduler?: SchedulerLike }).scheduler
++  if (s?.postTask) {
++    const ctrl = new AbortController()
++    s.postTask(cb, { priority, signal: ctrl.signal }).catch(() => {})
++    return () => ctrl.abort()
++  }
++  const id = window.setTimeout(cb, priority === 'background' ? 16 : 0)
++  return () => window.clearTimeout(id)
++}
++
++/**
++ * Runs `cb` in a new task after the next frame has been presented. A hidden or occluded window gets
++ * no animation frames, so a timer (`maxWaitMs`) fires it anyway.
++ */
++export function afterNextPaint(cb: () => void, priority: TaskPriority = 'user-visible', maxWaitMs = 300): () => void {
++  let fired = false
++  let cancel = () => {}
++  const fire = () => {
++    if (fired) return
++    fired = true
++    cancelAnimationFrame(raf)
++    window.clearTimeout(timer)
++    cancel = postTask(cb, priority)
++  }
++  const raf = requestAnimationFrame(fire)
++  const timer = window.setTimeout(fire, maxWaitMs)
++  return () => {
++    fired = true
++    cancelAnimationFrame(raf)
++    window.clearTimeout(timer)
++    cancel()
++  }
++}
++
++/** First sign the reader wants to move (scroll / touch / key). */
++export function onFirstIntent(cb: () => void): () => void {
++  const events = ['wheel', 'touchstart', 'keydown', 'pointerdown', 'scroll'] as const
++  let done = false
++  const fire = () => {
++    if (done) return
++    done = true
++    off()
++    cb()
++  }
++  const off = () => events.forEach((e) => window.removeEventListener(e, fire, true))
++  events.forEach((e) => window.addEventListener(e, fire, { capture: true, passive: true }))
++  return off
++}
++
++/**
++ * After the first contentful paint (text painted with its web font or the fallback), then one more
++ * frame. Requests started before that paint count as LCP dependencies (Lighthouse) and compete with
++ * the critical path on a slow link; `timeoutMs` covers browsers without paint timing.
++ */
++export function afterFirstContentfulPaint(cb: () => void, priority: TaskPriority = 'user-visible', timeoutMs = 3000): () => void {
++  let done = false
++  let cancel = () => {}
++  let observer: PerformanceObserver | null = null
++  const go = () => {
++    if (done) return
++    done = true
++    observer?.disconnect()
++    window.clearTimeout(timer)
++    cancel = afterNextPaint(cb, priority)
++  }
++  const timer = window.setTimeout(go, timeoutMs)
++  try {
++    if (performance.getEntriesByName('first-contentful-paint').length > 0) go()
++    else {
++      observer = new PerformanceObserver((list) => {
++        if (list.getEntriesByName('first-contentful-paint').length > 0) go()
++      })
++      observer.observe({ type: 'paint', buffered: true })
++    }
++  } catch {
++    go()
++  }
++  return () => {
++    done = true
++    observer?.disconnect()
++    window.clearTimeout(timer)
++    cancel()
++  }
++}
+diff --git a/src/lib/ttf.ts b/src/lib/ttf.ts
+index bcf671d..803432c 100644
+--- a/src/lib/ttf.ts
++++ b/src/lib/ttf.ts
+@@ -424,6 +424,15 @@ function resource(urls: readonly string[], chars: string): Resource {
+   return res
+ }
+ 
++/** The parsed font as a promise (same cache as `useTTFFont`); rejects if every candidate failed. */
++export function loadTTFFont(url: string | readonly string[], chars: string): Promise<TypefaceData> {
++  const res = resource(typeof url === 'string' ? [url] : url, chars)
++  return res.promise.then(() => {
++    if (res.status === 'error') throw res.error
++    return res.value as TypefaceData
++  })
++}
++
+ /** Start the download early (e.g. at module evaluation) so the first render does not wait on the network. */
+ export function preloadTTFFont(url: string | readonly string[], chars: string): void {
+   if (typeof fetch !== 'function') return
+diff --git a/src/sections/ProductDemo.tsx b/src/sections/ProductDemo.tsx
+index 8cf119c..401582e 100644
+--- a/src/sections/ProductDemo.tsx
++++ b/src/sections/ProductDemo.tsx
+@@ -416,9 +416,10 @@ export default function ProductDemo() {
+   }, [active])
+ 
+   useLayoutEffect(() => {
+-    measure()
+     const bar = tabbarRef.current
+     if (!bar) return
++    // The observer's first callback runs after the next layout and before paint: no forced
++    // synchronous layout of the whole page inside this commit.
+     const ro = new ResizeObserver(measure)
+     ro.observe(bar)
+     return () => ro.disconnect()
+diff --git a/src/sections/SkyScene.tsx b/src/sections/SkyScene.tsx
+index 6eedfda..0ebd5b2 100644
+--- a/src/sections/SkyScene.tsx
++++ b/src/sections/SkyScene.tsx
+@@ -1,19 +1,20 @@
+-import { Component, Suspense, useEffect, useLayoutEffect, useState, type ReactNode } from 'react'
++import { Component, Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+ import { Canvas, useFrame, useThree } from '@react-three/fiber'
++import * as THREE from 'three'
+ import { getConsoleFunction, setConsoleFunction } from 'three'
+ import { onScroll } from '../lib/scroll'
+ import { useDocumentVisible, useReducedMotion } from '../lib/media'
+ import { useRoute } from '../i18n/LocaleProvider'
+-import type { Page } from '../i18n/locale'
+ import { PALETTE, journey, setStaticJourney, updateJourney } from './sky/journey'
+-import { fallbackGradientFor } from './sky/fallback'
++import { fallbackGradientFor, presetForPage as presetFor, type StaticPreset } from './sky/fallback'
+ import { detectQuality, getAntialias, getDpr, type QualityTier } from './sky/quality'
+ import { attachPointer, stepPointer } from './sky/pointer'
+ import SkyDome from './sky/SkyDome'
+ import Stars from './sky/Stars'
+ import SceneLights from './sky/SceneLights'
+-import CloudSprites from './sky/CloudSprites'
+-import GlassWordmark, { preloadGlassWordmark } from './sky/GlassWordmark'
++import CloudSprites, { allowCloudBake } from './sky/CloudSprites'
++import GlassWordmark, { GLASS_WORDMARK_NAME, GlassWordmarkFailed, glassWordmarkSettled, preloadGlassWordmark } from './sky/GlassWordmark'
++import { compileTracked, delay, listWarmers, nextTask, warmPMREM, whenLinked } from './sky/warmup'
+ import Field from './sky/Field'
+ 
+ /**
+@@ -62,13 +63,85 @@ class Boundary extends Component<{ fallback: ReactNode; children: ReactNode }, {
+   }
+ }
+ 
+-/** A page without a scroll story renders one frozen journey preset (V3-BUILD-PLAN WP1 C). */
+-type StaticPreset = 'night' | 'space'
++/** drei <Environment resolution> in SceneLights: the PMREM programs are sized from it. */
++const ENV_RESOLUTION = 64
+ 
+-/** home → the scroll journey (null); 404 → space (the top of the journey); every other page → night. */
+-function presetFor(page: Page): StaticPreset | null {
+-  if (page === 'home') return null
+-  return page === 'notFound' ? 'space' : 'night'
++/**
++ * Links every program of the first frames in the background before the canvas renders at all
++ * (audit-loading L1). Order matters: three converts `scene.environment` with its PMREM programs
++ * inside the first compile of a lit material, so those (and the private bake scenes) are warmed
++ * and awaited first; then each top-level object is prepared for the main pass and for
++ * render-to-texture passes, one object per task.
++ */
++function Warmup({ withWordmark, onReady }: { withWordmark: boolean; onReady: () => void }) {
++  const gl = useThree((s) => s.gl)
++  const scene = useThree((s) => s.scene)
++  const camera = useThree((s) => s.camera)
++  useEffect(() => {
++    let cancelled = false
++    const both = async (object: THREE.Object3D, pending: Promise<unknown>[]) => {
++      pending.push(whenLinked(compileTracked(gl, object, camera, scene, false)))
++      await nextTask()
++      pending.push(whenLinked(compileTracked(gl, object, camera, scene, true)))
++      await nextTask()
++    }
++    const run = async () => {
++      await nextTask()
++      if (cancelled) return
++      const pending: Promise<unknown>[] = []
++      // 1. everything unlit (no environment conversion) + the private bake scenes + PMREM, in parallel
++      const pmrem = withWordmark ? warmPMREM(gl, ENV_RESOLUTION) : Promise.resolve()
++      pending.push(pmrem)
++      await nextTask()
++      for (const warm of listWarmers()) {
++        const p = warm(gl)
++        if (p) pending.push(p)
++        await nextTask()
++      }
++      for (const child of [...scene.children]) {
++        if (cancelled) return
++        if (child.name === GLASS_WORDMARK_NAME) continue
++        await both(child, pending)
++      }
++      // 2. the lit wordmark once its mesh exists and the PMREM programs are linked (its first
++      //    compile converts scene.environment with them)
++      if (withWordmark) {
++        await Promise.all([glassWordmarkSettled(), pmrem])
++        const wordmark = scene.getObjectByName(GLASS_WORDMARK_NAME)
++        if (wordmark && !cancelled) {
++          wordmark.traverse((o) => {
++            const m = (o as THREE.Mesh).material as (THREE.Material & { defines?: Record<string, string>; uniforms?: Record<string, unknown> }) | undefined
++            // drei's onBeforeCompile adds USE_TRANSMISSION on the first compile; declaring it up
++            // front keeps the program cache key stable, so the warmed program is the one drawn.
++            if (m?.uniforms && '_transmission' in m.uniforms && m.defines && !('USE_TRANSMISSION' in m.defines)) m.defines.USE_TRANSMISSION = ''
++          })
++          await both(wordmark, pending)
++        }
++      }
++      await Promise.all(pending)
++    }
++    // A driver without KHR_parallel_shader_compile still links (blocking); never hold the sky back.
++    Promise.race([run(), delay(8000)])
++      .catch(() => {})
++      .finally(() => {
++        if (!cancelled) onReady()
++      })
++    return () => {
++      cancelled = true
++    }
++  }, [gl, scene, camera, withWordmark, onReady])
++  return null
++}
++
++/** Calls `onFrame` once the first rendered frame has been handed to the compositor. */
++function FirstFrame({ onFrame }: { onFrame: () => void }) {
++  const done = useRef(false)
++  useFrame(() => {
++    if (done.current) return
++    done.current = true
++    requestAnimationFrame(() => onFrame())
++  })
++  return null
+ }
+ 
+ /**
+@@ -193,7 +266,48 @@ export default function SkyScene() {
+   const reduced = useReducedMotion()
+   const hidden = !useDocumentVisible()
+   const { tier, dpr, antialias } = useCanvasProfile()
+-  const frameloop = hidden ? 'never' : reduced ? 'demand' : 'always'
++  const canvasKey = `${tier}:${antialias ? 'msaa' : 'raw'}`
++  // Per canvas instance (a remount for new context attributes warms up again).
++  const [liveKey, setLiveKey] = useState<string | null>(null)
++  const [shownKey, setShownKey] = useState<string | null>(null)
++  const live = liveKey === canvasKey
++  const shown = shownKey === canvasKey
++  const onReady = useCallback(() => setLiveKey(canvasKey), [canvasKey])
++  const onShown = useCallback(() => setShownKey(canvasKey), [canvasKey])
++  const frameloop = hidden || !live ? 'never' : reduced ? 'demand' : 'always'
++
++  // Layers mount one commit (task) at a time: dome + stars, clouds, lights / environment, wordmark.
++  const [layerStage, setLayerStage] = useState(0)
++  useEffect(() => {
++    if (layerStage >= 3) return
++    let cancelled = false
++    void nextTask().then(() => {
++      if (!cancelled) setLayerStage((s) => s + 1)
++    })
++    return () => {
++      cancelled = true
++    }
++  }, [layerStage])
++
++  // After the reveal: the cloud atlas bake, then the night field (only the footer shows it).
++  const [fieldOn, setFieldOn] = useState(false)
++  useEffect(() => {
++    if (!shown) return
++    const bake = window.setTimeout(allowCloudBake, preset ? 0 : 1200)
++    if (preset) return () => window.clearTimeout(bake)
++    const mount = () => setFieldOn(true)
++    const idle = typeof window.requestIdleCallback === 'function' ? window.requestIdleCallback(mount, { timeout: 2500 }) : 0
++    const timer = idle ? 0 : window.setTimeout(mount, 1500)
++    const off = onScroll((s) => {
++      if (s.y > window.innerHeight * 0.3) mount()
++    })
++    return () => {
++      window.clearTimeout(bake)
++      if (idle) window.cancelIdleCallback(idle)
++      if (timer) window.clearTimeout(timer)
++      off()
++    }
++  }, [shown, preset])
+ 
+   // Start the wordmark TTF download with the chunk (idempotent), on the one page that draws it.
+   if (!preset) preloadGlassWordmark()
+@@ -207,9 +321,9 @@ export default function SkyScene() {
+       <Boundary fallback={null}>
+         <Canvas
+           // Context attributes (antialias) cannot change after creation: remount only for those.
+-          key={`${tier}:${antialias ? 'msaa' : 'raw'}`}
++          key={canvasKey}
+           className="absolute inset-0"
+-          style={{ position: 'absolute', inset: 0 }}
++          style={{ position: 'absolute', inset: 0, opacity: shown ? 1 : 0, transition: reduced ? 'none' : 'opacity 700ms ease-out' }}
+           dpr={dpr}
+           flat={false}
+           gl={{ antialias, alpha: false, powerPreference: 'high-performance', stencil: false, depth: true }}
+@@ -225,16 +339,18 @@ export default function SkyScene() {
+           {reduced && <DemandInvalidator />}
+           <SkyDome tier={tier} reduced={reduced} />
+           <Stars tier={tier} reduced={reduced} />
+-          {!preset && <SceneLights tier={tier} reduced={reduced} />}
+-          <CloudSprites tier={tier} reduced={reduced} />
+-          {!preset && (
+-            <Boundary fallback={null}>
++          {layerStage >= 2 && !preset && <SceneLights tier={tier} reduced={reduced} />}
++          {layerStage >= 1 && <CloudSprites tier={tier} reduced={reduced} />}
++          {layerStage >= 3 && !preset && (
++            <Boundary fallback={<GlassWordmarkFailed />}>
+               <Suspense fallback={null}>
+                 <GlassWordmark tier={tier} reduced={reduced} />
+               </Suspense>
+             </Boundary>
+           )}
+-          {!preset && <Field tier={tier} reduced={reduced} />}
++          {!preset && fieldOn && <Field tier={tier} reduced={reduced} />}
++          {layerStage >= 3 && <Warmup withWordmark={!preset} onReady={onReady} />}
++          {live && !shown && <FirstFrame onFrame={onShown} />}
+         </Canvas>
+       </Boundary>
+     </div>
+diff --git a/src/sections/sky/CloudSprites.tsx b/src/sections/sky/CloudSprites.tsx
+index 1b76e06..4a0b844 100644
+--- a/src/sections/sky/CloudSprites.tsx
++++ b/src/sections/sky/CloudSprites.tsx
+@@ -7,6 +7,17 @@ import { QUALITY } from './quality'
+ import { pointer } from './pointer'
+ import { CLOUD_COUNT, createCloudAtlas, type CloudAtlas } from './cloudBake'
+ import { cloudSpriteFragment, cloudSpriteVertex } from './shaders'
++import { registerWarmer } from './warmup'
++
++/**
++ * The atlas bake (one heavy fbm cell per frame + a pixel read-back on the first) only starts once
++ * SkyScene has revealed the canvas and had a quiet moment, or as soon as clouds are actually on
++ * screen (descent, the night preset). In space the deck is invisible anyway.
++ */
++let bakeAllowed = false
++export function allowCloudBake(): void {
++  bakeAllowed = true
++}
+ 
+ /**
+  * Baked cumulus sprites (docs/JOURNEY-SPEC.md "Clouds" + "Readability").
+@@ -355,14 +366,18 @@ export default function CloudSprites({ tier, reduced }: LayerProps) {
+   useEffect(() => {
+     resources.atlas.reset()
+     invalidate()
+-    return () => resources.dispose()
++    const off = registerWarmer((renderer) => resources.atlas.compile(renderer))
++    return () => {
++      off()
++      resources.dispose()
++    }
+   }, [resources, invalidate])
+ 
+   const last = useRef({ vh: -1, hW: 0, hH: 0, px: 0, moving: true })
+ 
+   useFrame((state) => {
+     const { atlas, layers } = resources
+-    if (!atlas.done) {
++    if (!atlas.done && (bakeAllowed || journey.clouds > 0)) {
+       atlas.step(gl)
+       if (!atlas.done) invalidate()
+     }
+diff --git a/src/sections/sky/Field.tsx b/src/sections/sky/Field.tsx
+index f9cb9d2..b917fff 100644
+--- a/src/sections/sky/Field.tsx
++++ b/src/sections/sky/Field.tsx
+@@ -1,7 +1,8 @@
+-import { useEffect, useMemo, useRef } from 'react'
++import { useEffect, useMemo, useRef, useState } from 'react'
+ import { useFrame, useThree } from '@react-three/fiber'
+ import * as THREE from 'three'
+ import type { LayerProps } from './types'
++import { nextTask } from './warmup'
+ import { journey, PALETTE } from './journey'
+ import { QUALITY } from './quality'
+ import { FIELD, HILL_SEGMENTS, createFieldUniforms } from './field/terrain'
+@@ -32,26 +33,28 @@ const noop = () => {}
+  * field, and drei's <Environment> assigns its texture in a layout effect), otherwise the cache
+  * key would differ at render time and the work would be wasted.
+  */
+-function warmFieldPrograms(gl: THREE.WebGLRenderer, group: THREE.Group, scene: THREE.Scene, camera: THREE.Camera) {
+-  const wasVisible = group.visible
+-  group.visible = true
++function warmOne(gl: THREE.WebGLRenderer, object: THREE.Object3D, scene: THREE.Scene, camera: THREE.Camera) {
++  gl.compileAsync(object, camera, scene).catch(noop)
++  const toneMapping = gl.toneMapping
++  const target = gl.getRenderTarget()
++  const scratch = new THREE.WebGLRenderTarget(1, 1, { depthBuffer: false, stencilBuffer: false })
++  gl.toneMapping = THREE.NoToneMapping
++  gl.setRenderTarget(scratch)
+   try {
+-    gl.compileAsync(group, camera, scene).catch(noop)
+-
+-    const toneMapping = gl.toneMapping
+-    const target = gl.getRenderTarget()
+-    const scratch = new THREE.WebGLRenderTarget(1, 1, { depthBuffer: false, stencilBuffer: false })
+-    gl.toneMapping = THREE.NoToneMapping
+-    gl.setRenderTarget(scratch)
+-    try {
+-      gl.compileAsync(group, camera, scene).catch(noop)
+-    } finally {
+-      gl.setRenderTarget(target)
+-      gl.toneMapping = toneMapping
+-      scratch.dispose()
+-    }
++    gl.compileAsync(object, camera, scene).catch(noop)
+   } finally {
+-    group.visible = wasVisible
++    gl.setRenderTarget(target)
++    gl.toneMapping = toneMapping
++    scratch.dispose()
++  }
++}
++
++/** One child (hills / grass chunks / flora) per task, so no task generates all six sources. */
++async function warmFieldPrograms(gl: THREE.WebGLRenderer, group: THREE.Group, scene: THREE.Scene, camera: THREE.Camera, cancelled: () => boolean) {
++  for (const child of [...group.children]) {
++    if (cancelled()) return
++    warmOne(gl, child, scene, camera)
++    await nextTask()
+   }
+ }
+ 
+@@ -79,12 +82,26 @@ export default function Field({ tier, reduced }: LayerProps) {
+     uniforms.uWind.value = reduced ? 0 : 1
+   }, [reduced, uniforms])
+ 
++  // Hills, grass and flora are built in three commits (one task each) instead of one.
++  const [stage, setStage] = useState(1)
++  useEffect(() => {
++    if (stage >= 3) return
++    let cancelled = false
++    void nextTask().then(() => {
++      if (!cancelled) setStage((s) => s + 1)
++    })
++    return () => {
++      cancelled = true
++    }
++  }, [stage])
++
+   useEffect(() => {
++    if (stage < 3) return
+     let cancelled = false
+     const run = () => {
+       const g = group.current
+       if (cancelled || !g) return
+-      warmFieldPrograms(gl, g, scene, camera)
++      void warmFieldPrograms(gl, g, scene, camera, () => cancelled)
+     }
+     // Off the critical path: the first idle slot, or at the latest ~1 s after mount — long before
+     // any scroll (Lenis-smoothed) can reach the footer. Safari has no requestIdleCallback.
+@@ -95,7 +112,7 @@ export default function Field({ tier, reduced }: LayerProps) {
+       if (idle) window.cancelIdleCallback(idle)
+       if (timer) window.clearTimeout(timer)
+     }
+-  }, [gl, scene, camera])
++  }, [gl, scene, camera, stage])
+ 
+   useFrame(() => {
+     const g = group.current
+@@ -109,8 +126,8 @@ export default function Field({ tier, reduced }: LayerProps) {
+   return (
+     <group ref={group} position={[0, FIELD.riseFrom, 0]} visible={false}>
+       <Hills segments={HILL_SEGMENTS[tier]} uniforms={uniforms} />
+-      <Grass count={q.blades} uniforms={uniforms} />
+-      <Flora uniforms={uniforms} />
++      {stage >= 2 && <Grass count={q.blades} uniforms={uniforms} />}
++      {stage >= 3 && <Flora uniforms={uniforms} />}
+     </group>
+   )
+ }
+diff --git a/src/sections/sky/GlassWordmark.tsx b/src/sections/sky/GlassWordmark.tsx
+index d422946..98c3fb2 100644
+--- a/src/sections/sky/GlassWordmark.tsx
++++ b/src/sections/sky/GlassWordmark.tsx
+@@ -1,9 +1,12 @@
+-import { Suspense, useRef } from 'react'
++import { Suspense, useLayoutEffect, useRef } from 'react'
+ import { useFrame } from '@react-three/fiber'
+ import * as THREE from 'three'
+ import { brand } from '../../i18n/shared'
+-import { preloadTTFFont, useTTFFont } from '../../lib/ttf'
+-import GlassText, { getGlassGeometry, type GlassTextBevel } from '../../components/three/GlassText'
++import { loadTTFFont, preloadTTFFont, useTTFFont } from '../../lib/ttf'
++import GlassText, { getGlassGeometry, prebuildGlassGeometry, type GlassTextBevel } from '../../components/three/GlassText'
++import type { TypefaceData } from '../../lib/ttf'
++import { delay, nextTask } from './warmup'
++import { WORDMARK_FONTS } from './wordmarkFont'
+ import { journey, smoothstep } from './journey'
+ import { QUALITY } from './quality'
+ import { pointer } from './pointer'
+@@ -16,7 +19,7 @@ import type { LayerProps } from './types'
+  * Sacramento (0.04) collapsed into "gairuhub". Dancing Script is only the fallback if Courgette
+  * fails to download or parse. Both are TrueType glyf fonts parsed at runtime by lib/ttf.ts.
+  */
+-const FONTS = ['/fonts/Courgette-Regular.ttf', '/fonts/DancingScript-Variable.ttf'] as const
++const FONTS = WORDMARK_FONTS
+ 
+ /**
+  * Starts the Courgette download + parse. SkyScene calls it on the home page only: sub-pages never
+@@ -24,6 +27,47 @@ const FONTS = ['/fonts/Courgette-Regular.ttf', '/fonts/DancingScript-Variable.tt
+  */
+ export function preloadGlassWordmark(): void {
+   preloadTTFFont(FONTS, brand.wordmark)
++  // Build the extrusion (one glyph per task) while the rest of the scene mounts.
++  loadTTFFont(FONTS, brand.wordmark)
++    .then((font) => prebuiltEntry(font).promise)
++    .catch(() => {})
++}
++
++/** Object name of the wordmark group (SkyScene's warm-up compiles it last). */
++export const GLASS_WORDMARK_NAME = 'qh-glass-wordmark'
++
++/* ---- readiness for SkyScene's warm-up: the run is in the scene (or failed / timed out) ---- */
++let markMounted: () => void = () => {}
++const mounted = new Promise<void>((resolve) => (markMounted = resolve))
++/** Resolves once the wordmark mesh is committed to the scene, it failed, or after `timeoutMs`. */
++export function glassWordmarkSettled(timeoutMs = 6000): Promise<void> {
++  return Promise.race([mounted, delay(timeoutMs)])
++}
++/** Rendered by SkyScene's error boundary around the wordmark: a failed font still settles. */
++export function GlassWordmarkFailed() {
++  useLayoutEffect(() => markMounted(), [])
++  return null
++}
++
++/* ---- geometry built one glyph per task before Letters renders (Suspense) ---- */
++const prebuilt = new WeakMap<TypefaceData, { done: boolean; promise: Promise<void> }>()
++function usePrebuiltGeometry(font: TypefaceData) {
++  const entry = prebuiltEntry(font)
++  if (!entry.done) throw entry.promise
++}
++function prebuiltEntry(font: TypefaceData) {
++  let entry = prebuilt.get(font)
++  if (!entry) {
++    const e = { done: false, promise: Promise.resolve() }
++    e.promise = prebuildGlassGeometry(font, brand.wordmark, { height: HEIGHT, curveSegments: CURVE_SEGMENTS, bevel: BEVEL }, nextTask)
++      .catch(() => {})
++      .then(() => {
++        e.done = true
++      })
++    prebuilt.set(font, e)
++    entry = e
++  }
++  return entry
+ }
+ 
+ /**
+@@ -153,6 +197,8 @@ export default function GlassWordmark(props: LayerProps) {
+ /** Suspends on the font; the geometry comes from the module-level cache in GlassText. */
+ function Letters({ tier, reduced }: LayerProps) {
+   const font = useTTFFont(FONTS, brand.wordmark)
++  usePrebuiltGeometry(font)
++  useLayoutEffect(() => markMounted(), [])
+   const geometry = getGlassGeometry(font, brand.wordmark, { height: HEIGHT, curveSegments: CURVE_SEGMENTS, bevel: BEVEL })
+   const bounds = geometry.boundingBox as THREE.Box3
+   const runWidth = Math.max(1e-4, bounds.max.x - bounds.min.x)
+@@ -230,7 +276,7 @@ function Letters({ tier, reduced }: LayerProps) {
+   })
+ 
+   return (
+-    <group ref={group}>
++    <group ref={group} name={GLASS_WORDMARK_NAME}>
+       <GlassText
+         ref={mesh}
+         text={brand.wordmark}
+diff --git a/src/sections/sky/SkyDome.tsx b/src/sections/sky/SkyDome.tsx
+index 128b238..f22982e 100644
+--- a/src/sections/sky/SkyDome.tsx
++++ b/src/sections/sky/SkyDome.tsx
+@@ -4,6 +4,7 @@ import * as THREE from 'three'
+ import { PALETTE, blendPalette, journey } from './journey'
+ import { domeFragment, domeVertex, nebulaFragment } from './skyShaders'
+ import type { LayerProps } from './types'
++import { registerWarmer } from './warmup'
+ 
+ /** position of the mid gradient stop (0 top … 1 bottom) — matches the old CSS fallback (55%) */
+ const MID_STOP = 0.55
+@@ -79,6 +80,20 @@ export default function SkyDome({ reduced }: LayerProps) {
+   }, [geometry])
+   material.uniforms.uNebula.value = bake.target.texture
+ 
++  useEffect(
++    () =>
++      registerWarmer((gl) => {
++        const prev = gl.getRenderTarget()
++        gl.setRenderTarget(bake.target)
++        try {
++          return gl.compileAsync(bake.scene, bake.camera)
++        } finally {
++          gl.setRenderTarget(prev)
++        }
++      }),
++    [bake],
++  )
++
+   useEffect(
+     () => () => {
+       geometry.dispose()
+diff --git a/src/sections/sky/cloudBake.ts b/src/sections/sky/cloudBake.ts
+index 1e82bc2..ac36cac 100644
+--- a/src/sections/sky/cloudBake.ts
++++ b/src/sections/sky/cloudBake.ts
+@@ -79,6 +79,8 @@ export interface CloudAtlas {
+   cell(i: number, out: Float32Array, offset: number, mirrored: boolean): void
+   /** Bake the next cell (call from useFrame). Returns true when there is nothing left to do. */
+   step(gl: THREE.WebGLRenderer): boolean
++  /** Links the bake program in the background (KHR_parallel_shader_compile) before the first step. */
++  compile(gl: THREE.WebGLRenderer): Promise<unknown>
+   /** Restart the bake (after a StrictMode remount); the atlas is re-cleared on the next step. */
+   reset(): void
+   dispose(): void
+@@ -266,6 +268,15 @@ export function createCloudAtlas(texSize: number, maxTextureSize: number): Cloud
+       }
+       return atlas.done
+     },
++    compile(gl) {
++      const prev = gl.getRenderTarget()
++      gl.setRenderTarget(target)
++      try {
++        return gl.compileAsync(mesh, camera)
++      } finally {
++        gl.setRenderTarget(prev)
++      }
++    },
+     reset() {
+       baked = 0
+       cleared = false
+diff --git a/src/sections/sky/fallback.ts b/src/sections/sky/fallback.ts
+index 45a8e08..325db26 100644
+--- a/src/sections/sky/fallback.ts
++++ b/src/sections/sky/fallback.ts
+@@ -22,3 +22,12 @@ export const NIGHT_FALLBACK_GRADIENT = `linear-gradient(180deg, ${PALETTE.night.
+ export function fallbackGradientFor(preset: 'night' | 'space'): string {
+   return preset === 'night' ? NIGHT_FALLBACK_GRADIENT : FALLBACK_GRADIENT
+ }
++
++/** A page without a scroll story renders one frozen journey preset (V3-BUILD-PLAN WP1 C). */
++export type StaticPreset = 'night' | 'space'
++
++/** home: the scroll journey (null); 404: space (the top of the journey); every other page: night. */
++export function presetForPage(page: string): StaticPreset | null {
++  if (page === 'home') return null
++  return page === 'notFound' ? 'space' : 'night'
++}
+diff --git a/src/sections/sky/quality.ts b/src/sections/sky/quality.ts
+index cb06406..bfe588b 100644
+--- a/src/sections/sky/quality.ts
++++ b/src/sections/sky/quality.ts
+@@ -64,7 +64,29 @@ type GpuClass = 'discrete' | 'integrated' | 'weak' | 'unknown'
+  * 20-core laptop with an Intel UHD iGPU (the user's machine) must not get the `high` budget —
+  * measured there, the glass + space dome at DPR 1.5 ran at ~24 fps on `high`.
+  */
++const GPU_KEY = 'qh.gpu'
++
++/** The GPU class never changes for a browser build on one machine: probe once, remember it. */
+ function probeGpu(): GpuClass {
++  try {
++    const raw = window.localStorage.getItem(GPU_KEY)
++    if (raw) {
++      const hit = JSON.parse(raw) as { ua?: string; gpu?: GpuClass }
++      if (hit.ua === navigator.userAgent && hit.gpu) return hit.gpu
++    }
++  } catch {
++    /* storage blocked: probe */
++  }
++  const gpu = probeGpuNow()
++  try {
++    if (gpu !== 'unknown') window.localStorage.setItem(GPU_KEY, JSON.stringify({ ua: navigator.userAgent, gpu }))
++  } catch {
++    /* ignore */
++  }
++  return gpu
++}
++
++function probeGpuNow(): GpuClass {
+   try {
+     const canvas = document.createElement('canvas')
+     const gl = canvas.getContext('webgl2') ?? canvas.getContext('webgl')
+diff --git a/src/sections/sky/warmup.ts b/src/sections/sky/warmup.ts
+new file mode 100644
+index 0000000..4b1ee2d
+--- /dev/null
++++ b/src/sections/sky/warmup.ts
+@@ -0,0 +1,146 @@
++import * as THREE from 'three'
++
++/**
++ * Non-blocking shader warm-up for the sky canvas (perf/v3.1/audit-loading.md, L1).
++ *
++ * three links every program on the main thread the first time it is used: `onFirstUse` asks for
++ * the info log / uniforms, and that call blocks until the driver has finished the link. With
++ * KHR_parallel_shader_compile (Chrome, Edge, Safari 17+, Firefox) `renderer.compileAsync()` issues
++ * the compile + link and then only POLLS `COMPLETION_STATUS_KHR`, so the GPU process links in the
++ * background while the page stays responsive. The canvas therefore stays on `frameloop="never"`
++ * until every program of the first frames reports ready.
++ *
++ * Programs are keyed by the render target that is bound while they are prepared (output colour
++ * space, tone mapping), so render-to-texture passes (drei's transmission FBO, the cloud / nebula
++ * bakes, three's PMREM conversion) are warmed with a target bound: `compileForTarget`.
++ */
++
++type Warmer = (gl: THREE.WebGLRenderer) => Promise<unknown> | void
++
++const warmers = new Set<Warmer>()
++
++/** Layers with private bake scenes register how to warm them (called once by SkyScene). */
++export function registerWarmer(fn: Warmer): () => void {
++  warmers.add(fn)
++  return () => {
++    warmers.delete(fn)
++  }
++}
++
++export function listWarmers(): Warmer[] {
++  return [...warmers]
++}
++
++/** Resolves in a new macrotask (after the browser had a chance to paint / handle input). */
++export function nextTask(): Promise<void> {
++  const s = (globalThis as { scheduler?: { yield?: () => Promise<void> } }).scheduler
++  if (s?.yield) return s.yield()
++  return new Promise((resolve) => {
++    const ch = new MessageChannel()
++    ch.port1.onmessage = () => resolve()
++    ch.port2.postMessage(0)
++  })
++}
++
++export const delay = (ms: number) => new Promise<void>((resolve) => window.setTimeout(resolve, ms))
++
++interface TrackedProgram {
++  isReady(): boolean
++}
++
++/**
++ * `renderer.compile()` (issues compile + link, never waits) and returns the program each material
++ * got for THIS variant. `compileAsync` only polls `currentProgram`, which the next variant
++ * (another render target) replaces, so the main-pass program would go unobserved.
++ * `target`: prepare the render-to-texture variant (any bound target keys the same way).
++ */
++export function compileTracked(gl: THREE.WebGLRenderer, object: THREE.Object3D, camera: THREE.Camera, scene: THREE.Scene | null, target: boolean): TrackedProgram[] {
++  const prev = gl.getRenderTarget()
++  const scratch = target ? new THREE.WebGLRenderTarget(1, 1, { depthBuffer: false, stencilBuffer: false }) : null
++  if (scratch) gl.setRenderTarget(scratch)
++  try {
++    const materials = gl.compile(object, camera, scene)
++    const out: TrackedProgram[] = []
++    materials.forEach((m) => {
++      const program = (gl.properties.get(m) as { currentProgram?: TrackedProgram }).currentProgram
++      if (program) out.push(program)
++    })
++    return out
++  } finally {
++    if (scratch) {
++      gl.setRenderTarget(prev)
++      scratch.dispose()
++    }
++  }
++}
++
++/** Resolves when every program reports COMPLETION_STATUS_KHR (polled, never blocking). */
++export function whenLinked(programs: TrackedProgram[]): Promise<void> {
++  return new Promise((resolve) => {
++    const left = new Set(programs)
++    const check = () => {
++      left.forEach((p) => {
++        if (p.isReady()) left.delete(p)
++      })
++      if (left.size === 0) resolve()
++      else window.setTimeout(check, 16)
++    }
++    check()
++  })
++}
++
++/** `compileAsync` with a scratch render target bound: the variant a render-to-texture pass uses. */
++export function compileForTarget(gl: THREE.WebGLRenderer, object: THREE.Object3D, camera: THREE.Camera, scene?: THREE.Scene): Promise<unknown> {
++  return whenLinked(compileTracked(gl, object, camera, scene ?? null, true))
++}
++
++interface PMREMInternals {
++  _setSize?: (cubeSize: number) => void
++  _allocateTargets?: () => THREE.WebGLRenderTarget
++  _ggxMaterial?: THREE.ShaderMaterial | null
++  _cubemapMaterial?: THREE.ShaderMaterial | null
++  _compileMaterial?: (material: THREE.Material) => void
++  compileCubemapShader: () => void
++}
++
++/**
++ * An (empty) geometry WITH a position attribute: three r186 keys programs on
++ * `hasPositionAttribute`, so a warm-up mesh without one prepares a program nobody renders.
++ * (three's own `PMREMGenerator.compileCubemapShader()` has exactly that problem.)
++ */
++function warmGeometry(): THREE.BufferGeometry {
++  const g = new THREE.BufferGeometry()
++  g.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 0], 3))
++  return g
++}
++
++/**
++ * Warms three's internal PMREM programs (CubemapToCubeUV + PMREMGGXConvolution) for a cube
++ * environment of `cubeSize`. The renderer converts `scene.environment` with its own
++ * PMREMGenerator inside the first compile/render of a lit material and links those programs
++ * synchronously there (≈ 0.35–0.7 s cold on an Intel UHD); an identical material compiled here
++ * first shares the cached program. Uses two private PMREMGenerator members (three r186) and
++ * silently does nothing if they ever disappear.
++ */
++export function warmPMREM(gl: THREE.WebGLRenderer, cubeSize: number): Promise<unknown> {
++  const pmrem = new THREE.PMREMGenerator(gl) as unknown as PMREMInternals & THREE.PMREMGenerator
++  if (typeof pmrem._setSize !== 'function' || typeof pmrem._allocateTargets !== 'function') return Promise.resolve()
++  pmrem._setSize(cubeSize)
++  const target = pmrem._allocateTargets()
++  // Creates the CubemapToCubeUV material; its own compile (empty geometry) is skipped.
++  pmrem._compileMaterial = () => {}
++  pmrem.compileCubemapShader()
++  const group = new THREE.Group()
++  const geometry = warmGeometry()
++  for (const m of [pmrem._ggxMaterial, pmrem._cubemapMaterial]) if (m) group.add(new THREE.Mesh(geometry, m))
++  const camera = new THREE.OrthographicCamera()
++  return compileForTarget(gl, group, camera).finally(() => {
++    // The programs stay cached in the renderer as long as some material uses them; the real
++    // conversion runs right after this resolves, so dispose on the next macrotask.
++    window.setTimeout(() => {
++      target.dispose()
++      geometry.dispose()
++      pmrem.dispose()
++    }, 5000)
++  })
++}
+diff --git a/src/sections/sky/wordmarkFont.ts b/src/sections/sky/wordmarkFont.ts
+new file mode 100644
+index 0000000..0467348
+--- /dev/null
++++ b/src/sections/sky/wordmarkFont.ts
+@@ -0,0 +1,13 @@
++import { brand } from '../../i18n/shared'
++import { preloadTTFFont } from '../../lib/ttf'
++
++/**
++ * Courgette (Dancing Script as the fallback): TrueType glyf fonts parsed at runtime by lib/ttf.ts
++ * for the 3D wordmark. Its own tiny module so App can start the download together with the sky
++ * chunk request, without waiting for three + r3f to arrive (audit-loading L4).
++ */
++export const WORDMARK_FONTS = ['/fonts/Courgette-Regular.ttf', '/fonts/DancingScript-Variable.ttf'] as const
++
++export function preloadWordmarkFont(): void {
++  preloadTTFFont(WORDMARK_FONTS, brand.wordmark)
++}
+diff --git a/src/styles/fonts.preload.json b/src/styles/fonts.preload.json
+index 13c75ae..846ea97 100644
+--- a/src/styles/fonts.preload.json
++++ b/src/styles/fonts.preload.json
+@@ -1,5 +1,24 @@
+ {
+-  "common": ["/fonts/Inter-latin.woff2", "/fonts/Anton-latin.woff2", "/fonts/Caveat-latin.woff2"],
+-  "home": ["/fonts/Courgette-Regular.ttf"],
+-  "kk": ["/fonts/Oswald-600-cyrillic.woff2", "/fonts/Inter-cyrillic.woff2"]
+-}
++  "common": [
++    "/fonts/Inter-latin.woff2"
++  ],
++  "home": [],
++  "pages": {
++    "members": [
++      "/fonts/Anton-latin.woff2",
++      "/fonts/Caveat-latin.woff2"
++    ],
++    "handbook": [
++      "/fonts/Anton-latin.woff2",
++      "/fonts/Caveat-latin.woff2"
++    ],
++    "notFound": [
++      "/fonts/Anton-latin.woff2",
++      "/fonts/Caveat-latin.woff2"
++    ]
++  },
++  "kk": [
++    "/fonts/Oswald-600-cyrillic.woff2",
++    "/fonts/Inter-cyrillic.woff2"
++  ]
++}
+\ No newline at end of file

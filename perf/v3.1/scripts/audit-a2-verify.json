@@ -1,0 +1,75 @@
+{
+  "what": "Verification runs for the AUDIT 2 changes that were implemented (A2-01 assistant islands, A2-04, A2-05, A2-06, A2-07, A2-08). Local only: /api/ask never reached OpenAI - the EDGE service binding pointed at a synthetic stub worker named qairuhub-edge that streams a fixed Responses-API event stream. D1 was a scratch local database (perf/v3.1/scripts/.wrangler/a2-*), never production.",
+  "rig": {
+    "build": "vite build of the working tree into a temp dir (never dist/), then a copy of scripts/build-html.mjs pointed at it",
+    "servers": "wrangler pages dev from scratch project copies (functions/ + shared/ + migrations/ + wrangler.toml), ports 8814 (new code, EDGE=stub), 8816 (new, no EDGE), 8817 (HEAD code, EDGE=stub), 8818 (new, ASK_ENABLED=false), 8819 (HEAD, no EDGE), 8820 (new code serving the temp build)",
+    "stub": "scratchpad edge-stub: 2400-char answer as 600 four-char tokens on a 10 ms schedule (~100 tok/s), plus stub-fail-mid and stub-leak scenarios"
+  },
+  "A2-01_assistant_chunk_failure": {
+    "script": "perf/v3.1/scripts/audit-assistant-chunk.mjs http://127.0.0.1:4831",
+    "cases": [
+      { "case": "Assistant panel chunk blocked, two launcher clicks", "blank": false, "dialogAfterFirstClick": 0, "dialogAfterSecondClick": 0, "launcherStillThere": 1, "pageErrors": [] },
+      { "case": "Answer chunk blocked, ask bar question", "blank": false, "answerBox": 1, "answerTextRendered": true, "sources": 0, "pageErrors": [] },
+      { "case": "Announcer chunk blocked, ask bar question", "blank": false, "answerBox": 1, "sources": 1, "pageErrors": [] },
+      { "case": "control: panel", "blank": false, "dialogAfterFirstClick": 1, "pageErrors": [] },
+      { "case": "control: ask bar question", "blank": false, "answerBox": 1, "sources": 1, "pageErrors": [] }
+    ],
+    "note": "The three/r3f/sub-page cases of audit-chunk-failure.mjs still need the App.tsx + main.tsx wiring, which is outside this agent's file scope (see the handoff)."
+  },
+  "A2-01_guarded_reload": {
+    "script": "perf/v3.1/scripts/audit-chunk-reload.mjs http://127.0.0.1:4831",
+    "steps": [
+      { "step": "panel chunk fails at t=4s", "loads": 1, "stored": null, "comment": "startup failure: fallback only, no reload" },
+      { "step": "panel chunk fails at t=36s", "loads": 2, "stored": "1789668568010", "comment": "exactly one reload, page intact, launcher alive" },
+      { "step": "two more failures after the reload", "loads": 2, "stored": "1789668568010", "comment": "5 min guard holds: no reload loop, no page errors" }
+    ]
+  },
+  "A2-04_markdown_parity": {
+    "samples": 2030,
+    "bytes": 705426,
+    "identical": true,
+    "how": "renderToStaticMarkup over every 7-char prefix of the audit-md-bench answer plus 18 edge-case documents (lists, headings, continuations, unclosed bold, link allowlist, CRLF, KK text), en + kk"
+  },
+  "A2-04_store_identity": {
+    "earlierMessagesKeptIdentity": true,
+    "arrayIsNew": true,
+    "how": "src/assistant/store.ts under Node: two asks; the first question/answer objects are identical before and after the second ask settles - the precondition for memo(Answer) to bail out"
+  },
+  "A2-05_counters": {
+    "normalAsk": { "ask:ipm": 1, "ask:ipd": 1, "ask:ai": 1, "roundTrips": 1 },
+    "seventhAskInAMinute": { "status": 429, "retryAfter": "26", "ask:ipm": 7, "ask:ipd": 7, "ask:ai": 6, "comment": "the guarded global statement wrote no row" },
+    "offline_no_key": { "keys": ["ask:ipd", "ask:ipm"], "ask:ai": "absent" },
+    "disabled": { "keys": ["ask:ipd", "ask:ipm"], "ask:ai": "absent" },
+    "d1MsInLogs": [18, 16, 4, 5, 3, 22, 28],
+    "evalAsk": { "cases": 20, "identicalToHead": true, "summaryNew": { "passedOverall": 6, "passedMustNot": 20, "modes": { "offline": 20 } }, "summaryHead": { "passedOverall": 6, "passedMustNot": 20, "modes": { "offline": 20 } }, "comment": "offline mode both sides (no model locally), answers byte-identical case by case" }
+  },
+  "A2-06_config_cache": {
+    "script": "perf/v3.1/scripts/audit-config-cache.mjs http://127.0.0.1:8820",
+    "firstView": { "transferSize": 345, "encodedBodySize": 45 },
+    "secondViewAfterReload": { "transferSize": 0, "encodedBodySize": 45 },
+    "header": "public, max-age=300, stale-while-revalidate=600 (HEAD sent public, max-age=300 and the client asked for no-store)",
+    "formSmoke": { "waitlistSubmit": "success", "api": ["GET /api/join 200", "GET /api/config 200", "POST /api/join 200"], "pageErrors": [] }
+  },
+  "A2-07_sse_framing": {
+    "upstreamTokens": 600,
+    "answerChars": 2400,
+    "head": { "deltaEvents": 379, "sseBytes": 13913, "firstDeltaMs": 517 },
+    "new": { "deltaEvents": 97, "sseBytes": 5735, "firstDeltaMs": 414 },
+    "sameText": true,
+    "ratio": { "events": 3.9, "bytes": 0.41 },
+    "slowerStubRun": { "tokensPerSecond": 45, "head": { "deltaEvents": 379, "sseBytes": 13913 }, "new": { "deltaEvents": 179, "sseBytes": 8113 } },
+    "failurePaths": {
+      "midStreamFailure": { "headChars": 160, "newChars": 160, "headEvents": 21, "newEvents": 7, "last": "error upstream_partial (both)" },
+      "leakGuard": { "headChars": 24, "newChars": 3, "last": "error upstream_partial (both)", "comment": "held text is dropped on a leak, so less prompt text escapes than before" }
+    },
+    "clientDisconnect": "still detected (outcome: aborted) when the client cancels mid-stream"
+  },
+  "A2-08_migration": {
+    "applied": "0001 then rows inserted then 0002, local D1",
+    "countersSql": "CREATE TABLE counters (key TEXT PRIMARY KEY, n INTEGER NOT NULL, expires_at INTEGER NOT NULL) WITHOUT ROWID",
+    "countersExpiresIndex": "gone (dropped with the table)",
+    "submissionsRowsKept": 1,
+    "modelReference": "perf/v3.1/scripts/d1-rows-3variants.json variant withoutRowidNoExpiresIndex: upsert writes 1 row, ask writes 3, purge still deletes expired rows"
+  },
+  "repoChecks": { "tsc client": "pass", "tsc functions": "pass", "tsc edge": "pass", "npm run check": "pass", "npm run test:routes": "26 checks passed" }
+}

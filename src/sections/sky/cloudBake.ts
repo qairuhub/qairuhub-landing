@@ -79,6 +79,8 @@ export interface CloudAtlas {
   cell(i: number, out: Float32Array, offset: number, mirrored: boolean): void
   /** Bake the next cell (call from useFrame). Returns true when there is nothing left to do. */
   step(gl: THREE.WebGLRenderer): boolean
+  /** Links the bake program in the background (KHR_parallel_shader_compile) before the first step. */
+  compile(gl: THREE.WebGLRenderer): Promise<unknown>
   /** Restart the bake (after a StrictMode remount); the atlas is re-cleared on the next step. */
   reset(): void
   dispose(): void
@@ -265,6 +267,15 @@ export function createCloudAtlas(texSize: number, maxTextureSize: number): Cloud
         gl.autoClear = prevAutoClear
       }
       return atlas.done
+    },
+    compile(gl) {
+      const prev = gl.getRenderTarget()
+      gl.setRenderTarget(target)
+      try {
+        return gl.compileAsync(mesh, camera)
+      } finally {
+        gl.setRenderTarget(prev)
+      }
     },
     reset() {
       baked = 0

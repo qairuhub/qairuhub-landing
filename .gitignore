@@ -5,6 +5,8 @@ reference
 .DS_Store
 *.log
 .wrangler
+# local miniflare state from ad-hoc probe servers (perf/v3.1/scripts/.wrangler-d1probe)
+.wrangler-*
 scripts/tmp-*
 private
 .dev.vars
@@ -16,3 +18,13 @@ public/handbook-index.json
 src/data/handbook.generated.ts
 # local-only private data (never committed)
 scripts/private-denylist.txt
+
+# v3.1 measurement artifacts: raw Lighthouse reports, traces, screenshots, dist copies.
+# The extracted numbers live in perf/v3.1/lighthouse-summary*.json and lighthouse-tables*.md.
+perf/v3.1/lighthouse/
+perf/v3.1/traces/
+perf/v3.1/reveal/
+perf/v3.1/visual/
+perf/v3.1/mac-safari/
+perf/v3.1/tmp-dist/
+perf/v3.1/tmp-dist-maps/

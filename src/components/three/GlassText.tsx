@@ -4,7 +4,7 @@ import { MeshTransmissionMaterial, type MeshTransmissionMaterialProps } from '@r
 import * as THREE from 'three'
 import { Font } from 'three/examples/jsm/loaders/FontLoader.js'
 import type { TypefaceData } from '../../lib/ttf'
-import { extrudeGlyphShapes } from './extrudeGlyphs'
+import { extrudeGlyphShapes, extrudeGlyphShapesAsync } from './extrudeGlyphs'
 
 /**
  * The one frosted-glass lettering recipe (docs/JOURNEY-SPEC.md "Frosted glass wordmark").
@@ -292,50 +292,84 @@ function disposeAll() {
   geometries.clear()
 }
 
-/**
- * Extruded + rounded-bevel glyph run, centred on the origin (bounding box and sphere computed).
- * Cached per font file (`familyName` is the TTF's file name, see lib/ttf.ts), text and shape
- * parameters; the same instance is handed to every mount, so never dispose it yourself.
- */
-export function getGlassGeometry(font: TypefaceData, text: string, opts: GlassGeometryOptions = {}): THREE.BufferGeometry {
+function glassKey(font: TypefaceData, text: string, opts: GlassGeometryOptions) {
   const size = opts.size ?? 1
   const height = opts.height ?? GLASS_HEIGHT * size
   const curveSegments = opts.curveSegments ?? GLASS_CURVE_SEGMENTS
   const bevel: GlassTextBevel = { ...GLASS_BEVEL, ...opts.bevel }
   const bevelOffset = bevel.offset ?? 0
   const key = [font.familyName, text, size, height, curveSegments, bevel.thickness, bevel.size, bevelOffset, bevel.segments].join('|')
-  let geometry = geometries.get(key)
-  if (!geometry) {
-    let typeface = fonts.get(font)
-    if (!typeface) {
-      typeface = new Font(font)
-      fonts.set(font, typeface)
-    }
-    // Same shapes and parameters as three's TextGeometry; the extruder clamps an inset bevel so
-    // thin tails collapse to a hairline instead of folding (see extrudeGlyphs.ts).
-    geometry = extrudeGlyphShapes(typeface.generateShapes(text, size), {
-      depth: height,
-      curveSegments,
-      bevelThickness: bevel.thickness * size,
-      bevelSize: bevel.size * size,
-      bevelOffset: bevelOffset * size,
-      bevelSegments: bevel.segments,
-      minHoleArea: MIN_HOLE_AREA * size * size,
-    })
-    // Centre from the BEVELLED bounds (the bevel swells the outline), so the visual centre of the
-    // run is the origin whatever the viewport does — the fit is then pure scale.
-    geometry.computeBoundingBox()
-    const bb = geometry.boundingBox
-    if (bb) geometry.translate(-(bb.min.x + bb.max.x) / 2, -(bb.min.y + bb.max.y) / 2, -(bb.min.z + bb.max.z) / 2)
-    geometry.computeBoundingBox()
-    geometry.computeBoundingSphere()
-    geometries.set(key, geometry)
-    if (!unloadHooked && typeof window !== 'undefined') {
-      unloadHooked = true
-      window.addEventListener('pagehide', disposeAll, { once: true })
-    }
+  const extrude = {
+    depth: height,
+    curveSegments,
+    bevelThickness: bevel.thickness * size,
+    bevelSize: bevel.size * size,
+    bevelOffset: bevelOffset * size,
+    bevelSegments: bevel.segments,
+    minHoleArea: MIN_HOLE_AREA * size * size,
+  }
+  return { key, size, extrude }
+}
+
+function shapesOf(font: TypefaceData, text: string, size: number) {
+  let typeface = fonts.get(font)
+  if (!typeface) {
+    typeface = new Font(font)
+    fonts.set(font, typeface)
+  }
+  return typeface.generateShapes(text, size)
+}
+
+function store(key: string, geometry: THREE.BufferGeometry) {
+  // Centre from the BEVELLED bounds (the bevel swells the outline), so the visual centre of the
+  // run is the origin whatever the viewport does: the fit is then pure scale.
+  geometry.computeBoundingBox()
+  const bb = geometry.boundingBox
+  if (bb) geometry.translate(-(bb.min.x + bb.max.x) / 2, -(bb.min.y + bb.max.y) / 2, -(bb.min.z + bb.max.z) / 2)
+  geometry.computeBoundingBox()
+  geometry.computeBoundingSphere()
+  geometries.set(key, geometry)
+  if (!unloadHooked && typeof window !== 'undefined') {
+    unloadHooked = true
+    window.addEventListener('pagehide', disposeAll, { once: true })
   }
   return geometry
+}
+
+/**
+ * Extruded + rounded-bevel glyph run, centred on the origin (bounding box and sphere computed).
+ * Cached per font file (`familyName` is the TTF's file name, see lib/ttf.ts), text and shape
+ * parameters; the same instance is handed to every mount, so never dispose it yourself.
+ */
+export function getGlassGeometry(font: TypefaceData, text: string, opts: GlassGeometryOptions = {}): THREE.BufferGeometry {
+  const { key, size, extrude } = glassKey(font, text, opts)
+  const cached = geometries.get(key)
+  if (cached) return cached
+  // Same shapes and parameters as three's TextGeometry; the extruder clamps an inset bevel so
+  // thin tails collapse to a hairline instead of folding (see extrudeGlyphs.ts).
+  return store(key, extrudeGlyphShapes(shapesOf(font, text, size), extrude))
+}
+
+const building = new Map<string, Promise<void>>()
+
+/**
+ * Builds the same geometry as `getGlassGeometry` one glyph per task and caches it, so the render
+ * that follows (`getGlassGeometry`) is a cache hit. Idempotent.
+ */
+export function prebuildGlassGeometry(font: TypefaceData, text: string, opts: GlassGeometryOptions, yieldTask: () => Promise<void>): Promise<void> {
+  const { key, size, extrude } = glassKey(font, text, opts)
+  if (geometries.has(key)) return Promise.resolve()
+  let p = building.get(key)
+  if (!p) {
+    p = (async () => {
+      await yieldTask()
+      const shapes = shapesOf(font, text, size)
+      await yieldTask()
+      store(key, await extrudeGlyphShapesAsync(shapes, extrude, yieldTask))
+    })()
+    building.set(key, p)
+  }
+  return p
 }
 
 /* ------------------------------------------------------------------ component */

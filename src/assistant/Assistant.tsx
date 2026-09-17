@@ -61,6 +61,8 @@ export default function Assistant({ launcherRef }: { launcherRef: RefObject<HTML
     },
     [launcherRef],
   )
+  // Stable, so memoised answers skip the 40 ms stream flushes and the textarea's keystrokes.
+  const onInternalLink = useCallback(() => close(false), [close])
 
   // Open: focus the input, warm the client (Turnstile config), start at the latest message.
   // Opened mid-answer ("Continue in chat" while streaming) the input is disabled, so focus parks
@@ -238,7 +240,7 @@ export default function Assistant({ launcherRef }: { launcherRef: RefObject<HTML
               </div>
             ) : (
               <div key={m.id} className="qa-msg qa-msg--bot">
-                <Answer message={m} onInternalLink={() => close(false)} />
+                <Answer message={m} onInternalLink={onInternalLink} />
               </div>
             ),
           )}

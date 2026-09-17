@@ -134,7 +134,17 @@ Search (tokeniser for EN / KK / RU, BM25F-lite ranking, selection, offline rende
   - `GET /api/config` returns `{ "turnstileSiteKey": string | null }` from the `TURNSTILE_SITE_KEY` var; `src/lib/turnstile.ts` reads it once, lazily, and loads the Turnstile script only when a key exists.
   - The server enforces Turnstile only when the `TURNSTILE_SECRET_KEY` secret is set.
   - Until then join, waitlist and ask are protected by a honeypot, a minimum fill time (≥ 2.5 s), the origin allowlist and per-IP D1 rate limits.
-  - To turn it on: create a Managed widget for `qairuhub-landing.pages.dev` in the Cloudflare dashboard, put the public site key in `wrangler.toml` `[vars] TURNSTILE_SITE_KEY`, set the secret with `npx wrangler pages secret put TURNSTILE_SECRET_KEY --project-name qairuhub-landing`, and redeploy. (With a `wrangler.toml` present, the file is the source of truth for plain vars.)
+  - **To turn it on, in this order** — the site key must reach every browser before the server starts
+    demanding a token, because `GET /api/config` is cached in the browser for `max-age=300` +
+    `stale-while-revalidate=600`:
+    1. create a Managed widget for `qairuhub-landing.pages.dev` in the Cloudflare dashboard, put the
+       public site key in `wrangler.toml` `[vars] TURNSTILE_SITE_KEY`, and deploy. (With a
+       `wrangler.toml` present, the file is the source of truth for plain vars.)
+    2. wait at least 15 minutes, so no tab can still be holding the cached `{"turnstileSiteKey": null}`.
+    3. only then set the secret: `npx wrangler pages secret put TURNSTILE_SECRET_KEY --project-name qairuhub-landing`.
+    Doing 3 before 2 makes every visitor with the cached `null` key send no token while the server
+    already enforces one: `/api/join` answers 403 `verify_failed` and `/api/ask` 403 `verify_required`
+    until that cache runs out. To turn Turnstile off again, drop the secret first, then the site key.
 
 ### Configuration names
 

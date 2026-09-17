@@ -1,9 +1,11 @@
 import clsx from 'clsx'
 import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react'
+import { ChunkBoundary } from '../components/ui/ChunkBoundary'
+import { reloadOnceForChunkError } from '../components/ui/chunkReload'
 import { useT } from '../i18n/LocaleProvider'
 import { launcherText } from './assistant.i18n'
 import { SnailQ, SNAIL_NAVY } from './SnailQ'
-import { closePanel, getState, openPanel, useAssistantValue } from './store'
+import { cancelPanelOpen, closePanel, getState, openPanel, useAssistantValue } from './store'
 import './Assistant.css'
 
 /**
@@ -14,7 +16,9 @@ import './Assistant.css'
  *
  * The panel (`Assistant.tsx` + Answer/Markdown) is a lazy chunk requested on the first hover,
  * focus or click; the network client is requested with it, Turnstile only once a question input
- * is focused.
+ * is focused. If the panel chunk can't load, the panel closes again (ChunkBoundary), the page stays
+ * as it is, the next open tries a fresh import, and a late failure (a deploy removed the chunk)
+ * reloads the page at most once per 5 minutes (`reloadOnceForChunkError`).
  *
  * Opening from elsewhere (contract for other sections and pages):
  *   - `window.dispatchEvent(new CustomEvent('qh:assistant-open'))` (Header's About → "Ask Q"), or
@@ -30,7 +34,7 @@ export const ASSISTANT_OPEN_EVENT = 'qh:assistant-open'
 export const ASSISTANT_OPEN_ATTR = 'data-assistant-open'
 
 const loadPanel = () => import('./Assistant')
-const Assistant = lazy(loadPanel)
+const PanelChunk = lazy(loadPanel)
 /** The live region (and its strings) loads with the first question, like the answer view. */
 const Announcer = lazy(() => import('./Announcer'))
 
@@ -62,10 +66,20 @@ export default function AssistantLauncher() {
   const btnRef = useRef<HTMLButtonElement | null>(null)
   const fabRef = useRef<HTMLDivElement | null>(null)
   const [hint, setHint] = useState(false)
+  // React.lazy keeps a rejected import for good, so a failed panel gets a fresh lazy for the next open.
+  const [Panel, setPanel] = useState(() => PanelChunk)
 
   const warm = useCallback(() => {
-    void loadPanel()
-    void import('./sseClient')
+    // Warm-ups may fail quietly: opening the panel has its own fallback.
+    loadPanel().catch(() => undefined)
+    import('./sseClient').catch(() => undefined)
+  }, [])
+
+  const onPanelError = useCallback(() => {
+    // The panel never showed, so an answer streaming under the Ask bar keeps going.
+    cancelPanelOpen()
+    setPanel(() => lazy(loadPanel))
+    reloadOnceForChunkError()
   }, [])
 
   const open = useCallback(() => {
@@ -206,10 +220,13 @@ export default function AssistantLauncher() {
 
   return (
     <>
+      {/* Unmounted while closed, so every open starts with a fresh boundary. */}
       {panelOpen && (
-        <Suspense fallback={null}>
-          <Assistant launcherRef={btnRef} />
-        </Suspense>
+        <ChunkBoundary onError={onPanelError}>
+          <Suspense fallback={null}>
+            <Panel launcherRef={btnRef} />
+          </Suspense>
+        </ChunkBoundary>
       )}
       <div ref={fabRef} className={clsx('qa-fab', panelOpen && 'is-open')}>
         {hint && !panelOpen && (
@@ -237,9 +254,11 @@ export default function AssistantLauncher() {
         </button>
       </div>
       {!panelOpen && hasThread && (
-        <Suspense fallback={null}>
-          <Announcer />
-        </Suspense>
+        <ChunkBoundary fallback={null}>
+          <Suspense fallback={null}>
+            <Announcer />
+          </Suspense>
+        </ChunkBoundary>
       )}
     </>
   )

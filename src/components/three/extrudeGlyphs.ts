@@ -325,6 +325,30 @@ export function extrudeGlyphShapes(shapes: THREE.Shape[], options: GlyphExtrudeO
   const positions: number[] = []
   const indices: number[] = []
   for (const shape of shapes) addShape(shape, options, geometry, positions, indices)
+  return finish(geometry, positions, indices)
+}
+
+/**
+ * Same output as `extrudeGlyphShapes` (identical vertex / index order and groups), one shape per
+ * task: `yieldTask` is awaited between glyphs so no single task carries the whole run
+ * (about 25 ms per glyph on a 4x-throttled phone instead of one 200 ms task).
+ */
+export async function extrudeGlyphShapesAsync(
+  shapes: THREE.Shape[],
+  options: GlyphExtrudeOptions,
+  yieldTask: () => Promise<void>,
+): Promise<THREE.BufferGeometry> {
+  const geometry = new THREE.BufferGeometry()
+  const positions: number[] = []
+  const indices: number[] = []
+  for (const shape of shapes) {
+    addShape(shape, options, geometry, positions, indices)
+    await yieldTask()
+  }
+  return finish(geometry, positions, indices)
+}
+
+function finish(geometry: THREE.BufferGeometry, positions: number[], indices: number[]): THREE.BufferGeometry {
   const position = new THREE.Float32BufferAttribute(positions, 3)
   const vertexCount = positions.length / 3
   const index = vertexCount > 65535 ? new THREE.Uint32BufferAttribute(indices, 1) : new THREE.Uint16BufferAttribute(indices, 1)

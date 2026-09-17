@@ -1,0 +1,6559 @@
+[
+ {
+  "file": "handbook-desktop-after-r1.json",
+  "page": "handbook",
+  "preset": "desktop",
+  "run": 1,
+  "env": {
+   "benchmarkIndex": 3265.5,
+   "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/152.0.0.0 Safari/537.36",
+   "formFactor": "desktop",
+   "throttling": "simulate"
+  },
+  "score": 98,
+  "fcp": 502.2954,
+  "lcp": 1067.5908,
+  "tbt": 24,
+  "cls": 0,
+  "si": 737.8765962035518,
+  "tti": 1067.5908,
+  "maxFid": 74,
+  "bytes": 739226,
+  "lcpElement": {
+   "selector": "div.subpage > div.subpage__head > div.subpage__intro > h1.u-h1-small",
+   "snippet": "<h1 class=\"u-h1-small subpage__title handbook__title\">",
+   "label": "THE QAIRUHUB HANDBOOK"
+  },
+  "lcpPhases": [
+   {
+    "phase": "TTFB",
+    "timing": 138
+   },
+   {
+    "phase": "Load Delay",
+    "timing": 0
+   },
+   {
+    "phase": "Load Time",
+    "timing": 0
+   },
+   {
+    "phase": "Render Delay",
+    "timing": 930
+   }
+  ],
+  "bootup": [
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "total": 213,
+    "scripting": 57,
+    "parse": 0
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "total": 166,
+    "scripting": 166,
+    "parse": 0
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "total": 127,
+    "scripting": 95,
+    "parse": 0
+   },
+   {
+    "url": "/handbook",
+    "total": 116,
+    "scripting": 1,
+    "parse": 0
+   },
+   {
+    "url": "Unattributable",
+    "total": 73,
+    "scripting": 9,
+    "parse": 0
+   }
+  ],
+  "mainThread": [
+   {
+    "group": "Script Evaluation",
+    "ms": 333
+   },
+   {
+    "group": "Other",
+    "ms": 210
+   },
+   {
+    "group": "Style & Layout",
+    "ms": 107
+   },
+   {
+    "group": "Rendering",
+    "ms": 40
+   },
+   {
+    "group": "Garbage Collection",
+    "ms": 9
+   },
+   {
+    "group": "Parse HTML & CSS",
+    "ms": 4
+   },
+   {
+    "group": "Script Parsing & Compilation",
+    "ms": 1
+   }
+  ],
+  "unusedJs": [
+   {
+    "url": "/assets/three-rAcLmdm5.js",
+    "total": 186491,
+    "wasted": 100944
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "total": 72217,
+    "wasted": 40886
+   },
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "total": 41604,
+    "wasted": 20915
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "total": 59115,
+    "wasted": 20534
+   }
+  ],
+  "unusedCss": [],
+  "renderBlocking": [
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "bytes": 17754,
+    "wastedMs": 98
+   }
+  ],
+  "renderBlockingInsight": [
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "bytes": 17754,
+    "ms": 98
+   }
+  ],
+  "fontDisplay": {
+   "score": 1,
+   "items": []
+  },
+  "images": {
+   "uses-optimized-images": {
+    "score": 1,
+    "n": 0
+   },
+   "modern-image-formats": {
+    "score": 1,
+    "n": 0
+   },
+   "offscreen-images": {
+    "score": 1,
+    "n": 0
+   },
+   "unsized-images": {
+    "score": 1,
+    "n": 0
+   },
+   "uses-responsive-images": {
+    "score": 1,
+    "n": 0
+   },
+   "image-size-responsive": {
+    "score": 1,
+    "n": 0
+   }
+  },
+  "longTasks": [
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "start": 948,
+    "dur": 74
+   }
+  ],
+  "requests": [
+   {
+    "url": "/handbook",
+    "type": "Document",
+    "prio": "VeryHigh",
+    "start": 1,
+    "end": 11,
+    "transfer": 1764,
+    "size": 2367,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Inter-latin.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 22,
+    "end": 37,
+    "transfer": 120736,
+    "size": 119400,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Courgette-wordmark.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 22,
+    "end": 50,
+    "transfer": 6664,
+    "size": 5692,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Anton-latin.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 22,
+    "end": 58,
+    "transfer": 27945,
+    "size": 26908,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Caveat-latin.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 22,
+    "end": 83,
+    "transfer": 83207,
+    "size": 81988,
+    "status": 200
+   },
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 24,
+    "end": 81,
+    "transfer": 44762,
+    "size": 135856,
+    "status": 200
+   },
+   {
+    "url": "/assets/rolldown-runtime-hePW80VL.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 24,
+    "end": 70,
+    "transfer": 1427,
+    "size": 716,
+    "status": 200
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 27,
+    "end": 91,
+    "transfer": 60092,
+    "size": 189604,
+    "status": 200
+   },
+   {
+    "url": "/assets/icons-BtZ7qFfY.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 27,
+    "end": 85,
+    "transfer": 2796,
+    "size": 6074,
+    "status": 200
+   },
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 27,
+    "end": 75,
+    "transfer": 17754,
+    "size": 82557,
+    "status": 200
+   },
+   {
+    "url": "/assets/HandbookPage-CbRMfOQ1.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 118,
+    "end": 142,
+    "transfer": 23181,
+    "size": 80953,
+    "status": 200
+   },
+   {
+    "url": "/assets/pageScroll-CgN8Uguu.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 118,
+    "end": 137,
+    "transfer": 1835,
+    "size": 1488,
+    "status": 200
+   },
+   {
+    "url": "/assets/HandbookPage-DFbqdk19.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 119,
+    "end": 137,
+    "transfer": 2773,
+    "size": 6052,
+    "status": 200
+   },
+   {
+    "url": "/assets/subpage-Cc-b23WF.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 119,
+    "end": 139,
+    "transfer": 1574,
+    "size": 1210,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Inter-cyrillic.woff2",
+    "type": "Font",
+    "prio": "VeryHigh",
+    "start": 149,
+    "end": 157,
+    "transfer": 53051,
+    "size": 51936,
+    "status": 200
+   },
+   {
+    "url": "/favicon.svg",
+    "type": "Other",
+    "prio": "High",
+    "start": 166,
+    "end": 181,
+    "transfer": 1314,
+    "size": 507,
+    "status": 200
+   },
+   {
+    "url": "/assets/SkyScene-BZ_nlMIB.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 282,
+    "end": 299,
+    "transfer": 24248,
+    "size": 59848,
+    "status": 200
+   },
+   {
+    "url": "/assets/three-rAcLmdm5.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 282,
+    "end": 321,
+    "transfer": 187468,
+    "size": 738246,
+    "status": 200
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 282,
+    "end": 312,
+    "transfer": 73195,
+    "size": 225129,
+    "status": 200
+   },
+   {
+    "url": "/assets/wordmarkFont-D8br0Rc7.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 282,
+    "end": 303,
+    "transfer": 3440,
+    "size": 5365,
+    "status": 200
+   }
+  ],
+  "consoleErrors": [],
+  "domSize": 1617,
+  "layoutShifts": 0,
+  "nonComposited": 0,
+  "cacheTtl": 1,
+  "textCompression": 1,
+  "legacyJs": 0,
+  "duplicatedJs": 0,
+  "thirdParty": []
+ },
+ {
+  "file": "handbook-desktop-after-r2.json",
+  "page": "handbook",
+  "preset": "desktop",
+  "run": 2,
+  "env": {
+   "benchmarkIndex": 3082,
+   "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/152.0.0.0 Safari/537.36",
+   "formFactor": "desktop",
+   "throttling": "simulate"
+  },
+  "score": 98,
+  "fcp": 493.21510000000006,
+  "lcp": 1047.4302000000002,
+  "tbt": 12,
+  "cls": 0,
+  "si": 710.9271599487352,
+  "tti": 1047.4302000000002,
+  "maxFid": 62,
+  "bytes": 739225,
+  "lcpElement": {
+   "selector": "div.subpage > div.subpage__head > div.subpage__intro > h1.u-h1-small",
+   "snippet": "<h1 class=\"u-h1-small subpage__title handbook__title\">",
+   "label": "THE QAIRUHUB HANDBOOK"
+  },
+  "lcpPhases": [
+   {
+    "phase": "TTFB",
+    "timing": 135
+   },
+   {
+    "phase": "Load Delay",
+    "timing": 0
+   },
+   {
+    "phase": "Load Time",
+    "timing": 0
+   },
+   {
+    "phase": "Render Delay",
+    "timing": 913
+   }
+  ],
+  "bootup": [
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "total": 207,
+    "scripting": 54,
+    "parse": 0
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "total": 155,
+    "scripting": 155,
+    "parse": 0
+   },
+   {
+    "url": "/handbook",
+    "total": 118,
+    "scripting": 1,
+    "parse": 0
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "total": 115,
+    "scripting": 89,
+    "parse": 0
+   },
+   {
+    "url": "Unattributable",
+    "total": 66,
+    "scripting": 10,
+    "parse": 0
+   }
+  ],
+  "mainThread": [
+   {
+    "group": "Script Evaluation",
+    "ms": 314
+   },
+   {
+    "group": "Other",
+    "ms": 199
+   },
+   {
+    "group": "Style & Layout",
+    "ms": 106
+   },
+   {
+    "group": "Rendering",
+    "ms": 40
+   },
+   {
+    "group": "Garbage Collection",
+    "ms": 7
+   },
+   {
+    "group": "Parse HTML & CSS",
+    "ms": 5
+   },
+   {
+    "group": "Script Parsing & Compilation",
+    "ms": 1
+   }
+  ],
+  "unusedJs": [
+   {
+    "url": "/assets/three-rAcLmdm5.js",
+    "total": 186491,
+    "wasted": 100944
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "total": 72217,
+    "wasted": 40886
+   },
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "total": 41604,
+    "wasted": 20915
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "total": 59115,
+    "wasted": 20534
+   }
+  ],
+  "unusedCss": [],
+  "renderBlocking": [
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "bytes": 17754,
+    "wastedMs": 95
+   }
+  ],
+  "renderBlockingInsight": [
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "bytes": 17754,
+    "ms": 95
+   }
+  ],
+  "fontDisplay": {
+   "score": 1,
+   "items": []
+  },
+  "images": {
+   "uses-optimized-images": {
+    "score": 1,
+    "n": 0
+   },
+   "modern-image-formats": {
+    "score": 1,
+    "n": 0
+   },
+   "offscreen-images": {
+    "score": 1,
+    "n": 0
+   },
+   "unsized-images": {
+    "score": 1,
+    "n": 0
+   },
+   "uses-responsive-images": {
+    "score": 1,
+    "n": 0
+   },
+   "image-size-responsive": {
+    "score": 1,
+    "n": 0
+   }
+  },
+  "longTasks": [
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "start": 927,
+    "dur": 62
+   }
+  ],
+  "requests": [
+   {
+    "url": "/handbook",
+    "type": "Document",
+    "prio": "VeryHigh",
+    "start": 1,
+    "end": 12,
+    "transfer": 1764,
+    "size": 2367,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Inter-latin.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 22,
+    "end": 92,
+    "transfer": 120736,
+    "size": 119400,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Courgette-wordmark.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 22,
+    "end": 57,
+    "transfer": 6664,
+    "size": 5692,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Anton-latin.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 22,
+    "end": 68,
+    "transfer": 27945,
+    "size": 26908,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Caveat-latin.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 22,
+    "end": 89,
+    "transfer": 83207,
+    "size": 81988,
+    "status": 200
+   },
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 28,
+    "end": 86,
+    "transfer": 44762,
+    "size": 135856,
+    "status": 200
+   },
+   {
+    "url": "/assets/rolldown-runtime-hePW80VL.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 28,
+    "end": 61,
+    "transfer": 1427,
+    "size": 716,
+    "status": 200
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 28,
+    "end": 95,
+    "transfer": 60092,
+    "size": 189604,
+    "status": 200
+   },
+   {
+    "url": "/assets/icons-BtZ7qFfY.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 28,
+    "end": 78,
+    "transfer": 2796,
+    "size": 6074,
+    "status": 200
+   },
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 30,
+    "end": 84,
+    "transfer": 17754,
+    "size": 82557,
+    "status": 200
+   },
+   {
+    "url": "/assets/HandbookPage-CbRMfOQ1.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 119,
+    "end": 141,
+    "transfer": 23181,
+    "size": 80953,
+    "status": 200
+   },
+   {
+    "url": "/assets/pageScroll-CgN8Uguu.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 120,
+    "end": 138,
+    "transfer": 1835,
+    "size": 1488,
+    "status": 200
+   },
+   {
+    "url": "/assets/HandbookPage-DFbqdk19.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 120,
+    "end": 138,
+    "transfer": 2772,
+    "size": 6052,
+    "status": 200
+   },
+   {
+    "url": "/assets/subpage-Cc-b23WF.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 120,
+    "end": 139,
+    "transfer": 1573,
+    "size": 1210,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Inter-cyrillic.woff2",
+    "type": "Font",
+    "prio": "VeryHigh",
+    "start": 151,
+    "end": 159,
+    "transfer": 53051,
+    "size": 51936,
+    "status": 200
+   },
+   {
+    "url": "/favicon.svg",
+    "type": "Other",
+    "prio": "High",
+    "start": 161,
+    "end": 169,
+    "transfer": 1314,
+    "size": 507,
+    "status": 200
+   },
+   {
+    "url": "/assets/SkyScene-BZ_nlMIB.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 247,
+    "end": 262,
+    "transfer": 24248,
+    "size": 59848,
+    "status": 200
+   },
+   {
+    "url": "/assets/three-rAcLmdm5.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 247,
+    "end": 284,
+    "transfer": 187468,
+    "size": 738246,
+    "status": 200
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 247,
+    "end": 275,
+    "transfer": 73195,
+    "size": 225129,
+    "status": 200
+   },
+   {
+    "url": "/assets/wordmarkFont-D8br0Rc7.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 247,
+    "end": 268,
+    "transfer": 3441,
+    "size": 5365,
+    "status": 200
+   }
+  ],
+  "consoleErrors": [],
+  "domSize": 1617,
+  "layoutShifts": 0,
+  "nonComposited": 0,
+  "cacheTtl": 1,
+  "textCompression": 1,
+  "legacyJs": 0,
+  "duplicatedJs": 0,
+  "thirdParty": []
+ },
+ {
+  "file": "handbook-mobile-after-r1.json",
+  "page": "handbook",
+  "preset": "mobile",
+  "run": 1,
+  "env": {
+   "benchmarkIndex": 3076,
+   "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/152.0.0.0 Safari/537.36",
+   "formFactor": "mobile",
+   "throttling": "simulate"
+  },
+  "score": 65,
+  "fcp": 2182.0452,
+  "lcp": 5354.0904,
+  "tbt": 501,
+  "cls": 0,
+  "si": 2182.0452,
+  "tti": 5390.3904,
+  "maxFid": 448,
+  "bytes": 739227,
+  "lcpElement": {
+   "selector": "div.subpage > div.subpage__head > div.subpage__intro > h1.u-h1-small",
+   "snippet": "<h1 class=\"u-h1-small subpage__title handbook__title\">",
+   "label": "THE QAIRUHUB HANDBOOK"
+  },
+  "lcpPhases": [
+   {
+    "phase": "TTFB",
+    "timing": 467
+   },
+   {
+    "phase": "Load Delay",
+    "timing": 0
+   },
+   {
+    "phase": "Load Time",
+    "timing": 0
+   },
+   {
+    "phase": "Render Delay",
+    "timing": 4887
+   }
+  ],
+  "bootup": [
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "total": 903,
+    "scripting": 238,
+    "parse": 1
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "total": 825,
+    "scripting": 823,
+    "parse": 1
+   },
+   {
+    "url": "/handbook",
+    "total": 467,
+    "scripting": 3,
+    "parse": 1
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "total": 428,
+    "scripting": 316,
+    "parse": 0
+   },
+   {
+    "url": "Unattributable",
+    "total": 214,
+    "scripting": 31,
+    "parse": 0
+   }
+  ],
+  "mainThread": [
+   {
+    "group": "Script Evaluation",
+    "ms": 1427
+   },
+   {
+    "group": "Other",
+    "ms": 812
+   },
+   {
+    "group": "Style & Layout",
+    "ms": 426
+   },
+   {
+    "group": "Rendering",
+    "ms": 172
+   },
+   {
+    "group": "Garbage Collection",
+    "ms": 16
+   },
+   {
+    "group": "Parse HTML & CSS",
+    "ms": 14
+   },
+   {
+    "group": "Script Parsing & Compilation",
+    "ms": 5
+   }
+  ],
+  "unusedJs": [
+   {
+    "url": "/assets/three-rAcLmdm5.js",
+    "total": 186491,
+    "wasted": 100944
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "total": 72217,
+    "wasted": 40886
+   },
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "total": 41604,
+    "wasted": 20915
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "total": 59115,
+    "wasted": 20534
+   }
+  ],
+  "unusedCss": [],
+  "renderBlocking": [
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "bytes": 17754,
+    "wastedMs": 467
+   }
+  ],
+  "renderBlockingInsight": [
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "bytes": 17754,
+    "ms": 467
+   }
+  ],
+  "fontDisplay": {
+   "score": 1,
+   "items": []
+  },
+  "images": {
+   "uses-optimized-images": {
+    "score": 1,
+    "n": 0
+   },
+   "modern-image-formats": {
+    "score": 1,
+    "n": 0
+   },
+   "offscreen-images": {
+    "score": 1,
+    "n": 0
+   },
+   "unsized-images": {
+    "score": 1,
+    "n": 0
+   },
+   "uses-responsive-images": {
+    "score": 1,
+    "n": 0
+   },
+   "image-size-responsive": {
+    "score": 1,
+    "n": 0
+   }
+  },
+  "longTasks": [
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "start": 4604,
+    "dur": 448
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "start": 3154,
+    "dur": 93
+   },
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "start": 2435,
+    "dur": 92
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "start": 5354,
+    "dur": 66
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "start": 3069,
+    "dur": 60
+   },
+   {
+    "url": "/handbook",
+    "start": 627,
+    "dur": 54
+   }
+  ],
+  "requests": [
+   {
+    "url": "/handbook",
+    "type": "Document",
+    "prio": "VeryHigh",
+    "start": 1,
+    "end": 13,
+    "transfer": 1764,
+    "size": 2367,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Inter-latin.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 32,
+    "end": 51,
+    "transfer": 120736,
+    "size": 119400,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Courgette-wordmark.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 32,
+    "end": 67,
+    "transfer": 6664,
+    "size": 5692,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Anton-latin.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 32,
+    "end": 73,
+    "transfer": 27945,
+    "size": 26908,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Caveat-latin.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 32,
+    "end": 83,
+    "transfer": 83207,
+    "size": 81988,
+    "status": 200
+   },
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 37,
+    "end": 94,
+    "transfer": 44762,
+    "size": 135856,
+    "status": 200
+   },
+   {
+    "url": "/assets/rolldown-runtime-hePW80VL.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 39,
+    "end": 80,
+    "transfer": 1427,
+    "size": 716,
+    "status": 200
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 39,
+    "end": 98,
+    "transfer": 60092,
+    "size": 189604,
+    "status": 200
+   },
+   {
+    "url": "/assets/icons-BtZ7qFfY.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 39,
+    "end": 86,
+    "transfer": 2796,
+    "size": 6074,
+    "status": 200
+   },
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 41,
+    "end": 90,
+    "transfer": 17754,
+    "size": 82557,
+    "status": 200
+   },
+   {
+    "url": "/assets/HandbookPage-CbRMfOQ1.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 122,
+    "end": 147,
+    "transfer": 23181,
+    "size": 80953,
+    "status": 200
+   },
+   {
+    "url": "/assets/pageScroll-CgN8Uguu.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 122,
+    "end": 141,
+    "transfer": 1835,
+    "size": 1488,
+    "status": 200
+   },
+   {
+    "url": "/assets/HandbookPage-DFbqdk19.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 123,
+    "end": 143,
+    "transfer": 2773,
+    "size": 6052,
+    "status": 200
+   },
+   {
+    "url": "/assets/subpage-Cc-b23WF.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 123,
+    "end": 145,
+    "transfer": 1574,
+    "size": 1210,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Inter-cyrillic.woff2",
+    "type": "Font",
+    "prio": "VeryHigh",
+    "start": 155,
+    "end": 166,
+    "transfer": 53051,
+    "size": 51936,
+    "status": 200
+   },
+   {
+    "url": "/favicon.svg",
+    "type": "Other",
+    "prio": "High",
+    "start": 172,
+    "end": 180,
+    "transfer": 1314,
+    "size": 507,
+    "status": 200
+   },
+   {
+    "url": "/assets/SkyScene-BZ_nlMIB.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 230,
+    "end": 244,
+    "transfer": 24248,
+    "size": 59848,
+    "status": 200
+   },
+   {
+    "url": "/assets/three-rAcLmdm5.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 230,
+    "end": 268,
+    "transfer": 187468,
+    "size": 738246,
+    "status": 200
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 230,
+    "end": 259,
+    "transfer": 73195,
+    "size": 225129,
+    "status": 200
+   },
+   {
+    "url": "/assets/wordmarkFont-D8br0Rc7.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 230,
+    "end": 250,
+    "transfer": 3441,
+    "size": 5365,
+    "status": 200
+   }
+  ],
+  "consoleErrors": [],
+  "domSize": 1617,
+  "layoutShifts": 0,
+  "nonComposited": 0,
+  "cacheTtl": 1,
+  "textCompression": 1,
+  "legacyJs": 0,
+  "duplicatedJs": 0,
+  "thirdParty": []
+ },
+ {
+  "file": "handbook-mobile-after-r2.json",
+  "page": "handbook",
+  "preset": "mobile",
+  "run": 2,
+  "env": {
+   "benchmarkIndex": 3282,
+   "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/152.0.0.0 Safari/537.36",
+   "formFactor": "mobile",
+   "throttling": "simulate"
+  },
+  "score": 65,
+  "fcp": 2200.2944,
+  "lcp": 5200.588799999999,
+  "tbt": 521.5,
+  "cls": 0,
+  "si": 2238.1748707144816,
+  "tti": 5240.738799999999,
+  "maxFid": 480,
+  "bytes": 739228,
+  "lcpElement": {
+   "selector": "div.subpage > div.subpage__head > div.subpage__intro > h1.u-h1-small",
+   "snippet": "<h1 class=\"u-h1-small subpage__title handbook__title\">",
+   "label": "THE QAIRUHUB HANDBOOK"
+  },
+  "lcpPhases": [
+   {
+    "phase": "TTFB",
+    "timing": 467
+   },
+   {
+    "phase": "Load Delay",
+    "timing": 0
+   },
+   {
+    "phase": "Load Time",
+    "timing": 0
+   },
+   {
+    "phase": "Render Delay",
+    "timing": 4734
+   }
+  ],
+  "bootup": [
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "total": 910,
+    "scripting": 236,
+    "parse": 1
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "total": 879,
+    "scripting": 877,
+    "parse": 1
+   },
+   {
+    "url": "/handbook",
+    "total": 449,
+    "scripting": 4,
+    "parse": 1
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "total": 442,
+    "scripting": 337,
+    "parse": 0
+   },
+   {
+    "url": "Unattributable",
+    "total": 282,
+    "scripting": 37,
+    "parse": 0
+   }
+  ],
+  "mainThread": [
+   {
+    "group": "Script Evaluation",
+    "ms": 1516
+   },
+   {
+    "group": "Other",
+    "ms": 873
+   },
+   {
+    "group": "Style & Layout",
+    "ms": 411
+   },
+   {
+    "group": "Rendering",
+    "ms": 169
+   },
+   {
+    "group": "Garbage Collection",
+    "ms": 18
+   },
+   {
+    "group": "Parse HTML & CSS",
+    "ms": 16
+   },
+   {
+    "group": "Script Parsing & Compilation",
+    "ms": 4
+   }
+  ],
+  "unusedJs": [
+   {
+    "url": "/assets/three-rAcLmdm5.js",
+    "total": 186491,
+    "wasted": 100944
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "total": 72217,
+    "wasted": 40886
+   },
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "total": 41604,
+    "wasted": 20915
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "total": 59115,
+    "wasted": 20534
+   }
+  ],
+  "unusedCss": [],
+  "renderBlocking": [
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "bytes": 17754,
+    "wastedMs": 317
+   }
+  ],
+  "renderBlockingInsight": [
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "bytes": 17754,
+    "ms": 317
+   }
+  ],
+  "fontDisplay": {
+   "score": 1,
+   "items": []
+  },
+  "images": {
+   "uses-optimized-images": {
+    "score": 1,
+    "n": 0
+   },
+   "modern-image-formats": {
+    "score": 1,
+    "n": 0
+   },
+   "offscreen-images": {
+    "score": 1,
+    "n": 0
+   },
+   "unsized-images": {
+    "score": 1,
+    "n": 0
+   },
+   "uses-responsive-images": {
+    "score": 1,
+    "n": 0
+   },
+   "image-size-responsive": {
+    "score": 1,
+    "n": 0
+   }
+  },
+  "longTasks": [
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "start": 4510,
+    "dur": 480
+   },
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "start": 2450,
+    "dur": 91
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "start": 3009,
+    "dur": 80
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "start": 5201,
+    "dur": 73
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "start": 2917,
+    "dur": 59
+   },
+   {
+    "url": "Unattributable",
+    "start": 659,
+    "dur": 57
+   }
+  ],
+  "requests": [
+   {
+    "url": "/handbook",
+    "type": "Document",
+    "prio": "VeryHigh",
+    "start": 1,
+    "end": 13,
+    "transfer": 1764,
+    "size": 2367,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Inter-latin.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 32,
+    "end": 97,
+    "transfer": 120736,
+    "size": 119400,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Courgette-wordmark.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 32,
+    "end": 60,
+    "transfer": 6664,
+    "size": 5692,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Anton-latin.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 32,
+    "end": 72,
+    "transfer": 27945,
+    "size": 26908,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Caveat-latin.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 32,
+    "end": 93,
+    "transfer": 83207,
+    "size": 81988,
+    "status": 200
+   },
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 36,
+    "end": 91,
+    "transfer": 44762,
+    "size": 135856,
+    "status": 200
+   },
+   {
+    "url": "/assets/rolldown-runtime-hePW80VL.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 36,
+    "end": 65,
+    "transfer": 1428,
+    "size": 716,
+    "status": 200
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 38,
+    "end": 100,
+    "transfer": 60092,
+    "size": 189604,
+    "status": 200
+   },
+   {
+    "url": "/assets/icons-BtZ7qFfY.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 39,
+    "end": 83,
+    "transfer": 2796,
+    "size": 6074,
+    "status": 200
+   },
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 39,
+    "end": 87,
+    "transfer": 17754,
+    "size": 82557,
+    "status": 200
+   },
+   {
+    "url": "/assets/HandbookPage-CbRMfOQ1.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 125,
+    "end": 149,
+    "transfer": 23181,
+    "size": 80953,
+    "status": 200
+   },
+   {
+    "url": "/assets/pageScroll-CgN8Uguu.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 125,
+    "end": 145,
+    "transfer": 1835,
+    "size": 1488,
+    "status": 200
+   },
+   {
+    "url": "/assets/HandbookPage-DFbqdk19.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 126,
+    "end": 145,
+    "transfer": 2773,
+    "size": 6052,
+    "status": 200
+   },
+   {
+    "url": "/assets/subpage-Cc-b23WF.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 126,
+    "end": 146,
+    "transfer": 1574,
+    "size": 1210,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Inter-cyrillic.woff2",
+    "type": "Font",
+    "prio": "VeryHigh",
+    "start": 154,
+    "end": 162,
+    "transfer": 53051,
+    "size": 51936,
+    "status": 200
+   },
+   {
+    "url": "/favicon.svg",
+    "type": "Other",
+    "prio": "High",
+    "start": 169,
+    "end": 178,
+    "transfer": 1314,
+    "size": 507,
+    "status": 200
+   },
+   {
+    "url": "/assets/SkyScene-BZ_nlMIB.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 240,
+    "end": 254,
+    "transfer": 24248,
+    "size": 59848,
+    "status": 200
+   },
+   {
+    "url": "/assets/three-rAcLmdm5.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 240,
+    "end": 279,
+    "transfer": 187468,
+    "size": 738246,
+    "status": 200
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 240,
+    "end": 271,
+    "transfer": 73195,
+    "size": 225129,
+    "status": 200
+   },
+   {
+    "url": "/assets/wordmarkFont-D8br0Rc7.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 240,
+    "end": 260,
+    "transfer": 3441,
+    "size": 5365,
+    "status": 200
+   }
+  ],
+  "consoleErrors": [],
+  "domSize": 1617,
+  "layoutShifts": 0,
+  "nonComposited": 0,
+  "cacheTtl": 1,
+  "textCompression": 1,
+  "legacyJs": 0,
+  "duplicatedJs": 0,
+  "thirdParty": []
+ },
+ {
+  "file": "home-desktop-after-r1.json",
+  "page": "home",
+  "preset": "desktop",
+  "run": 1,
+  "env": {
+   "benchmarkIndex": 3502.5,
+   "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/152.0.0.0 Safari/537.36",
+   "formFactor": "desktop",
+   "throttling": "simulate"
+  },
+  "score": 99,
+  "fcp": 514.45165,
+  "lcp": 676.3011,
+  "tbt": 0,
+  "cls": 0,
+  "si": 1012.0233368674952,
+  "tti": 676.3011000000001,
+  "maxFid": 26,
+  "bytes": 787527,
+  "lcpElement": {
+   "selector": "nav.hdr__nav > ul.hdr__list > li.hdr__item > a.hdr__link",
+   "snippet": "<a class=\"hdr__link\" href=\"/#offer\">",
+   "label": "Programs"
+  },
+  "lcpPhases": [
+   {
+    "phase": "TTFB",
+    "timing": 138
+   },
+   {
+    "phase": "Load Delay",
+    "timing": 0
+   },
+   {
+    "phase": "Load Time",
+    "timing": 0
+   },
+   {
+    "phase": "Render Delay",
+    "timing": 538
+   }
+  ],
+  "bootup": [
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "total": 269,
+    "scripting": 51,
+    "parse": 0
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "total": 235,
+    "scripting": 187,
+    "parse": 0
+   },
+   {
+    "url": "/",
+    "total": 176,
+    "scripting": 1,
+    "parse": 0
+   },
+   {
+    "url": "Unattributable",
+    "total": 97,
+    "scripting": 45,
+    "parse": 0
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "total": 83,
+    "scripting": 82,
+    "parse": 0
+   }
+  ],
+  "mainThread": [
+   {
+    "group": "Script Evaluation",
+    "ms": 389
+   },
+   {
+    "group": "Other",
+    "ms": 256
+   },
+   {
+    "group": "Style & Layout",
+    "ms": 173
+   },
+   {
+    "group": "Rendering",
+    "ms": 54
+   },
+   {
+    "group": "Garbage Collection",
+    "ms": 14
+   },
+   {
+    "group": "Parse HTML & CSS",
+    "ms": 2
+   },
+   {
+    "group": "Script Parsing & Compilation",
+    "ms": 1
+   }
+  ],
+  "unusedJs": [
+   {
+    "url": "/assets/three-rAcLmdm5.js",
+    "total": 186491,
+    "wasted": 85169
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "total": 72217,
+    "wasted": 32894
+   }
+  ],
+  "unusedCss": [],
+  "renderBlocking": [
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "bytes": 17754,
+    "wastedMs": 98
+   }
+  ],
+  "renderBlockingInsight": [
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "bytes": 17754,
+    "ms": 98
+   }
+  ],
+  "fontDisplay": {
+   "score": 1,
+   "items": []
+  },
+  "images": {
+   "uses-optimized-images": {
+    "score": 1,
+    "n": 0
+   },
+   "modern-image-formats": {
+    "score": 1,
+    "n": 0
+   },
+   "offscreen-images": {
+    "score": 1,
+    "n": 0
+   },
+   "unsized-images": {
+    "score": 1,
+    "n": 0
+   },
+   "uses-responsive-images": {
+    "score": 1,
+    "n": 0
+   },
+   "image-size-responsive": {
+    "score": 1,
+    "n": 0
+   }
+  },
+  "longTasks": [],
+  "requests": [
+   {
+    "url": "/",
+    "type": "Document",
+    "prio": "VeryHigh",
+    "start": 1,
+    "end": 14,
+    "transfer": 1938,
+    "size": 2765,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Inter-latin.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 27,
+    "end": 73,
+    "transfer": 120736,
+    "size": 119400,
+    "status": 200
+   },
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 29,
+    "end": 68,
+    "transfer": 44762,
+    "size": 135856,
+    "status": 200
+   },
+   {
+    "url": "/assets/rolldown-runtime-hePW80VL.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 29,
+    "end": 56,
+    "transfer": 1428,
+    "size": 716,
+    "status": 200
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 30,
+    "end": 71,
+    "transfer": 60092,
+    "size": 189604,
+    "status": 200
+   },
+   {
+    "url": "/assets/icons-BtZ7qFfY.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 30,
+    "end": 57,
+    "transfer": 2796,
+    "size": 6074,
+    "status": 200
+   },
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 31,
+    "end": 65,
+    "transfer": 17754,
+    "size": 82557,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Inter-cyrillic.woff2",
+    "type": "Font",
+    "prio": "VeryHigh",
+    "start": 118,
+    "end": 128,
+    "transfer": 53051,
+    "size": 51936,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Courgette-wordmark.woff2",
+    "type": "Font",
+    "prio": "VeryHigh",
+    "start": 118,
+    "end": 155,
+    "transfer": 6664,
+    "size": 5692,
+    "status": 200
+   },
+   {
+    "url": "/favicon.svg",
+    "type": "Other",
+    "prio": "High",
+    "start": 137,
+    "end": 163,
+    "transfer": 1315,
+    "size": 507,
+    "status": 200
+   },
+   {
+    "url": "/assets/ProductDemo-BpuTiddf.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 137,
+    "end": 165,
+    "transfer": 7751,
+    "size": 21796,
+    "status": 200
+   },
+   {
+    "url": "/assets/ProductDemo-BeL7NzAZ.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 137,
+    "end": 167,
+    "transfer": 4339,
+    "size": 14336,
+    "status": 200
+   },
+   {
+    "url": "/assets/DemoForm-8E0lqTZh.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 138,
+    "end": 168,
+    "transfer": 6092,
+    "size": 13180,
+    "status": 200
+   },
+   {
+    "url": "/assets/DemoForm-C0qAN6Yn.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 138,
+    "end": 161,
+    "transfer": 2958,
+    "size": 6580,
+    "status": 200
+   },
+   {
+    "url": "/assets/wordmarkFont-D8br0Rc7.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 213,
+    "end": 227,
+    "transfer": 3441,
+    "size": 5365,
+    "status": 200
+   },
+   {
+    "url": "/assets/SkyScene-BZ_nlMIB.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 214,
+    "end": 228,
+    "transfer": 24248,
+    "size": 59848,
+    "status": 200
+   },
+   {
+    "url": "/assets/three-rAcLmdm5.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 214,
+    "end": 264,
+    "transfer": 187468,
+    "size": 738246,
+    "status": 200
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 214,
+    "end": 246,
+    "transfer": 73195,
+    "size": 225129,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Caveat-latin.woff2",
+    "type": "Font",
+    "prio": "VeryHigh",
+    "start": 242,
+    "end": 257,
+    "transfer": 83207,
+    "size": 81988,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Courgette-Regular.ttf",
+    "type": "Fetch",
+    "prio": "High",
+    "start": 246,
+    "end": 261,
+    "transfer": 56347,
+    "size": 122072,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Anton-latin.woff2",
+    "type": "Font",
+    "prio": "VeryHigh",
+    "start": 354,
+    "end": 361,
+    "transfer": 27945,
+    "size": 26908,
+    "status": 200
+   },
+   {
+    "url": "data:image/svg+xml;utf8,<svg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://w…",
+    "type": "Image",
+    "prio": "Low",
+    "start": 742,
+    "end": 742,
+    "transfer": 0,
+    "size": 228,
+    "status": 200
+   }
+  ],
+  "consoleErrors": [],
+  "domSize": 1967,
+  "layoutShifts": 0,
+  "nonComposited": 1,
+  "cacheTtl": 1,
+  "textCompression": 1,
+  "legacyJs": 0,
+  "duplicatedJs": 0,
+  "thirdParty": []
+ },
+ {
+  "file": "home-desktop-after-r2.json",
+  "page": "home",
+  "preset": "desktop",
+  "run": 2,
+  "env": {
+   "benchmarkIndex": 3059.5,
+   "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/152.0.0.0 Safari/537.36",
+   "formFactor": "desktop",
+   "throttling": "simulate"
+  },
+  "score": 99,
+  "fcp": 498.35005,
+  "lcp": 665.5667000000001,
+  "tbt": 0,
+  "cls": 0,
+  "si": 1065.979357188848,
+  "tti": 665.5667000000001,
+  "maxFid": 30,
+  "bytes": 787527,
+  "lcpElement": {
+   "selector": "nav.hdr__nav > ul.hdr__list > li.hdr__item > a.hdr__link",
+   "snippet": "<a class=\"hdr__link\" href=\"/#offer\">",
+   "label": "Programs"
+  },
+  "lcpPhases": [
+   {
+    "phase": "TTFB",
+    "timing": 133
+   },
+   {
+    "phase": "Load Delay",
+    "timing": 0
+   },
+   {
+    "phase": "Load Time",
+    "timing": 0
+   },
+   {
+    "phase": "Render Delay",
+    "timing": 533
+   }
+  ],
+  "bootup": [
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "total": 297,
+    "scripting": 55,
+    "parse": 0
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "total": 233,
+    "scripting": 179,
+    "parse": 0
+   },
+   {
+    "url": "/",
+    "total": 187,
+    "scripting": 1,
+    "parse": 0
+   },
+   {
+    "url": "Unattributable",
+    "total": 102,
+    "scripting": 45,
+    "parse": 0
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "total": 72,
+    "scripting": 71,
+    "parse": 0
+   }
+  ],
+  "mainThread": [
+   {
+    "group": "Script Evaluation",
+    "ms": 382
+   },
+   {
+    "group": "Other",
+    "ms": 285
+   },
+   {
+    "group": "Style & Layout",
+    "ms": 187
+   },
+   {
+    "group": "Rendering",
+    "ms": 58
+   },
+   {
+    "group": "Garbage Collection",
+    "ms": 14
+   },
+   {
+    "group": "Parse HTML & CSS",
+    "ms": 2
+   },
+   {
+    "group": "Script Parsing & Compilation",
+    "ms": 1
+   }
+  ],
+  "unusedJs": [
+   {
+    "url": "/assets/three-rAcLmdm5.js",
+    "total": 186491,
+    "wasted": 85169
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "total": 72217,
+    "wasted": 32894
+   }
+  ],
+  "unusedCss": [],
+  "renderBlocking": [
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "bytes": 17754,
+    "wastedMs": 93
+   }
+  ],
+  "renderBlockingInsight": [
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "bytes": 17754,
+    "ms": 93
+   }
+  ],
+  "fontDisplay": {
+   "score": 1,
+   "items": []
+  },
+  "images": {
+   "uses-optimized-images": {
+    "score": 1,
+    "n": 0
+   },
+   "modern-image-formats": {
+    "score": 1,
+    "n": 0
+   },
+   "offscreen-images": {
+    "score": 1,
+    "n": 0
+   },
+   "unsized-images": {
+    "score": 1,
+    "n": 0
+   },
+   "uses-responsive-images": {
+    "score": 1,
+    "n": 0
+   },
+   "image-size-responsive": {
+    "score": 1,
+    "n": 0
+   }
+  },
+  "longTasks": [],
+  "requests": [
+   {
+    "url": "/",
+    "type": "Document",
+    "prio": "VeryHigh",
+    "start": 1,
+    "end": 12,
+    "transfer": 1938,
+    "size": 2765,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Inter-latin.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 25,
+    "end": 83,
+    "transfer": 120736,
+    "size": 119400,
+    "status": 200
+   },
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 27,
+    "end": 78,
+    "transfer": 44762,
+    "size": 135856,
+    "status": 200
+   },
+   {
+    "url": "/assets/rolldown-runtime-hePW80VL.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 28,
+    "end": 63,
+    "transfer": 1428,
+    "size": 716,
+    "status": 200
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 28,
+    "end": 81,
+    "transfer": 60092,
+    "size": 189604,
+    "status": 200
+   },
+   {
+    "url": "/assets/icons-BtZ7qFfY.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 31,
+    "end": 67,
+    "transfer": 2796,
+    "size": 6074,
+    "status": 200
+   },
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 31,
+    "end": 74,
+    "transfer": 17754,
+    "size": 82557,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Inter-cyrillic.woff2",
+    "type": "Font",
+    "prio": "VeryHigh",
+    "start": 135,
+    "end": 144,
+    "transfer": 53051,
+    "size": 51936,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Courgette-wordmark.woff2",
+    "type": "Font",
+    "prio": "VeryHigh",
+    "start": 135,
+    "end": 147,
+    "transfer": 6664,
+    "size": 5692,
+    "status": 200
+   },
+   {
+    "url": "/favicon.svg",
+    "type": "Other",
+    "prio": "High",
+    "start": 148,
+    "end": 168,
+    "transfer": 1315,
+    "size": 507,
+    "status": 200
+   },
+   {
+    "url": "/assets/ProductDemo-BpuTiddf.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 154,
+    "end": 172,
+    "transfer": 7751,
+    "size": 21796,
+    "status": 200
+   },
+   {
+    "url": "/assets/ProductDemo-BeL7NzAZ.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 155,
+    "end": 175,
+    "transfer": 4339,
+    "size": 14336,
+    "status": 200
+   },
+   {
+    "url": "/assets/DemoForm-8E0lqTZh.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 155,
+    "end": 177,
+    "transfer": 6092,
+    "size": 13180,
+    "status": 200
+   },
+   {
+    "url": "/assets/DemoForm-C0qAN6Yn.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 155,
+    "end": 171,
+    "transfer": 2958,
+    "size": 6580,
+    "status": 200
+   },
+   {
+    "url": "/assets/wordmarkFont-D8br0Rc7.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 248,
+    "end": 262,
+    "transfer": 3441,
+    "size": 5365,
+    "status": 200
+   },
+   {
+    "url": "/assets/SkyScene-BZ_nlMIB.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 248,
+    "end": 264,
+    "transfer": 24248,
+    "size": 59848,
+    "status": 200
+   },
+   {
+    "url": "/assets/three-rAcLmdm5.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 249,
+    "end": 305,
+    "transfer": 187468,
+    "size": 738246,
+    "status": 200
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 249,
+    "end": 281,
+    "transfer": 73195,
+    "size": 225129,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Caveat-latin.woff2",
+    "type": "Font",
+    "prio": "VeryHigh",
+    "start": 275,
+    "end": 295,
+    "transfer": 83207,
+    "size": 81988,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Courgette-Regular.ttf",
+    "type": "Fetch",
+    "prio": "High",
+    "start": 281,
+    "end": 300,
+    "transfer": 56347,
+    "size": 122072,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Anton-latin.woff2",
+    "type": "Font",
+    "prio": "VeryHigh",
+    "start": 401,
+    "end": 410,
+    "transfer": 27945,
+    "size": 26908,
+    "status": 200
+   },
+   {
+    "url": "data:image/svg+xml;utf8,<svg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://w…",
+    "type": "Image",
+    "prio": "Low",
+    "start": 789,
+    "end": 790,
+    "transfer": 0,
+    "size": 228,
+    "status": 200
+   }
+  ],
+  "consoleErrors": [],
+  "domSize": 1967,
+  "layoutShifts": 0,
+  "nonComposited": 1,
+  "cacheTtl": 1,
+  "textCompression": 1,
+  "legacyJs": 0,
+  "duplicatedJs": 0,
+  "thirdParty": []
+ },
+ {
+  "file": "home-mobile-after-r1.json",
+  "page": "home",
+  "preset": "mobile",
+  "run": 1,
+  "env": {
+   "benchmarkIndex": 3557.5,
+   "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/152.0.0.0 Safari/537.36",
+   "formFactor": "mobile",
+   "throttling": "simulate"
+  },
+  "score": 92,
+  "fcp": 2146.66125,
+  "lcp": 3031.1075,
+  "tbt": 58,
+  "cls": 0,
+  "si": 2868.0430302976893,
+  "tti": 5361.9141875000005,
+  "maxFid": 100,
+  "bytes": 787526,
+  "lcpElement": {
+   "selector": "div.grid-air > div.hdr__actions > a.btn > span.u-body-2",
+   "snippet": "<span class=\"u-body-2\">",
+   "label": "Open platform"
+  },
+  "lcpPhases": [
+   {
+    "phase": "TTFB",
+    "timing": 466
+   },
+   {
+    "phase": "Load Delay",
+    "timing": 0
+   },
+   {
+    "phase": "Load Time",
+    "timing": 0
+   },
+   {
+    "phase": "Render Delay",
+    "timing": 2566
+   }
+  ],
+  "bootup": [
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "total": 1868,
+    "scripting": 282,
+    "parse": 1
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "total": 817,
+    "scripting": 598,
+    "parse": 0
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "total": 436,
+    "scripting": 433,
+    "parse": 1
+   },
+   {
+    "url": "Unattributable",
+    "total": 382,
+    "scripting": 181,
+    "parse": 0
+   },
+   {
+    "url": "/",
+    "total": 194,
+    "scripting": 5,
+    "parse": 1
+   }
+  ],
+  "mainThread": [
+   {
+    "group": "Script Evaluation",
+    "ms": 1571
+   },
+   {
+    "group": "Other",
+    "ms": 1211
+   },
+   {
+    "group": "Style & Layout",
+    "ms": 722
+   },
+   {
+    "group": "Rendering",
+    "ms": 242
+   },
+   {
+    "group": "Garbage Collection",
+    "ms": 32
+   },
+   {
+    "group": "Parse HTML & CSS",
+    "ms": 9
+   },
+   {
+    "group": "Script Parsing & Compilation",
+    "ms": 4
+   }
+  ],
+  "unusedJs": [
+   {
+    "url": "/assets/three-rAcLmdm5.js",
+    "total": 186491,
+    "wasted": 85142
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "total": 72217,
+    "wasted": 37578
+   }
+  ],
+  "unusedCss": [],
+  "renderBlocking": [
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "bytes": 17754,
+    "wastedMs": 616
+   }
+  ],
+  "renderBlockingInsight": [
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "bytes": 17754,
+    "ms": 616
+   }
+  ],
+  "fontDisplay": {
+   "score": 1,
+   "items": []
+  },
+  "images": {
+   "uses-optimized-images": {
+    "score": 1,
+    "n": 0
+   },
+   "modern-image-formats": {
+    "score": 1,
+    "n": 0
+   },
+   "offscreen-images": {
+    "score": 1,
+    "n": 0
+   },
+   "unsized-images": {
+    "score": 1,
+    "n": 0
+   },
+   "uses-responsive-images": {
+    "score": 1,
+    "n": 0
+   },
+   "image-size-responsive": {
+    "score": 1,
+    "n": 0
+   }
+  },
+  "longTasks": [
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "start": 5015,
+    "dur": 100
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "start": 3017,
+    "dur": 76
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "start": 5612,
+    "dur": 64
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "start": 2926,
+    "dur": 50
+   }
+  ],
+  "requests": [
+   {
+    "url": "/",
+    "type": "Document",
+    "prio": "VeryHigh",
+    "start": 1,
+    "end": 14,
+    "transfer": 1938,
+    "size": 2765,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Inter-latin.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 31,
+    "end": 82,
+    "transfer": 120736,
+    "size": 119400,
+    "status": 200
+   },
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 35,
+    "end": 74,
+    "transfer": 44762,
+    "size": 135856,
+    "status": 200
+   },
+   {
+    "url": "/assets/rolldown-runtime-hePW80VL.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 36,
+    "end": 61,
+    "transfer": 1427,
+    "size": 716,
+    "status": 200
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 36,
+    "end": 80,
+    "transfer": 60092,
+    "size": 189604,
+    "status": 200
+   },
+   {
+    "url": "/assets/icons-BtZ7qFfY.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 37,
+    "end": 70,
+    "transfer": 2796,
+    "size": 6074,
+    "status": 200
+   },
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 38,
+    "end": 76,
+    "transfer": 17754,
+    "size": 82557,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Inter-cyrillic.woff2",
+    "type": "Font",
+    "prio": "VeryHigh",
+    "start": 131,
+    "end": 139,
+    "transfer": 53051,
+    "size": 51936,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Courgette-wordmark.woff2",
+    "type": "Font",
+    "prio": "VeryHigh",
+    "start": 131,
+    "end": 142,
+    "transfer": 6664,
+    "size": 5692,
+    "status": 200
+   },
+   {
+    "url": "/favicon.svg",
+    "type": "Other",
+    "prio": "High",
+    "start": 143,
+    "end": 163,
+    "transfer": 1315,
+    "size": 507,
+    "status": 200
+   },
+   {
+    "url": "/assets/ProductDemo-BpuTiddf.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 144,
+    "end": 169,
+    "transfer": 7751,
+    "size": 21796,
+    "status": 200
+   },
+   {
+    "url": "/assets/ProductDemo-BeL7NzAZ.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 144,
+    "end": 163,
+    "transfer": 4339,
+    "size": 14336,
+    "status": 200
+   },
+   {
+    "url": "/assets/DemoForm-8E0lqTZh.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 144,
+    "end": 170,
+    "transfer": 6092,
+    "size": 13180,
+    "status": 200
+   },
+   {
+    "url": "/assets/DemoForm-C0qAN6Yn.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 144,
+    "end": 167,
+    "transfer": 2958,
+    "size": 6580,
+    "status": 200
+   },
+   {
+    "url": "/assets/wordmarkFont-D8br0Rc7.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 232,
+    "end": 245,
+    "transfer": 3441,
+    "size": 5365,
+    "status": 200
+   },
+   {
+    "url": "/assets/SkyScene-BZ_nlMIB.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 233,
+    "end": 247,
+    "transfer": 24248,
+    "size": 59848,
+    "status": 200
+   },
+   {
+    "url": "/assets/three-rAcLmdm5.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 234,
+    "end": 279,
+    "transfer": 187468,
+    "size": 738246,
+    "status": 200
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 234,
+    "end": 267,
+    "transfer": 73195,
+    "size": 225129,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Caveat-latin.woff2",
+    "type": "Font",
+    "prio": "VeryHigh",
+    "start": 253,
+    "end": 270,
+    "transfer": 83207,
+    "size": 81988,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Courgette-Regular.ttf",
+    "type": "Fetch",
+    "prio": "High",
+    "start": 260,
+    "end": 275,
+    "transfer": 56347,
+    "size": 122072,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Anton-latin.woff2",
+    "type": "Font",
+    "prio": "VeryHigh",
+    "start": 360,
+    "end": 367,
+    "transfer": 27945,
+    "size": 26908,
+    "status": 200
+   },
+   {
+    "url": "data:image/svg+xml;utf8,<svg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://w…",
+    "type": "Image",
+    "prio": "Low",
+    "start": 744,
+    "end": 745,
+    "transfer": 0,
+    "size": 228,
+    "status": 200
+   }
+  ],
+  "consoleErrors": [],
+  "domSize": 1967,
+  "layoutShifts": 0,
+  "nonComposited": 1,
+  "cacheTtl": 1,
+  "textCompression": 1,
+  "legacyJs": 0,
+  "duplicatedJs": 0,
+  "thirdParty": []
+ },
+ {
+  "file": "home-mobile-after-r2.json",
+  "page": "home",
+  "preset": "mobile",
+  "run": 2,
+  "env": {
+   "benchmarkIndex": 3159,
+   "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/152.0.0.0 Safari/537.36",
+   "formFactor": "mobile",
+   "throttling": "simulate"
+  },
+  "score": 91,
+  "fcp": 2217.7161,
+  "lcp": 3028.4774,
+  "tbt": 88.5,
+  "cls": 0,
+  "si": 2887.852882287095,
+  "tti": 5293.974785,
+  "maxFid": 102,
+  "bytes": 787526,
+  "lcpElement": {
+   "selector": "div.grid-air > div.hdr__actions > a.btn > span.u-body-2",
+   "snippet": "<span class=\"u-body-2\">",
+   "label": "Open platform"
+  },
+  "lcpPhases": [
+   {
+    "phase": "TTFB",
+    "timing": 464
+   },
+   {
+    "phase": "Load Delay",
+    "timing": 0
+   },
+   {
+    "phase": "Load Time",
+    "timing": 0
+   },
+   {
+    "phase": "Render Delay",
+    "timing": 2564
+   }
+  ],
+  "bootup": [
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "total": 2059,
+    "scripting": 291,
+    "parse": 1
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "total": 825,
+    "scripting": 647,
+    "parse": 0
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "total": 416,
+    "scripting": 414,
+    "parse": 1
+   },
+   {
+    "url": "Unattributable",
+    "total": 412,
+    "scripting": 212,
+    "parse": 0
+   },
+   {
+    "url": "/",
+    "total": 197,
+    "scripting": 4,
+    "parse": 0
+   }
+  ],
+  "mainThread": [
+   {
+    "group": "Script Evaluation",
+    "ms": 1636
+   },
+   {
+    "group": "Other",
+    "ms": 1329
+   },
+   {
+    "group": "Style & Layout",
+    "ms": 728
+   },
+   {
+    "group": "Rendering",
+    "ms": 269
+   },
+   {
+    "group": "Garbage Collection",
+    "ms": 38
+   },
+   {
+    "group": "Parse HTML & CSS",
+    "ms": 8
+   },
+   {
+    "group": "Script Parsing & Compilation",
+    "ms": 5
+   }
+  ],
+  "unusedJs": [
+   {
+    "url": "/assets/three-rAcLmdm5.js",
+    "total": 186491,
+    "wasted": 85142
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "total": 72217,
+    "wasted": 37578
+   }
+  ],
+  "unusedCss": [],
+  "renderBlocking": [
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "bytes": 17754,
+    "wastedMs": 614
+   }
+  ],
+  "renderBlockingInsight": [
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "bytes": 17754,
+    "ms": 614
+   }
+  ],
+  "fontDisplay": {
+   "score": 1,
+   "items": []
+  },
+  "images": {
+   "uses-optimized-images": {
+    "score": 1,
+    "n": 0
+   },
+   "modern-image-formats": {
+    "score": 1,
+    "n": 0
+   },
+   "offscreen-images": {
+    "score": 1,
+    "n": 0
+   },
+   "unsized-images": {
+    "score": 1,
+    "n": 0
+   },
+   "uses-responsive-images": {
+    "score": 1,
+    "n": 0
+   },
+   "image-size-responsive": {
+    "score": 1,
+    "n": 0
+   }
+  },
+  "longTasks": [
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "start": 4862,
+    "dur": 102
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "start": 2831,
+    "dur": 74
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "start": 5485,
+    "dur": 71
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "start": 4964,
+    "dur": 54
+   },
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "start": 2333,
+    "dur": 50
+   }
+  ],
+  "requests": [
+   {
+    "url": "/",
+    "type": "Document",
+    "prio": "VeryHigh",
+    "start": 1,
+    "end": 10,
+    "transfer": 1938,
+    "size": 2765,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Inter-latin.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 40,
+    "end": 92,
+    "transfer": 120736,
+    "size": 119400,
+    "status": 200
+   },
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 43,
+    "end": 87,
+    "transfer": 44762,
+    "size": 135856,
+    "status": 200
+   },
+   {
+    "url": "/assets/rolldown-runtime-hePW80VL.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 43,
+    "end": 73,
+    "transfer": 1428,
+    "size": 716,
+    "status": 200
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 43,
+    "end": 90,
+    "transfer": 60092,
+    "size": 189604,
+    "status": 200
+   },
+   {
+    "url": "/assets/icons-BtZ7qFfY.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 45,
+    "end": 76,
+    "transfer": 2796,
+    "size": 6074,
+    "status": 200
+   },
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 45,
+    "end": 82,
+    "transfer": 17754,
+    "size": 82557,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Inter-cyrillic.woff2",
+    "type": "Font",
+    "prio": "VeryHigh",
+    "start": 135,
+    "end": 143,
+    "transfer": 53051,
+    "size": 51936,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Courgette-wordmark.woff2",
+    "type": "Font",
+    "prio": "VeryHigh",
+    "start": 135,
+    "end": 146,
+    "transfer": 6664,
+    "size": 5692,
+    "status": 200
+   },
+   {
+    "url": "/favicon.svg",
+    "type": "Other",
+    "prio": "High",
+    "start": 146,
+    "end": 163,
+    "transfer": 1315,
+    "size": 507,
+    "status": 200
+   },
+   {
+    "url": "/assets/ProductDemo-BpuTiddf.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 147,
+    "end": 168,
+    "transfer": 7751,
+    "size": 21796,
+    "status": 200
+   },
+   {
+    "url": "/assets/ProductDemo-BeL7NzAZ.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 147,
+    "end": 164,
+    "transfer": 4339,
+    "size": 14336,
+    "status": 200
+   },
+   {
+    "url": "/assets/DemoForm-8E0lqTZh.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 148,
+    "end": 167,
+    "transfer": 6092,
+    "size": 13180,
+    "status": 200
+   },
+   {
+    "url": "/assets/DemoForm-C0qAN6Yn.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 148,
+    "end": 165,
+    "transfer": 2958,
+    "size": 6580,
+    "status": 200
+   },
+   {
+    "url": "/assets/wordmarkFont-D8br0Rc7.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 218,
+    "end": 234,
+    "transfer": 3441,
+    "size": 5365,
+    "status": 200
+   },
+   {
+    "url": "/assets/SkyScene-BZ_nlMIB.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 220,
+    "end": 237,
+    "transfer": 24248,
+    "size": 59848,
+    "status": 200
+   },
+   {
+    "url": "/assets/three-rAcLmdm5.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 220,
+    "end": 290,
+    "transfer": 187468,
+    "size": 738246,
+    "status": 200
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 220,
+    "end": 257,
+    "transfer": 73195,
+    "size": 225129,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Caveat-latin.woff2",
+    "type": "Font",
+    "prio": "VeryHigh",
+    "start": 246,
+    "end": 281,
+    "transfer": 83207,
+    "size": 81988,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Courgette-Regular.ttf",
+    "type": "Fetch",
+    "prio": "High",
+    "start": 253,
+    "end": 285,
+    "transfer": 56346,
+    "size": 122072,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Anton-latin.woff2",
+    "type": "Font",
+    "prio": "VeryHigh",
+    "start": 364,
+    "end": 372,
+    "transfer": 27945,
+    "size": 26908,
+    "status": 200
+   },
+   {
+    "url": "data:image/svg+xml;utf8,<svg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://w…",
+    "type": "Image",
+    "prio": "Low",
+    "start": 750,
+    "end": 750,
+    "transfer": 0,
+    "size": 228,
+    "status": 200
+   }
+  ],
+  "consoleErrors": [],
+  "domSize": 1967,
+  "layoutShifts": 0,
+  "nonComposited": 1,
+  "cacheTtl": 1,
+  "textCompression": 1,
+  "legacyJs": 0,
+  "duplicatedJs": 0,
+  "thirdParty": []
+ },
+ {
+  "file": "kk-desktop-after-r1.json",
+  "page": "kk",
+  "preset": "desktop",
+  "run": 1,
+  "env": {
+   "benchmarkIndex": 3185.5,
+   "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/152.0.0.0 Safari/537.36",
+   "formFactor": "desktop",
+   "throttling": "simulate"
+  },
+  "score": 99,
+  "fcp": 428.02660000000003,
+  "lcp": 624.0266,
+  "tbt": 0,
+  "cls": 0,
+  "si": 1060.5012711217964,
+  "tti": 624.0266000000001,
+  "maxFid": 24,
+  "bytes": 901376,
+  "lcpElement": {
+   "selector": "nav.hdr__nav > ul.hdr__list > li.hdr__item > a.hdr__link",
+   "snippet": "<a class=\"hdr__link\" href=\"/kk/#offer\">",
+   "label": "Бағдарламалар"
+  },
+  "lcpPhases": [
+   {
+    "phase": "TTFB",
+    "timing": 132
+   },
+   {
+    "phase": "Load Delay",
+    "timing": 0
+   },
+   {
+    "phase": "Load Time",
+    "timing": 0
+   },
+   {
+    "phase": "Render Delay",
+    "timing": 492
+   }
+  ],
+  "bootup": [
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "total": 282,
+    "scripting": 52,
+    "parse": 0
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "total": 256,
+    "scripting": 165,
+    "parse": 0
+   },
+   {
+    "url": "/kk/",
+    "total": 140,
+    "scripting": 1,
+    "parse": 0
+   },
+   {
+    "url": "Unattributable",
+    "total": 115,
+    "scripting": 47,
+    "parse": 0
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "total": 72,
+    "scripting": 72,
+    "parse": 0
+   }
+  ],
+  "mainThread": [
+   {
+    "group": "Script Evaluation",
+    "ms": 364
+   },
+   {
+    "group": "Other",
+    "ms": 282
+   },
+   {
+    "group": "Style & Layout",
+    "ms": 184
+   },
+   {
+    "group": "Rendering",
+    "ms": 52
+   },
+   {
+    "group": "Garbage Collection",
+    "ms": 15
+   },
+   {
+    "group": "Parse HTML & CSS",
+    "ms": 3
+   },
+   {
+    "group": "Script Parsing & Compilation",
+    "ms": 1
+   }
+  ],
+  "unusedJs": [
+   {
+    "url": "/assets/three-rAcLmdm5.js",
+    "total": 186491,
+    "wasted": 85554
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "total": 72217,
+    "wasted": 32894
+   }
+  ],
+  "unusedCss": [],
+  "renderBlocking": [
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "bytes": 17754,
+    "wastedMs": 92
+   }
+  ],
+  "renderBlockingInsight": [
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "bytes": 17754,
+    "ms": 92
+   }
+  ],
+  "fontDisplay": {
+   "score": 1,
+   "items": []
+  },
+  "images": {
+   "uses-optimized-images": {
+    "score": 1,
+    "n": 0
+   },
+   "modern-image-formats": {
+    "score": 1,
+    "n": 0
+   },
+   "offscreen-images": {
+    "score": 1,
+    "n": 0
+   },
+   "unsized-images": {
+    "score": 1,
+    "n": 0
+   },
+   "uses-responsive-images": {
+    "score": 1,
+    "n": 0
+   },
+   "image-size-responsive": {
+    "score": 1,
+    "n": 0
+   }
+  },
+  "longTasks": [],
+  "requests": [
+   {
+    "url": "/kk/",
+    "type": "Document",
+    "prio": "VeryHigh",
+    "start": 1,
+    "end": 11,
+    "transfer": 2116,
+    "size": 3391,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Inter-latin.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 22,
+    "end": 77,
+    "transfer": 120736,
+    "size": 119400,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Oswald-600-cyrillic.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 22,
+    "end": 51,
+    "transfer": 11285,
+    "size": 10300,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Inter-cyrillic.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 22,
+    "end": 66,
+    "transfer": 53051,
+    "size": 51936,
+    "status": 200
+   },
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 25,
+    "end": 74,
+    "transfer": 44762,
+    "size": 135856,
+    "status": 200
+   },
+   {
+    "url": "/assets/rolldown-runtime-hePW80VL.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 26,
+    "end": 52,
+    "transfer": 1428,
+    "size": 716,
+    "status": 200
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 26,
+    "end": 81,
+    "transfer": 60092,
+    "size": 189604,
+    "status": 200
+   },
+   {
+    "url": "/assets/icons-BtZ7qFfY.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 26,
+    "end": 62,
+    "transfer": 2796,
+    "size": 6074,
+    "status": 200
+   },
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 27,
+    "end": 71,
+    "transfer": 17754,
+    "size": 82557,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Courgette-wordmark.woff2",
+    "type": "Font",
+    "prio": "VeryHigh",
+    "start": 133,
+    "end": 142,
+    "transfer": 6664,
+    "size": 5692,
+    "status": 200
+   },
+   {
+    "url": "/favicon.svg",
+    "type": "Other",
+    "prio": "High",
+    "start": 142,
+    "end": 150,
+    "transfer": 1314,
+    "size": 507,
+    "status": 200
+   },
+   {
+    "url": "/assets/ProductDemo-BpuTiddf.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 204,
+    "end": 224,
+    "transfer": 7751,
+    "size": 21796,
+    "status": 200
+   },
+   {
+    "url": "/assets/ProductDemo-BeL7NzAZ.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 205,
+    "end": 220,
+    "transfer": 4339,
+    "size": 14336,
+    "status": 200
+   },
+   {
+    "url": "/assets/DemoForm-8E0lqTZh.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 205,
+    "end": 225,
+    "transfer": 6092,
+    "size": 13180,
+    "status": 200
+   },
+   {
+    "url": "/assets/DemoForm-C0qAN6Yn.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 206,
+    "end": 221,
+    "transfer": 2958,
+    "size": 6580,
+    "status": 200
+   },
+   {
+    "url": "/assets/wordmarkFont-D8br0Rc7.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 222,
+    "end": 238,
+    "transfer": 3441,
+    "size": 5365,
+    "status": 200
+   },
+   {
+    "url": "/assets/SkyScene-BZ_nlMIB.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 224,
+    "end": 245,
+    "transfer": 24248,
+    "size": 59848,
+    "status": 200
+   },
+   {
+    "url": "/assets/three-rAcLmdm5.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 224,
+    "end": 276,
+    "transfer": 187468,
+    "size": 738246,
+    "status": 200
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 225,
+    "end": 262,
+    "transfer": 73195,
+    "size": 225129,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Caveat-cyrillic.woff2",
+    "type": "Font",
+    "prio": "VeryHigh",
+    "start": 250,
+    "end": 267,
+    "transfer": 102387,
+    "size": 101116,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Courgette-Regular.ttf",
+    "type": "Fetch",
+    "prio": "High",
+    "start": 252,
+    "end": 270,
+    "transfer": 56347,
+    "size": 122072,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Caveat-latin.woff2",
+    "type": "Font",
+    "prio": "VeryHigh",
+    "start": 298,
+    "end": 308,
+    "transfer": 83207,
+    "size": 81988,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Anton-latin.woff2",
+    "type": "Font",
+    "prio": "VeryHigh",
+    "start": 298,
+    "end": 313,
+    "transfer": 27945,
+    "size": 26908,
+    "status": 200
+   },
+   {
+    "url": "data:image/svg+xml;utf8,<svg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://w…",
+    "type": "Image",
+    "prio": "Low",
+    "start": 767,
+    "end": 767,
+    "transfer": 0,
+    "size": 228,
+    "status": 200
+   }
+  ],
+  "consoleErrors": [],
+  "domSize": 1967,
+  "layoutShifts": 0,
+  "nonComposited": 1,
+  "cacheTtl": 1,
+  "textCompression": 1,
+  "legacyJs": 0,
+  "duplicatedJs": 0,
+  "thirdParty": []
+ },
+ {
+  "file": "kk-desktop-after-r2.json",
+  "page": "kk",
+  "preset": "desktop",
+  "run": 2,
+  "env": {
+   "benchmarkIndex": 3172,
+   "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/152.0.0.0 Safari/537.36",
+   "formFactor": "desktop",
+   "throttling": "simulate"
+  },
+  "score": 99,
+  "fcp": 424.3822,
+  "lcp": 624.3822,
+  "tbt": 0,
+  "cls": 0,
+  "si": 1059.4541279907194,
+  "tti": 624.3822,
+  "maxFid": 31,
+  "bytes": 901375,
+  "lcpElement": {
+   "selector": "nav.hdr__nav > ul.hdr__list > li.hdr__item > a.hdr__link",
+   "snippet": "<a class=\"hdr__link\" href=\"/kk/#offer\">",
+   "label": "Бағдарламалар"
+  },
+  "lcpPhases": [
+   {
+    "phase": "TTFB",
+    "timing": 132
+   },
+   {
+    "phase": "Load Delay",
+    "timing": 0
+   },
+   {
+    "phase": "Load Time",
+    "timing": 0
+   },
+   {
+    "phase": "Render Delay",
+    "timing": 492
+   }
+  ],
+  "bootup": [
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "total": 290,
+    "scripting": 54,
+    "parse": 0
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "total": 261,
+    "scripting": 172,
+    "parse": 0
+   },
+   {
+    "url": "/kk/",
+    "total": 152,
+    "scripting": 1,
+    "parse": 0
+   },
+   {
+    "url": "Unattributable",
+    "total": 113,
+    "scripting": 53,
+    "parse": 0
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "total": 65,
+    "scripting": 65,
+    "parse": 0
+   }
+  ],
+  "mainThread": [
+   {
+    "group": "Script Evaluation",
+    "ms": 371
+   },
+   {
+    "group": "Other",
+    "ms": 277
+   },
+   {
+    "group": "Style & Layout",
+    "ms": 192
+   },
+   {
+    "group": "Rendering",
+    "ms": 55
+   },
+   {
+    "group": "Garbage Collection",
+    "ms": 18
+   },
+   {
+    "group": "Parse HTML & CSS",
+    "ms": 2
+   },
+   {
+    "group": "Script Parsing & Compilation",
+    "ms": 1
+   }
+  ],
+  "unusedJs": [
+   {
+    "url": "/assets/three-rAcLmdm5.js",
+    "total": 186491,
+    "wasted": 85554
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "total": 72217,
+    "wasted": 32894
+   }
+  ],
+  "unusedCss": [],
+  "renderBlocking": [
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "bytes": 17754,
+    "wastedMs": 92
+   }
+  ],
+  "renderBlockingInsight": [
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "bytes": 17754,
+    "ms": 92
+   }
+  ],
+  "fontDisplay": {
+   "score": 1,
+   "items": []
+  },
+  "images": {
+   "uses-optimized-images": {
+    "score": 1,
+    "n": 0
+   },
+   "modern-image-formats": {
+    "score": 1,
+    "n": 0
+   },
+   "offscreen-images": {
+    "score": 1,
+    "n": 0
+   },
+   "unsized-images": {
+    "score": 1,
+    "n": 0
+   },
+   "uses-responsive-images": {
+    "score": 1,
+    "n": 0
+   },
+   "image-size-responsive": {
+    "score": 1,
+    "n": 0
+   }
+  },
+  "longTasks": [],
+  "requests": [
+   {
+    "url": "/kk/",
+    "type": "Document",
+    "prio": "VeryHigh",
+    "start": 1,
+    "end": 14,
+    "transfer": 2116,
+    "size": 3391,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Inter-latin.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 26,
+    "end": 80,
+    "transfer": 120736,
+    "size": 119400,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Oswald-600-cyrillic.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 26,
+    "end": 55,
+    "transfer": 11285,
+    "size": 10300,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Inter-cyrillic.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 26,
+    "end": 62,
+    "transfer": 53051,
+    "size": 51936,
+    "status": 200
+   },
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 29,
+    "end": 83,
+    "transfer": 44762,
+    "size": 135856,
+    "status": 200
+   },
+   {
+    "url": "/assets/rolldown-runtime-hePW80VL.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 30,
+    "end": 64,
+    "transfer": 1427,
+    "size": 716,
+    "status": 200
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 30,
+    "end": 86,
+    "transfer": 60092,
+    "size": 189604,
+    "status": 200
+   },
+   {
+    "url": "/assets/icons-BtZ7qFfY.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 30,
+    "end": 73,
+    "transfer": 2796,
+    "size": 6074,
+    "status": 200
+   },
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 30,
+    "end": 78,
+    "transfer": 17754,
+    "size": 82557,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Courgette-wordmark.woff2",
+    "type": "Font",
+    "prio": "VeryHigh",
+    "start": 128,
+    "end": 134,
+    "transfer": 6664,
+    "size": 5692,
+    "status": 200
+   },
+   {
+    "url": "/favicon.svg",
+    "type": "Other",
+    "prio": "High",
+    "start": 140,
+    "end": 148,
+    "transfer": 1314,
+    "size": 507,
+    "status": 200
+   },
+   {
+    "url": "/assets/ProductDemo-BpuTiddf.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 199,
+    "end": 216,
+    "transfer": 7751,
+    "size": 21796,
+    "status": 200
+   },
+   {
+    "url": "/assets/ProductDemo-BeL7NzAZ.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 199,
+    "end": 230,
+    "transfer": 4339,
+    "size": 14336,
+    "status": 200
+   },
+   {
+    "url": "/assets/DemoForm-8E0lqTZh.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 200,
+    "end": 213,
+    "transfer": 6092,
+    "size": 13180,
+    "status": 200
+   },
+   {
+    "url": "/assets/DemoForm-C0qAN6Yn.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 200,
+    "end": 217,
+    "transfer": 2958,
+    "size": 6580,
+    "status": 200
+   },
+   {
+    "url": "/assets/wordmarkFont-D8br0Rc7.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 232,
+    "end": 247,
+    "transfer": 3441,
+    "size": 5365,
+    "status": 200
+   },
+   {
+    "url": "/assets/SkyScene-BZ_nlMIB.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 233,
+    "end": 249,
+    "transfer": 24248,
+    "size": 59848,
+    "status": 200
+   },
+   {
+    "url": "/assets/three-rAcLmdm5.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 233,
+    "end": 288,
+    "transfer": 187468,
+    "size": 738246,
+    "status": 200
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 234,
+    "end": 270,
+    "transfer": 73195,
+    "size": 225129,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Caveat-cyrillic.woff2",
+    "type": "Font",
+    "prio": "VeryHigh",
+    "start": 258,
+    "end": 280,
+    "transfer": 102387,
+    "size": 101116,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Courgette-Regular.ttf",
+    "type": "Fetch",
+    "prio": "High",
+    "start": 260,
+    "end": 277,
+    "transfer": 56347,
+    "size": 122072,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Caveat-latin.woff2",
+    "type": "Font",
+    "prio": "VeryHigh",
+    "start": 309,
+    "end": 319,
+    "transfer": 83207,
+    "size": 81988,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Anton-latin.woff2",
+    "type": "Font",
+    "prio": "VeryHigh",
+    "start": 310,
+    "end": 320,
+    "transfer": 27945,
+    "size": 26908,
+    "status": 200
+   },
+   {
+    "url": "data:image/svg+xml;utf8,<svg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://w…",
+    "type": "Image",
+    "prio": "Low",
+    "start": 783,
+    "end": 783,
+    "transfer": 0,
+    "size": 228,
+    "status": 200
+   }
+  ],
+  "consoleErrors": [],
+  "domSize": 1967,
+  "layoutShifts": 0,
+  "nonComposited": 1,
+  "cacheTtl": 1,
+  "textCompression": 1,
+  "legacyJs": 0,
+  "duplicatedJs": 0,
+  "thirdParty": []
+ },
+ {
+  "file": "kk-mobile-after-r1.json",
+  "page": "kk",
+  "preset": "mobile",
+  "run": 1,
+  "env": {
+   "benchmarkIndex": 3380,
+   "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/152.0.0.0 Safari/537.36",
+   "formFactor": "mobile",
+   "throttling": "simulate"
+  },
+  "score": 93,
+  "fcp": 1822.7471,
+  "lcp": 2872.7470999999996,
+  "tbt": 71.5,
+  "cls": 0,
+  "si": 3102.4568166037297,
+  "tti": 5961.9093975,
+  "maxFid": 92,
+  "bytes": 901375,
+  "lcpElement": {
+   "selector": "div.grid-air > div.hdr__actions > a.btn > span.u-body-2",
+   "snippet": "<span class=\"u-body-2\">",
+   "label": "Платформаны ашу"
+  },
+  "lcpPhases": [
+   {
+    "phase": "TTFB",
+    "timing": 461
+   },
+   {
+    "phase": "Load Delay",
+    "timing": 0
+   },
+   {
+    "phase": "Load Time",
+    "timing": 0
+   },
+   {
+    "phase": "Render Delay",
+    "timing": 2411
+   }
+  ],
+  "bootup": [
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "total": 1603,
+    "scripting": 261,
+    "parse": 0
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "total": 923,
+    "scripting": 565,
+    "parse": 0
+   },
+   {
+    "url": "Unattributable",
+    "total": 408,
+    "scripting": 207,
+    "parse": 0
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "total": 370,
+    "scripting": 368,
+    "parse": 1
+   },
+   {
+    "url": "/kk/",
+    "total": 176,
+    "scripting": 4,
+    "parse": 0
+   }
+  ],
+  "mainThread": [
+   {
+    "group": "Script Evaluation",
+    "ms": 1472
+   },
+   {
+    "group": "Other",
+    "ms": 1114
+   },
+   {
+    "group": "Style & Layout",
+    "ms": 716
+   },
+   {
+    "group": "Rendering",
+    "ms": 227
+   },
+   {
+    "group": "Garbage Collection",
+    "ms": 29
+   },
+   {
+    "group": "Parse HTML & CSS",
+    "ms": 10
+   },
+   {
+    "group": "Script Parsing & Compilation",
+    "ms": 4
+   }
+  ],
+  "unusedJs": [
+   {
+    "url": "/assets/three-rAcLmdm5.js",
+    "total": 186491,
+    "wasted": 85142
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "total": 72217,
+    "wasted": 37578
+   }
+  ],
+  "unusedCss": [],
+  "renderBlocking": [
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "bytes": 17754,
+    "wastedMs": 611
+   }
+  ],
+  "renderBlockingInsight": [
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "bytes": 17754,
+    "ms": 611
+   }
+  ],
+  "fontDisplay": {
+   "score": 1,
+   "items": []
+  },
+  "images": {
+   "uses-optimized-images": {
+    "score": 1,
+    "n": 0
+   },
+   "modern-image-formats": {
+    "score": 1,
+    "n": 0
+   },
+   "offscreen-images": {
+    "score": 1,
+    "n": 0
+   },
+   "unsized-images": {
+    "score": 1,
+    "n": 0
+   },
+   "uses-responsive-images": {
+    "score": 1,
+    "n": 0
+   },
+   "image-size-responsive": {
+    "score": 1,
+    "n": 0
+   }
+  },
+  "longTasks": [
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "start": 5504,
+    "dur": 92
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "start": 3172,
+    "dur": 72
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "start": 6218,
+    "dur": 63
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "start": 3115,
+    "dur": 57
+   },
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "start": 3244,
+    "dur": 56
+   }
+  ],
+  "requests": [
+   {
+    "url": "/kk/",
+    "type": "Document",
+    "prio": "VeryHigh",
+    "start": 1,
+    "end": 14,
+    "transfer": 2116,
+    "size": 3391,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Inter-latin.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 30,
+    "end": 83,
+    "transfer": 120736,
+    "size": 119400,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Oswald-600-cyrillic.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 30,
+    "end": 60,
+    "transfer": 11285,
+    "size": 10300,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Inter-cyrillic.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 30,
+    "end": 69,
+    "transfer": 53051,
+    "size": 51936,
+    "status": 200
+   },
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 34,
+    "end": 81,
+    "transfer": 44762,
+    "size": 135856,
+    "status": 200
+   },
+   {
+    "url": "/assets/rolldown-runtime-hePW80VL.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 35,
+    "end": 66,
+    "transfer": 1427,
+    "size": 716,
+    "status": 200
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 36,
+    "end": 87,
+    "transfer": 60092,
+    "size": 189604,
+    "status": 200
+   },
+   {
+    "url": "/assets/icons-BtZ7qFfY.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 36,
+    "end": 75,
+    "transfer": 2796,
+    "size": 6074,
+    "status": 200
+   },
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 36,
+    "end": 80,
+    "transfer": 17754,
+    "size": 82557,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Courgette-wordmark.woff2",
+    "type": "Font",
+    "prio": "VeryHigh",
+    "start": 131,
+    "end": 143,
+    "transfer": 6664,
+    "size": 5692,
+    "status": 200
+   },
+   {
+    "url": "/favicon.svg",
+    "type": "Other",
+    "prio": "High",
+    "start": 140,
+    "end": 150,
+    "transfer": 1314,
+    "size": 507,
+    "status": 200
+   },
+   {
+    "url": "/assets/ProductDemo-BpuTiddf.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 205,
+    "end": 221,
+    "transfer": 7751,
+    "size": 21796,
+    "status": 200
+   },
+   {
+    "url": "/assets/ProductDemo-BeL7NzAZ.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 205,
+    "end": 219,
+    "transfer": 4339,
+    "size": 14336,
+    "status": 200
+   },
+   {
+    "url": "/assets/DemoForm-8E0lqTZh.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 206,
+    "end": 223,
+    "transfer": 6092,
+    "size": 13180,
+    "status": 200
+   },
+   {
+    "url": "/assets/DemoForm-C0qAN6Yn.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 206,
+    "end": 222,
+    "transfer": 2958,
+    "size": 6580,
+    "status": 200
+   },
+   {
+    "url": "/assets/wordmarkFont-D8br0Rc7.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 245,
+    "end": 257,
+    "transfer": 3441,
+    "size": 5365,
+    "status": 200
+   },
+   {
+    "url": "/assets/SkyScene-BZ_nlMIB.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 245,
+    "end": 260,
+    "transfer": 24248,
+    "size": 59848,
+    "status": 200
+   },
+   {
+    "url": "/assets/three-rAcLmdm5.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 245,
+    "end": 297,
+    "transfer": 187468,
+    "size": 738246,
+    "status": 200
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 246,
+    "end": 285,
+    "transfer": 73195,
+    "size": 225129,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Caveat-cyrillic.woff2",
+    "type": "Font",
+    "prio": "VeryHigh",
+    "start": 266,
+    "end": 291,
+    "transfer": 102387,
+    "size": 101116,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Courgette-Regular.ttf",
+    "type": "Fetch",
+    "prio": "High",
+    "start": 269,
+    "end": 288,
+    "transfer": 56347,
+    "size": 122072,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Caveat-latin.woff2",
+    "type": "Font",
+    "prio": "VeryHigh",
+    "start": 305,
+    "end": 312,
+    "transfer": 83207,
+    "size": 81988,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Anton-latin.woff2",
+    "type": "Font",
+    "prio": "VeryHigh",
+    "start": 305,
+    "end": 314,
+    "transfer": 27945,
+    "size": 26908,
+    "status": 200
+   },
+   {
+    "url": "data:image/svg+xml;utf8,<svg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://w…",
+    "type": "Image",
+    "prio": "Low",
+    "start": 763,
+    "end": 763,
+    "transfer": 0,
+    "size": 228,
+    "status": 200
+   }
+  ],
+  "consoleErrors": [],
+  "domSize": 1967,
+  "layoutShifts": 0,
+  "nonComposited": 1,
+  "cacheTtl": 1,
+  "textCompression": 1,
+  "legacyJs": 0,
+  "duplicatedJs": 0,
+  "thirdParty": []
+ },
+ {
+  "file": "kk-mobile-after-r2.json",
+  "page": "kk",
+  "preset": "mobile",
+  "run": 2,
+  "env": {
+   "benchmarkIndex": 3079,
+   "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/152.0.0.0 Safari/537.36",
+   "formFactor": "mobile",
+   "throttling": "simulate"
+  },
+  "score": 92,
+  "fcp": 1827.0317,
+  "lcp": 2877.0317000000005,
+  "tbt": 137,
+  "cls": 0,
+  "si": 3009.5770663242274,
+  "tti": 5984.177232500001,
+  "maxFid": 102,
+  "bytes": 901376,
+  "lcpElement": {
+   "selector": "div.grid-air > div.hdr__actions > a.btn > span.u-body-2",
+   "snippet": "<span class=\"u-body-2\">",
+   "label": "Платформаны ашу"
+  },
+  "lcpPhases": [
+   {
+    "phase": "TTFB",
+    "timing": 464
+   },
+   {
+    "phase": "Load Delay",
+    "timing": 0
+   },
+   {
+    "phase": "Load Time",
+    "timing": 0
+   },
+   {
+    "phase": "Render Delay",
+    "timing": 2414
+   }
+  ],
+  "bootup": [
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "total": 1921,
+    "scripting": 298,
+    "parse": 1
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "total": 1052,
+    "scripting": 687,
+    "parse": 0
+   },
+   {
+    "url": "Unattributable",
+    "total": 417,
+    "scripting": 191,
+    "parse": 0
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "total": 411,
+    "scripting": 407,
+    "parse": 1
+   },
+   {
+    "url": "/kk/",
+    "total": 176,
+    "scripting": 3,
+    "parse": 0
+   }
+  ],
+  "mainThread": [
+   {
+    "group": "Script Evaluation",
+    "ms": 1670
+   },
+   {
+    "group": "Other",
+    "ms": 1292
+   },
+   {
+    "group": "Style & Layout",
+    "ms": 816
+   },
+   {
+    "group": "Rendering",
+    "ms": 252
+   },
+   {
+    "group": "Garbage Collection",
+    "ms": 45
+   },
+   {
+    "group": "Parse HTML & CSS",
+    "ms": 11
+   },
+   {
+    "group": "Script Parsing & Compilation",
+    "ms": 5
+   }
+  ],
+  "unusedJs": [
+   {
+    "url": "/assets/three-rAcLmdm5.js",
+    "total": 186491,
+    "wasted": 85142
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "total": 72217,
+    "wasted": 37578
+   }
+  ],
+  "unusedCss": [],
+  "renderBlocking": [
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "bytes": 17754,
+    "wastedMs": 614
+   }
+  ],
+  "renderBlockingInsight": [
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "bytes": 17754,
+    "ms": 614
+   }
+  ],
+  "fontDisplay": {
+   "score": 1,
+   "items": []
+  },
+  "images": {
+   "uses-optimized-images": {
+    "score": 1,
+    "n": 0
+   },
+   "modern-image-formats": {
+    "score": 1,
+    "n": 0
+   },
+   "offscreen-images": {
+    "score": 1,
+    "n": 0
+   },
+   "unsized-images": {
+    "score": 1,
+    "n": 0
+   },
+   "uses-responsive-images": {
+    "score": 1,
+    "n": 0
+   },
+   "image-size-responsive": {
+    "score": 1,
+    "n": 0
+   }
+  },
+  "longTasks": [
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "start": 3200,
+    "dur": 102
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "start": 5498,
+    "dur": 101
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "start": 6231,
+    "dur": 71
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "start": 3135,
+    "dur": 65
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "start": 5643,
+    "dur": 58
+   },
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "start": 3302,
+    "dur": 56
+   }
+  ],
+  "requests": [
+   {
+    "url": "/kk/",
+    "type": "Document",
+    "prio": "VeryHigh",
+    "start": 1,
+    "end": 12,
+    "transfer": 2116,
+    "size": 3391,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Inter-latin.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 26,
+    "end": 91,
+    "transfer": 120736,
+    "size": 119400,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Oswald-600-cyrillic.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 26,
+    "end": 62,
+    "transfer": 11285,
+    "size": 10300,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Inter-cyrillic.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 26,
+    "end": 73,
+    "transfer": 53051,
+    "size": 51936,
+    "status": 200
+   },
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 28,
+    "end": 87,
+    "transfer": 44762,
+    "size": 135856,
+    "status": 200
+   },
+   {
+    "url": "/assets/rolldown-runtime-hePW80VL.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 31,
+    "end": 70,
+    "transfer": 1428,
+    "size": 716,
+    "status": 200
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 31,
+    "end": 95,
+    "transfer": 60092,
+    "size": 189604,
+    "status": 200
+   },
+   {
+    "url": "/assets/icons-BtZ7qFfY.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 31,
+    "end": 82,
+    "transfer": 2796,
+    "size": 6074,
+    "status": 200
+   },
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 31,
+    "end": 88,
+    "transfer": 17754,
+    "size": 82557,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Courgette-wordmark.woff2",
+    "type": "Font",
+    "prio": "VeryHigh",
+    "start": 143,
+    "end": 153,
+    "transfer": 6664,
+    "size": 5692,
+    "status": 200
+   },
+   {
+    "url": "/favicon.svg",
+    "type": "Other",
+    "prio": "High",
+    "start": 150,
+    "end": 158,
+    "transfer": 1314,
+    "size": 507,
+    "status": 200
+   },
+   {
+    "url": "/assets/ProductDemo-BpuTiddf.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 214,
+    "end": 239,
+    "transfer": 7751,
+    "size": 21796,
+    "status": 200
+   },
+   {
+    "url": "/assets/ProductDemo-BeL7NzAZ.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 214,
+    "end": 238,
+    "transfer": 4339,
+    "size": 14336,
+    "status": 200
+   },
+   {
+    "url": "/assets/DemoForm-8E0lqTZh.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 214,
+    "end": 250,
+    "transfer": 6092,
+    "size": 13180,
+    "status": 200
+   },
+   {
+    "url": "/assets/DemoForm-C0qAN6Yn.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 215,
+    "end": 241,
+    "transfer": 2958,
+    "size": 6580,
+    "status": 200
+   },
+   {
+    "url": "/assets/wordmarkFont-D8br0Rc7.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 225,
+    "end": 245,
+    "transfer": 3441,
+    "size": 5365,
+    "status": 200
+   },
+   {
+    "url": "/assets/SkyScene-BZ_nlMIB.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 226,
+    "end": 257,
+    "transfer": 24248,
+    "size": 59848,
+    "status": 200
+   },
+   {
+    "url": "/assets/three-rAcLmdm5.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 226,
+    "end": 285,
+    "transfer": 187468,
+    "size": 738246,
+    "status": 200
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 226,
+    "end": 275,
+    "transfer": 73195,
+    "size": 225129,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Caveat-cyrillic.woff2",
+    "type": "Font",
+    "prio": "VeryHigh",
+    "start": 254,
+    "end": 273,
+    "transfer": 102387,
+    "size": 101116,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Courgette-Regular.ttf",
+    "type": "Fetch",
+    "prio": "High",
+    "start": 258,
+    "end": 277,
+    "transfer": 56347,
+    "size": 122072,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Caveat-latin.woff2",
+    "type": "Font",
+    "prio": "VeryHigh",
+    "start": 300,
+    "end": 313,
+    "transfer": 83207,
+    "size": 81988,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Anton-latin.woff2",
+    "type": "Font",
+    "prio": "VeryHigh",
+    "start": 301,
+    "end": 316,
+    "transfer": 27945,
+    "size": 26908,
+    "status": 200
+   },
+   {
+    "url": "data:image/svg+xml;utf8,<svg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://w…",
+    "type": "Image",
+    "prio": "Low",
+    "start": 767,
+    "end": 767,
+    "transfer": 0,
+    "size": 228,
+    "status": 200
+   }
+  ],
+  "consoleErrors": [],
+  "domSize": 1967,
+  "layoutShifts": 0,
+  "nonComposited": 1,
+  "cacheTtl": 1,
+  "textCompression": 1,
+  "legacyJs": 0,
+  "duplicatedJs": 0,
+  "thirdParty": []
+ },
+ {
+  "file": "members-desktop-after-r1.json",
+  "page": "members",
+  "preset": "desktop",
+  "run": 1,
+  "env": {
+   "benchmarkIndex": 3275,
+   "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/152.0.0.0 Safari/537.36",
+   "formFactor": "desktop",
+   "throttling": "simulate"
+  },
+  "score": 99,
+  "fcp": 468.56264999999996,
+  "lcp": 747.3751,
+  "tbt": 58.5,
+  "cls": 0,
+  "si": 759.5749165951985,
+  "tti": 1039.1752999999999,
+  "maxFid": 111,
+  "bytes": 720810,
+  "lcpElement": {
+   "selector": "header.hdr > div.grid-air > a.hdr__logo > span.wordmark",
+   "snippet": "<span class=\"wordmark inline-block select-none\" lang=\"en\" aria-hidden=\"true\" style=\"font-size: 28px;\">",
+   "label": "qairuhub"
+  },
+  "lcpPhases": [
+   {
+    "phase": "TTFB",
+    "timing": 134
+   },
+   {
+    "phase": "Load Delay",
+    "timing": 0
+   },
+   {
+    "phase": "Load Time",
+    "timing": 0
+   },
+   {
+    "phase": "Render Delay",
+    "timing": 614
+   }
+  ],
+  "bootup": [
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "total": 222,
+    "scripting": 53,
+    "parse": 0
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "total": 200,
+    "scripting": 199,
+    "parse": 0
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "total": 156,
+    "scripting": 129,
+    "parse": 0
+   },
+   {
+    "url": "/members",
+    "total": 94,
+    "scripting": 1,
+    "parse": 0
+   },
+   {
+    "url": "Unattributable",
+    "total": 51,
+    "scripting": 11,
+    "parse": 0
+   }
+  ],
+  "mainThread": [
+   {
+    "group": "Script Evaluation",
+    "ms": 399
+   },
+   {
+    "group": "Other",
+    "ms": 204
+   },
+   {
+    "group": "Style & Layout",
+    "ms": 86
+   },
+   {
+    "group": "Rendering",
+    "ms": 39
+   },
+   {
+    "group": "Garbage Collection",
+    "ms": 5
+   },
+   {
+    "group": "Parse HTML & CSS",
+    "ms": 2
+   },
+   {
+    "group": "Script Parsing & Compilation",
+    "ms": 1
+   }
+  ],
+  "unusedJs": [
+   {
+    "url": "/assets/three-rAcLmdm5.js",
+    "total": 186491,
+    "wasted": 100944
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "total": 72217,
+    "wasted": 40886
+   },
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "total": 41604,
+    "wasted": 20776
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "total": 59115,
+    "wasted": 20546
+   }
+  ],
+  "unusedCss": [],
+  "renderBlocking": [
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "bytes": 17754,
+    "wastedMs": 94
+   }
+  ],
+  "renderBlockingInsight": [
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "bytes": 17754,
+    "ms": 94
+   }
+  ],
+  "fontDisplay": {
+   "score": 1,
+   "items": []
+  },
+  "images": {
+   "uses-optimized-images": {
+    "score": 1,
+    "n": 0
+   },
+   "modern-image-formats": {
+    "score": 1,
+    "n": 0
+   },
+   "offscreen-images": {
+    "score": 1,
+    "n": 0
+   },
+   "unsized-images": {
+    "score": 1,
+    "n": 0
+   },
+   "uses-responsive-images": {
+    "score": 1,
+    "n": 0
+   },
+   "image-size-responsive": {
+    "score": 1,
+    "n": 0
+   }
+  },
+  "longTasks": [
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "start": 933,
+    "dur": 111
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "start": 695,
+    "dur": 53
+   }
+  ],
+  "requests": [
+   {
+    "url": "/members",
+    "type": "Document",
+    "prio": "VeryHigh",
+    "start": 1,
+    "end": 13,
+    "transfer": 1752,
+    "size": 2330,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Inter-latin.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 23,
+    "end": 90,
+    "transfer": 120736,
+    "size": 119400,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Courgette-wordmark.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 23,
+    "end": 51,
+    "transfer": 6664,
+    "size": 5692,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Anton-latin.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 24,
+    "end": 53,
+    "transfer": 27945,
+    "size": 26908,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Caveat-latin.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 24,
+    "end": 83,
+    "transfer": 83207,
+    "size": 81988,
+    "status": 200
+   },
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 28,
+    "end": 88,
+    "transfer": 44762,
+    "size": 135856,
+    "status": 200
+   },
+   {
+    "url": "/assets/rolldown-runtime-hePW80VL.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 28,
+    "end": 66,
+    "transfer": 1428,
+    "size": 716,
+    "status": 200
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 28,
+    "end": 93,
+    "transfer": 60092,
+    "size": 189604,
+    "status": 200
+   },
+   {
+    "url": "/assets/icons-BtZ7qFfY.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 29,
+    "end": 75,
+    "transfer": 2796,
+    "size": 6074,
+    "status": 200
+   },
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 29,
+    "end": 81,
+    "transfer": 17754,
+    "size": 82557,
+    "status": 200
+   },
+   {
+    "url": "/assets/MembersPage-BIMHBA0T.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 115,
+    "end": 130,
+    "transfer": 5277,
+    "size": 12640,
+    "status": 200
+   },
+   {
+    "url": "/assets/pageScroll-CgN8Uguu.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 115,
+    "end": 131,
+    "transfer": 1835,
+    "size": 1488,
+    "status": 200
+   },
+   {
+    "url": "/assets/MembersPage-Cf8tOaP5.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 116,
+    "end": 132,
+    "transfer": 2272,
+    "size": 4858,
+    "status": 200
+   },
+   {
+    "url": "/assets/subpage-Cc-b23WF.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 116,
+    "end": 133,
+    "transfer": 1574,
+    "size": 1210,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Inter-cyrillic.woff2",
+    "type": "Font",
+    "prio": "VeryHigh",
+    "start": 143,
+    "end": 153,
+    "transfer": 53051,
+    "size": 51936,
+    "status": 200
+   },
+   {
+    "url": "/favicon.svg",
+    "type": "Other",
+    "prio": "High",
+    "start": 160,
+    "end": 168,
+    "transfer": 1314,
+    "size": 507,
+    "status": 200
+   },
+   {
+    "url": "/assets/SkyScene-BZ_nlMIB.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 219,
+    "end": 233,
+    "transfer": 24248,
+    "size": 59848,
+    "status": 200
+   },
+   {
+    "url": "/assets/three-rAcLmdm5.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 219,
+    "end": 254,
+    "transfer": 187468,
+    "size": 738246,
+    "status": 200
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 219,
+    "end": 244,
+    "transfer": 73195,
+    "size": 225129,
+    "status": 200
+   },
+   {
+    "url": "/assets/wordmarkFont-D8br0Rc7.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 219,
+    "end": 236,
+    "transfer": 3440,
+    "size": 5365,
+    "status": 200
+   }
+  ],
+  "consoleErrors": [],
+  "domSize": 508,
+  "layoutShifts": 0,
+  "nonComposited": 0,
+  "cacheTtl": 1,
+  "textCompression": 1,
+  "legacyJs": 0,
+  "duplicatedJs": 0,
+  "thirdParty": []
+ },
+ {
+  "file": "members-desktop-after-r2.json",
+  "page": "members",
+  "preset": "desktop",
+  "run": 2,
+  "env": {
+   "benchmarkIndex": 3184.5,
+   "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/152.0.0.0 Safari/537.36",
+   "formFactor": "desktop",
+   "throttling": "simulate"
+  },
+  "score": 99,
+  "fcp": 473.17909999999995,
+  "lcp": 749.1194,
+  "tbt": 94,
+  "cls": 0,
+  "si": 765.0234953055246,
+  "tti": 1042.3582000000001,
+  "maxFid": 114.99999999999989,
+  "bytes": 720811,
+  "lcpElement": {
+   "selector": "header.hdr > div.grid-air > a.hdr__logo > span.wordmark",
+   "snippet": "<span class=\"wordmark inline-block select-none\" lang=\"en\" aria-hidden=\"true\" style=\"font-size: 28px;\">",
+   "label": "qairuhub"
+  },
+  "lcpPhases": [
+   {
+    "phase": "TTFB",
+    "timing": 135
+   },
+   {
+    "phase": "Load Delay",
+    "timing": 0
+   },
+   {
+    "phase": "Load Time",
+    "timing": 0
+   },
+   {
+    "phase": "Render Delay",
+    "timing": 615
+   }
+  ],
+  "bootup": [
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "total": 217,
+    "scripting": 53,
+    "parse": 0
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "total": 201,
+    "scripting": 200,
+    "parse": 0
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "total": 189,
+    "scripting": 158,
+    "parse": 0
+   },
+   {
+    "url": "/members",
+    "total": 98,
+    "scripting": 1,
+    "parse": 0
+   },
+   {
+    "url": "Unattributable",
+    "total": 53,
+    "scripting": 11,
+    "parse": 0
+   }
+  ],
+  "mainThread": [
+   {
+    "group": "Script Evaluation",
+    "ms": 430
+   },
+   {
+    "group": "Other",
+    "ms": 203
+   },
+   {
+    "group": "Style & Layout",
+    "ms": 89
+   },
+   {
+    "group": "Rendering",
+    "ms": 39
+   },
+   {
+    "group": "Garbage Collection",
+    "ms": 5
+   },
+   {
+    "group": "Parse HTML & CSS",
+    "ms": 2
+   },
+   {
+    "group": "Script Parsing & Compilation",
+    "ms": 1
+   }
+  ],
+  "unusedJs": [
+   {
+    "url": "/assets/three-rAcLmdm5.js",
+    "total": 186491,
+    "wasted": 100944
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "total": 72217,
+    "wasted": 40886
+   },
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "total": 41604,
+    "wasted": 20776
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "total": 59115,
+    "wasted": 20546
+   }
+  ],
+  "unusedCss": [],
+  "renderBlocking": [
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "bytes": 17754,
+    "wastedMs": 95
+   }
+  ],
+  "renderBlockingInsight": [
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "bytes": 17754,
+    "ms": 95
+   }
+  ],
+  "fontDisplay": {
+   "score": 1,
+   "items": []
+  },
+  "images": {
+   "uses-optimized-images": {
+    "score": 1,
+    "n": 0
+   },
+   "modern-image-formats": {
+    "score": 1,
+    "n": 0
+   },
+   "offscreen-images": {
+    "score": 1,
+    "n": 0
+   },
+   "unsized-images": {
+    "score": 1,
+    "n": 0
+   },
+   "uses-responsive-images": {
+    "score": 1,
+    "n": 0
+   },
+   "image-size-responsive": {
+    "score": 1,
+    "n": 0
+   }
+  },
+  "longTasks": [
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "start": 927,
+    "dur": 115
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "start": 702,
+    "dur": 79
+   }
+  ],
+  "requests": [
+   {
+    "url": "/members",
+    "type": "Document",
+    "prio": "VeryHigh",
+    "start": 1,
+    "end": 11,
+    "transfer": 1752,
+    "size": 2330,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Inter-latin.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 22,
+    "end": 82,
+    "transfer": 120736,
+    "size": 119400,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Courgette-wordmark.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 22,
+    "end": 49,
+    "transfer": 6664,
+    "size": 5692,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Anton-latin.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 22,
+    "end": 61,
+    "transfer": 27945,
+    "size": 26908,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Caveat-latin.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 23,
+    "end": 79,
+    "transfer": 83207,
+    "size": 81988,
+    "status": 200
+   },
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 28,
+    "end": 77,
+    "transfer": 44762,
+    "size": 135856,
+    "status": 200
+   },
+   {
+    "url": "/assets/rolldown-runtime-hePW80VL.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 28,
+    "end": 55,
+    "transfer": 1428,
+    "size": 716,
+    "status": 200
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 28,
+    "end": 86,
+    "transfer": 60092,
+    "size": 189604,
+    "status": 200
+   },
+   {
+    "url": "/assets/icons-BtZ7qFfY.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 28,
+    "end": 70,
+    "transfer": 2796,
+    "size": 6074,
+    "status": 200
+   },
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 30,
+    "end": 74,
+    "transfer": 17754,
+    "size": 82557,
+    "status": 200
+   },
+   {
+    "url": "/assets/MembersPage-BIMHBA0T.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 111,
+    "end": 132,
+    "transfer": 5277,
+    "size": 12640,
+    "status": 200
+   },
+   {
+    "url": "/assets/pageScroll-CgN8Uguu.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 111,
+    "end": 129,
+    "transfer": 1835,
+    "size": 1488,
+    "status": 200
+   },
+   {
+    "url": "/assets/MembersPage-Cf8tOaP5.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 111,
+    "end": 128,
+    "transfer": 2272,
+    "size": 4858,
+    "status": 200
+   },
+   {
+    "url": "/assets/subpage-Cc-b23WF.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 112,
+    "end": 131,
+    "transfer": 1574,
+    "size": 1210,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Inter-cyrillic.woff2",
+    "type": "Font",
+    "prio": "VeryHigh",
+    "start": 142,
+    "end": 153,
+    "transfer": 53051,
+    "size": 51936,
+    "status": 200
+   },
+   {
+    "url": "/favicon.svg",
+    "type": "Other",
+    "prio": "High",
+    "start": 160,
+    "end": 171,
+    "transfer": 1314,
+    "size": 507,
+    "status": 200
+   },
+   {
+    "url": "/assets/SkyScene-BZ_nlMIB.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 242,
+    "end": 256,
+    "transfer": 24248,
+    "size": 59848,
+    "status": 200
+   },
+   {
+    "url": "/assets/three-rAcLmdm5.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 242,
+    "end": 278,
+    "transfer": 187468,
+    "size": 738246,
+    "status": 200
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 242,
+    "end": 269,
+    "transfer": 73195,
+    "size": 225129,
+    "status": 200
+   },
+   {
+    "url": "/assets/wordmarkFont-D8br0Rc7.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 242,
+    "end": 260,
+    "transfer": 3441,
+    "size": 5365,
+    "status": 200
+   }
+  ],
+  "consoleErrors": [],
+  "domSize": 508,
+  "layoutShifts": 0,
+  "nonComposited": 0,
+  "cacheTtl": 1,
+  "textCompression": 1,
+  "legacyJs": 0,
+  "duplicatedJs": 0,
+  "thirdParty": []
+ },
+ {
+  "file": "members-mobile-after-r1.json",
+  "page": "members",
+  "preset": "mobile",
+  "run": 1,
+  "env": {
+   "benchmarkIndex": 3260,
+   "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/152.0.0.0 Safari/537.36",
+   "formFactor": "mobile",
+   "throttling": "simulate"
+  },
+  "score": 75,
+  "fcp": 2151.3015,
+  "lcp": 3784.201,
+  "tbt": 464,
+  "cls": 0,
+  "si": 2296.6060506964163,
+  "tti": 5291.603000000001,
+  "maxFid": 418,
+  "bytes": 720810,
+  "lcpElement": {
+   "selector": "header.hdr > div.grid-air > a.hdr__logo > span.wordmark",
+   "snippet": "<span class=\"wordmark inline-block select-none\" lang=\"en\" aria-hidden=\"true\" style=\"font-size: 28px;\">",
+   "label": "qairuhub"
+  },
+  "lcpPhases": [
+   {
+    "phase": "TTFB",
+    "timing": 467
+   },
+   {
+    "phase": "Load Delay",
+    "timing": 0
+   },
+   {
+    "phase": "Load Time",
+    "timing": 0
+   },
+   {
+    "phase": "Render Delay",
+    "timing": 3317
+   }
+  ],
+  "bootup": [
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "total": 973,
+    "scripting": 216,
+    "parse": 1
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "total": 781,
+    "scripting": 778,
+    "parse": 1
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "total": 460,
+    "scripting": 347,
+    "parse": 0
+   },
+   {
+    "url": "/members",
+    "total": 393,
+    "scripting": 3,
+    "parse": 0
+   },
+   {
+    "url": "Unattributable",
+    "total": 251,
+    "scripting": 42,
+    "parse": 0
+   }
+  ],
+  "mainThread": [
+   {
+    "group": "Script Evaluation",
+    "ms": 1403
+   },
+   {
+    "group": "Other",
+    "ms": 927
+   },
+   {
+    "group": "Style & Layout",
+    "ms": 368
+   },
+   {
+    "group": "Rendering",
+    "ms": 169
+   },
+   {
+    "group": "Garbage Collection",
+    "ms": 15
+   },
+   {
+    "group": "Parse HTML & CSS",
+    "ms": 9
+   },
+   {
+    "group": "Script Parsing & Compilation",
+    "ms": 4
+   }
+  ],
+  "unusedJs": [
+   {
+    "url": "/assets/three-rAcLmdm5.js",
+    "total": 186491,
+    "wasted": 100944
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "total": 72217,
+    "wasted": 40886
+   },
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "total": 41604,
+    "wasted": 20776
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "total": 59115,
+    "wasted": 20546
+   }
+  ],
+  "unusedCss": [],
+  "renderBlocking": [
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "bytes": 17754,
+    "wastedMs": 617
+   }
+  ],
+  "renderBlockingInsight": [
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "bytes": 17754,
+    "ms": 617
+   }
+  ],
+  "fontDisplay": {
+   "score": 1,
+   "items": []
+  },
+  "images": {
+   "uses-optimized-images": {
+    "score": 1,
+    "n": 0
+   },
+   "modern-image-formats": {
+    "score": 1,
+    "n": 0
+   },
+   "offscreen-images": {
+    "score": 1,
+    "n": 0
+   },
+   "unsized-images": {
+    "score": 1,
+    "n": 0
+   },
+   "uses-responsive-images": {
+    "score": 1,
+    "n": 0
+   },
+   "image-size-responsive": {
+    "score": 1,
+    "n": 0
+   }
+  },
+  "longTasks": [
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "start": 4603,
+    "dur": 418
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "start": 3153,
+    "dur": 90
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "start": 5203,
+    "dur": 89
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "start": 3068,
+    "dur": 67
+   }
+  ],
+  "requests": [
+   {
+    "url": "/members",
+    "type": "Document",
+    "prio": "VeryHigh",
+    "start": 1,
+    "end": 13,
+    "transfer": 1752,
+    "size": 2330,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Inter-latin.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 27,
+    "end": 92,
+    "transfer": 120736,
+    "size": 119400,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Courgette-wordmark.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 28,
+    "end": 56,
+    "transfer": 6664,
+    "size": 5692,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Anton-latin.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 28,
+    "end": 61,
+    "transfer": 27945,
+    "size": 26908,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Caveat-latin.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 28,
+    "end": 87,
+    "transfer": 83207,
+    "size": 81988,
+    "status": 200
+   },
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 33,
+    "end": 90,
+    "transfer": 44762,
+    "size": 135856,
+    "status": 200
+   },
+   {
+    "url": "/assets/rolldown-runtime-hePW80VL.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 33,
+    "end": 72,
+    "transfer": 1428,
+    "size": 716,
+    "status": 200
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 33,
+    "end": 96,
+    "transfer": 60092,
+    "size": 189604,
+    "status": 200
+   },
+   {
+    "url": "/assets/icons-BtZ7qFfY.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 33,
+    "end": 80,
+    "transfer": 2796,
+    "size": 6074,
+    "status": 200
+   },
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 35,
+    "end": 84,
+    "transfer": 17754,
+    "size": 82557,
+    "status": 200
+   },
+   {
+    "url": "/assets/MembersPage-BIMHBA0T.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 124,
+    "end": 144,
+    "transfer": 5277,
+    "size": 12640,
+    "status": 200
+   },
+   {
+    "url": "/assets/pageScroll-CgN8Uguu.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 125,
+    "end": 147,
+    "transfer": 1835,
+    "size": 1488,
+    "status": 200
+   },
+   {
+    "url": "/assets/MembersPage-Cf8tOaP5.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 125,
+    "end": 146,
+    "transfer": 2272,
+    "size": 4858,
+    "status": 200
+   },
+   {
+    "url": "/assets/subpage-Cc-b23WF.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 125,
+    "end": 148,
+    "transfer": 1574,
+    "size": 1210,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Inter-cyrillic.woff2",
+    "type": "Font",
+    "prio": "VeryHigh",
+    "start": 154,
+    "end": 165,
+    "transfer": 53051,
+    "size": 51936,
+    "status": 200
+   },
+   {
+    "url": "/favicon.svg",
+    "type": "Other",
+    "prio": "High",
+    "start": 162,
+    "end": 172,
+    "transfer": 1314,
+    "size": 507,
+    "status": 200
+   },
+   {
+    "url": "/assets/SkyScene-BZ_nlMIB.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 225,
+    "end": 242,
+    "transfer": 24248,
+    "size": 59848,
+    "status": 200
+   },
+   {
+    "url": "/assets/three-rAcLmdm5.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 225,
+    "end": 269,
+    "transfer": 187468,
+    "size": 738246,
+    "status": 200
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 225,
+    "end": 259,
+    "transfer": 73195,
+    "size": 225129,
+    "status": 200
+   },
+   {
+    "url": "/assets/wordmarkFont-D8br0Rc7.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 225,
+    "end": 245,
+    "transfer": 3440,
+    "size": 5365,
+    "status": 200
+   }
+  ],
+  "consoleErrors": [],
+  "domSize": 508,
+  "layoutShifts": 0,
+  "nonComposited": 0,
+  "cacheTtl": 1,
+  "textCompression": 1,
+  "legacyJs": 0,
+  "duplicatedJs": 0,
+  "thirdParty": []
+ },
+ {
+  "file": "members-mobile-after-r2.json",
+  "page": "members",
+  "preset": "mobile",
+  "run": 2,
+  "env": {
+   "benchmarkIndex": 3159.5,
+   "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/152.0.0.0 Safari/537.36",
+   "formFactor": "mobile",
+   "throttling": "simulate"
+  },
+  "score": 78,
+  "fcp": 2045.7856000000002,
+  "lcp": 3633.1904,
+  "tbt": 420,
+  "cls": 0,
+  "si": 2321.1978262573703,
+  "tti": 5117.8212,
+  "maxFid": 426,
+  "bytes": 720810,
+  "lcpElement": {
+   "selector": "header.hdr > div.grid-air > a.hdr__logo > span.wordmark",
+   "snippet": "<span class=\"wordmark inline-block select-none\" lang=\"en\" aria-hidden=\"true\" style=\"font-size: 28px;\">",
+   "label": "qairuhub"
+  },
+  "lcpPhases": [
+   {
+    "phase": "TTFB",
+    "timing": 467
+   },
+   {
+    "phase": "Load Delay",
+    "timing": 0
+   },
+   {
+    "phase": "Load Time",
+    "timing": 0
+   },
+   {
+    "phase": "Render Delay",
+    "timing": 3167
+   }
+  ],
+  "bootup": [
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "total": 1008,
+    "scripting": 240,
+    "parse": 1
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "total": 836,
+    "scripting": 833,
+    "parse": 1
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "total": 410,
+    "scripting": 306,
+    "parse": 0
+   },
+   {
+    "url": "/members",
+    "total": 391,
+    "scripting": 4,
+    "parse": 1
+   },
+   {
+    "url": "Unattributable",
+    "total": 211,
+    "scripting": 33,
+    "parse": 0
+   }
+  ],
+  "mainThread": [
+   {
+    "group": "Script Evaluation",
+    "ms": 1436
+   },
+   {
+    "group": "Other",
+    "ms": 900
+   },
+   {
+    "group": "Style & Layout",
+    "ms": 363
+   },
+   {
+    "group": "Rendering",
+    "ms": 169
+   },
+   {
+    "group": "Garbage Collection",
+    "ms": 17
+   },
+   {
+    "group": "Parse HTML & CSS",
+    "ms": 10
+   },
+   {
+    "group": "Script Parsing & Compilation",
+    "ms": 4
+   }
+  ],
+  "unusedJs": [
+   {
+    "url": "/assets/three-rAcLmdm5.js",
+    "total": 186491,
+    "wasted": 100944
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "total": 72217,
+    "wasted": 40886
+   },
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "total": 41604,
+    "wasted": 20776
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "total": 59115,
+    "wasted": 20546
+   }
+  ],
+  "unusedCss": [],
+  "renderBlocking": [
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "bytes": 17754,
+    "wastedMs": 317
+   }
+  ],
+  "renderBlockingInsight": [
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "bytes": 17754,
+    "ms": 317
+   }
+  ],
+  "fontDisplay": {
+   "score": 1,
+   "items": []
+  },
+  "images": {
+   "uses-optimized-images": {
+    "score": 1,
+    "n": 0
+   },
+   "modern-image-formats": {
+    "score": 1,
+    "n": 0
+   },
+   "offscreen-images": {
+    "score": 1,
+    "n": 0
+   },
+   "unsized-images": {
+    "score": 1,
+    "n": 0
+   },
+   "uses-responsive-images": {
+    "score": 1,
+    "n": 0
+   },
+   "image-size-responsive": {
+    "score": 1,
+    "n": 0
+   }
+  },
+  "longTasks": [
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "start": 4497,
+    "dur": 426
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "start": 2984,
+    "dur": 80
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "start": 5200,
+    "dur": 78
+   }
+  ],
+  "requests": [
+   {
+    "url": "/members",
+    "type": "Document",
+    "prio": "VeryHigh",
+    "start": 1,
+    "end": 15,
+    "transfer": 1752,
+    "size": 2330,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Inter-latin.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 35,
+    "end": 123,
+    "transfer": 120736,
+    "size": 119400,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Courgette-wordmark.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 35,
+    "end": 78,
+    "transfer": 6664,
+    "size": 5692,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Anton-latin.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 35,
+    "end": 81,
+    "transfer": 27945,
+    "size": 26908,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Caveat-latin.woff2",
+    "type": "Font",
+    "prio": "High",
+    "start": 35,
+    "end": 120,
+    "transfer": 83207,
+    "size": 81988,
+    "status": 200
+   },
+   {
+    "url": "/assets/index-C3_ps3Vm.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 41,
+    "end": 116,
+    "transfer": 44762,
+    "size": 135856,
+    "status": 200
+   },
+   {
+    "url": "/assets/rolldown-runtime-hePW80VL.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 42,
+    "end": 92,
+    "transfer": 1428,
+    "size": 716,
+    "status": 200
+   },
+   {
+    "url": "/assets/react-D48Lzm2I.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 42,
+    "end": 127,
+    "transfer": 60092,
+    "size": 189604,
+    "status": 200
+   },
+   {
+    "url": "/assets/icons-BtZ7qFfY.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 43,
+    "end": 110,
+    "transfer": 2796,
+    "size": 6074,
+    "status": 200
+   },
+   {
+    "url": "/assets/index-BNbzZmq5.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 44,
+    "end": 118,
+    "transfer": 17754,
+    "size": 82557,
+    "status": 200
+   },
+   {
+    "url": "/assets/MembersPage-BIMHBA0T.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 153,
+    "end": 169,
+    "transfer": 5277,
+    "size": 12640,
+    "status": 200
+   },
+   {
+    "url": "/assets/pageScroll-CgN8Uguu.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 153,
+    "end": 166,
+    "transfer": 1835,
+    "size": 1488,
+    "status": 200
+   },
+   {
+    "url": "/assets/MembersPage-Cf8tOaP5.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 154,
+    "end": 167,
+    "transfer": 2272,
+    "size": 4858,
+    "status": 200
+   },
+   {
+    "url": "/assets/subpage-Cc-b23WF.css",
+    "type": "Stylesheet",
+    "prio": "VeryHigh",
+    "start": 154,
+    "end": 168,
+    "transfer": 1574,
+    "size": 1210,
+    "status": 200
+   },
+   {
+    "url": "/fonts/Inter-cyrillic.woff2",
+    "type": "Font",
+    "prio": "VeryHigh",
+    "start": 179,
+    "end": 188,
+    "transfer": 53051,
+    "size": 51936,
+    "status": 200
+   },
+   {
+    "url": "/favicon.svg",
+    "type": "Other",
+    "prio": "High",
+    "start": 193,
+    "end": 200,
+    "transfer": 1314,
+    "size": 507,
+    "status": 200
+   },
+   {
+    "url": "/assets/SkyScene-BZ_nlMIB.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 264,
+    "end": 279,
+    "transfer": 24248,
+    "size": 59848,
+    "status": 200
+   },
+   {
+    "url": "/assets/three-rAcLmdm5.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 264,
+    "end": 303,
+    "transfer": 187468,
+    "size": 738246,
+    "status": 200
+   },
+   {
+    "url": "/assets/r3f-Bg8020Tw.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 264,
+    "end": 293,
+    "transfer": 73195,
+    "size": 225129,
+    "status": 200
+   },
+   {
+    "url": "/assets/wordmarkFont-D8br0Rc7.js",
+    "type": "Script",
+    "prio": "High",
+    "start": 264,
+    "end": 284,
+    "transfer": 3440,
+    "size": 5365,
+    "status": 200
+   }
+  ],
+  "consoleErrors": [],
+  "domSize": 508,
+  "layoutShifts": 0,
+  "nonComposited": 0,
+  "cacheTtl": 1,
+  "textCompression": 1,
+  "legacyJs": 0,
+  "duplicatedJs": 0,
+  "thirdParty": []
+ }
+]

@@ -1,19 +1,20 @@
-import { Component, Suspense, useEffect, useLayoutEffect, useState, type ReactNode } from 'react'
+import { Component, Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import * as THREE from 'three'
 import { getConsoleFunction, setConsoleFunction } from 'three'
 import { onScroll } from '../lib/scroll'
 import { useDocumentVisible, useReducedMotion } from '../lib/media'
 import { useRoute } from '../i18n/LocaleProvider'
-import type { Page } from '../i18n/locale'
 import { PALETTE, journey, setStaticJourney, updateJourney } from './sky/journey'
-import { fallbackGradientFor } from './sky/fallback'
+import { fallbackGradientFor, presetForPage as presetFor, type StaticPreset } from './sky/fallback'
 import { detectQuality, getAntialias, getDpr, type QualityTier } from './sky/quality'
 import { attachPointer, stepPointer } from './sky/pointer'
 import SkyDome from './sky/SkyDome'
 import Stars from './sky/Stars'
 import SceneLights from './sky/SceneLights'
-import CloudSprites from './sky/CloudSprites'
-import GlassWordmark, { preloadGlassWordmark } from './sky/GlassWordmark'
+import CloudSprites, { allowCloudBake } from './sky/CloudSprites'
+import GlassWordmark, { GLASS_WORDMARK_NAME, GlassWordmarkFailed, glassWordmarkSettled, preloadGlassWordmark } from './sky/GlassWordmark'
+import { compileTracked, delay, listWarmers, markReveal, nextTask, openWordmarkGate, warmPMREM, whenLinked } from './sky/warmup'
 import Field from './sky/Field'
 
 /**
@@ -62,13 +63,116 @@ class Boundary extends Component<{ fallback: ReactNode; children: ReactNode }, {
   }
 }
 
-/** A page without a scroll story renders one frozen journey preset (V3-BUILD-PLAN WP1 C). */
-type StaticPreset = 'night' | 'space'
+/** drei <Environment resolution> in SceneLights: the PMREM programs are sized from it. */
+const ENV_RESOLUTION = 64
 
-/** home → the scroll journey (null); 404 → space (the top of the journey); every other page → night. */
-function presetFor(page: Page): StaticPreset | null {
-  if (page === 'home') return null
-  return page === 'notFound' ? 'space' : 'night'
+/**
+ * Links every program of the first frames in the background before the canvas renders at all
+ * (audit-loading L1). Order matters: three converts `scene.environment` with its PMREM programs
+ * inside the first compile of a lit material, so those (and the private bake scenes) are warmed
+ * and awaited first; then each top-level object is prepared for the main pass and for
+ * render-to-texture passes, one object per task.
+ *
+ * Two stages (verify round 2): `onReady` fires once every layer EXCEPT the glass wordmark is
+ * linked, which is what the canvas reveal waits for; the wordmark's own program (drei's
+ * transmission material, the slowest to link, on a geometry that is built one glyph per task)
+ * then opens its gate and GlassWordmark fades it in. Waiting for it here cost the hero ~1.4 s.
+ */
+function Warmup({ withWordmark, gateKey, onReady }: { withWordmark: boolean; gateKey: string; onReady: () => void }) {
+  const gl = useThree((s) => s.gl)
+  const scene = useThree((s) => s.scene)
+  const camera = useThree((s) => s.camera)
+  const invalidate = useThree((s) => s.invalidate)
+  useEffect(() => {
+    let cancelled = false
+    const both = async (object: THREE.Object3D, pending: Promise<unknown>[]) => {
+      pending.push(whenLinked(compileTracked(gl, object, camera, scene, false)))
+      await nextTask()
+      pending.push(whenLinked(compileTracked(gl, object, camera, scene, true)))
+      await nextTask()
+    }
+    const run = async () => {
+      await nextTask()
+      if (cancelled) return
+      const pending: Promise<unknown>[] = []
+      // 1. everything unlit (no environment conversion) + the private bake scenes + PMREM, in parallel.
+      //    PMREM belongs to the lit wordmark, so the reveal does not strictly need it — but letting the
+      //    frameloop start first only moves the contention: measured on the reference machine, dropping
+      //    it from this gate reveals the sky 247 ms sooner and the WORDMARK 338 ms later (1448/2739 vs
+      //    1695/2401 ms), because the wordmark's link then polls against a running render loop. The
+      //    wordmark is the hero, and here it lands exactly as the 700 ms canvas fade ends.
+      const pmrem = withWordmark ? warmPMREM(gl, ENV_RESOLUTION) : Promise.resolve()
+      pending.push(pmrem)
+      await nextTask()
+      for (const warm of listWarmers()) {
+        const p = warm(gl)
+        if (p) pending.push(p)
+        await nextTask()
+      }
+      for (const child of [...scene.children]) {
+        if (cancelled) return
+        if (child.name === GLASS_WORDMARK_NAME) continue
+        await both(child, pending)
+      }
+      // 1b. the sky can be revealed now: everything it draws in the first frames is linked.
+      await Promise.all(pending)
+      if (cancelled) return
+      // Only where linking really happens off the main thread. Without the extension (SwiftShader,
+      // old drivers) the wordmark's link would block the frames this reveal starts, so there the
+      // canvas keeps waiting for the single gate below — the same behaviour as before.
+      if (gl.getContext().getExtension('KHR_parallel_shader_compile')) onReady()
+      // 2. the lit wordmark once its mesh exists and the PMREM programs are linked (its first
+      //    compile converts scene.environment with them)
+      if (withWordmark) {
+        const wordmarkPending: Promise<unknown>[] = []
+        await Promise.all([glassWordmarkSettled(), pmrem])
+        const wordmark = scene.getObjectByName(GLASS_WORDMARK_NAME)
+        if (wordmark && !cancelled) {
+          wordmark.traverse((o) => {
+            const m = (o as THREE.Mesh).material as (THREE.Material & { defines?: Record<string, string>; uniforms?: Record<string, unknown> }) | undefined
+            // drei's onBeforeCompile adds USE_TRANSMISSION on the first compile; declaring it up
+            // front keeps the program cache key stable, so the warmed program is the one drawn.
+            if (m?.uniforms && '_transmission' in m.uniforms && m.defines && !('USE_TRANSMISSION' in m.defines)) m.defines.USE_TRANSMISSION = ''
+          })
+          await both(wordmark, wordmarkPending)
+        }
+        await Promise.all(wordmarkPending)
+      }
+    }
+    // A driver without KHR_parallel_shader_compile still links (blocking); never hold the sky or
+    // the wordmark back: both gates open on the timeout too.
+    Promise.race([run(), delay(8000)])
+      .catch(() => {})
+      .finally(() => {
+        if (cancelled) return
+        onReady()
+        openWordmarkGate(gateKey)
+        // The gate is module state, so it re-renders nothing: in `demand` mode (reduced motion)
+        // ask for the one frame that draws the wordmark, instead of waiting for the next scroll.
+        invalidate()
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [gl, scene, camera, withWordmark, gateKey, onReady, invalidate])
+  return null
+}
+
+/**
+ * Calls `onFrame` once the first rendered frame has been handed to the compositor. It mounts in
+ * the commit that switches the frameloop on; in `demand` mode (reduced motion) the store's own
+ * invalidate may already have been spent before this subscriber existed, so it asks for a frame.
+ */
+function FirstFrame({ onFrame }: { onFrame: () => void }) {
+  const done = useRef(false)
+  const invalidate = useThree((s) => s.invalidate)
+  useEffect(() => invalidate(), [invalidate])
+  useFrame(() => {
+    if (done.current) return
+    done.current = true
+    requestAnimationFrame(() => onFrame())
+  })
+  return null
 }
 
 /**
@@ -186,6 +290,12 @@ function useCanvasProfile(): CanvasProfile {
  * the dome, the stars and the clouds. No GlassWordmark (no Courgette fetch, no transmission FBO),
  * no Field and no SceneLights: every remaining layer is an unlit shader, so the environment bake
  * would be wasted.
+ *
+ * Load sequence (perf/v3.1/audit-loading.md L1, L6–L8): the layers mount one task at a time, the
+ * canvas stays on `frameloop="never"` while <Warmup> links every program in the background, and
+ * the first frame then fades in over the gradient. The glass wordmark has its own, later gate (its
+ * transmission program is the slowest to link), so the sky does not wait for it. The cloud-atlas
+ * bake and the night field only start after the reveal.
  */
 export default function SkyScene() {
   const { page } = useRoute()
@@ -193,7 +303,51 @@ export default function SkyScene() {
   const reduced = useReducedMotion()
   const hidden = !useDocumentVisible()
   const { tier, dpr, antialias } = useCanvasProfile()
-  const frameloop = hidden ? 'never' : reduced ? 'demand' : 'always'
+  const canvasKey = `${tier}:${antialias ? 'msaa' : 'raw'}`
+  // Per canvas instance (a remount for new context attributes warms up again).
+  const [liveKey, setLiveKey] = useState<string | null>(null)
+  const [shownKey, setShownKey] = useState<string | null>(null)
+  const live = liveKey === canvasKey
+  const shown = shownKey === canvasKey
+  const onReady = useCallback(() => {
+    markReveal('qh-sky-ready')
+    setLiveKey(canvasKey)
+  }, [canvasKey])
+  const onShown = useCallback(() => setShownKey(canvasKey), [canvasKey])
+  const frameloop = hidden || !live ? 'never' : reduced ? 'demand' : 'always'
+
+  // Layers mount one commit (task) at a time: dome + stars, clouds, lights / environment, wordmark.
+  const [layerStage, setLayerStage] = useState(0)
+  useEffect(() => {
+    if (layerStage >= 3) return
+    let cancelled = false
+    void nextTask().then(() => {
+      if (!cancelled) setLayerStage((s) => s + 1)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [layerStage])
+
+  // After the reveal: the cloud atlas bake, then the night field (only the footer shows it).
+  const [fieldOn, setFieldOn] = useState(false)
+  useEffect(() => {
+    if (!shown) return
+    const bake = window.setTimeout(allowCloudBake, preset ? 0 : 1200)
+    if (preset) return () => window.clearTimeout(bake)
+    const mount = () => setFieldOn(true)
+    const idle = typeof window.requestIdleCallback === 'function' ? window.requestIdleCallback(mount, { timeout: 2500 }) : 0
+    const timer = idle ? 0 : window.setTimeout(mount, 1500)
+    const off = onScroll((s) => {
+      if (s.y > window.innerHeight * 0.3) mount()
+    })
+    return () => {
+      window.clearTimeout(bake)
+      if (idle) window.cancelIdleCallback(idle)
+      if (timer) window.clearTimeout(timer)
+      off()
+    }
+  }, [shown, preset])
 
   // Start the wordmark TTF download with the chunk (idempotent), on the one page that draws it.
   if (!preset) preloadGlassWordmark()
@@ -207,9 +361,9 @@ export default function SkyScene() {
       <Boundary fallback={null}>
         <Canvas
           // Context attributes (antialias) cannot change after creation: remount only for those.
-          key={`${tier}:${antialias ? 'msaa' : 'raw'}`}
+          key={canvasKey}
           className="absolute inset-0"
-          style={{ position: 'absolute', inset: 0 }}
+          style={{ position: 'absolute', inset: 0, opacity: shown ? 1 : 0, transition: reduced ? 'none' : 'opacity 700ms ease-out' }}
           dpr={dpr}
           flat={false}
           gl={{ antialias, alpha: false, powerPreference: 'high-performance', stencil: false, depth: true }}
@@ -217,6 +371,10 @@ export default function SkyScene() {
           frameloop={frameloop}
           onCreated={(state) => {
             state.gl.setClearColor(preset === 'night' ? PALETTE.night.top : PALETTE.space.top, 1)
+            // three's first use of a program reads three info logs: on ANGLE-D3D11 each is a
+            // synchronous GPU-process round trip (5–25 ms per program even after the warm-up).
+            // Dev builds keep the shader error reporting.
+            state.gl.debug.checkShaderErrors = import.meta.env.DEV
             // Dev-only handle for perf profiling (toggle layers, read gl.info); stripped from prod.
             if (import.meta.env.DEV) (window as unknown as { __sky?: unknown }).__sky = state
           }}
@@ -225,16 +383,18 @@ export default function SkyScene() {
           {reduced && <DemandInvalidator />}
           <SkyDome tier={tier} reduced={reduced} />
           <Stars tier={tier} reduced={reduced} />
-          {!preset && <SceneLights tier={tier} reduced={reduced} />}
-          <CloudSprites tier={tier} reduced={reduced} />
-          {!preset && (
-            <Boundary fallback={null}>
+          {layerStage >= 2 && !preset && <SceneLights tier={tier} reduced={reduced} />}
+          {layerStage >= 1 && <CloudSprites tier={tier} reduced={reduced} />}
+          {layerStage >= 3 && !preset && (
+            <Boundary fallback={<GlassWordmarkFailed />}>
               <Suspense fallback={null}>
-                <GlassWordmark tier={tier} reduced={reduced} />
+                <GlassWordmark tier={tier} reduced={reduced} gateKey={canvasKey} />
               </Suspense>
             </Boundary>
           )}
-          {!preset && <Field tier={tier} reduced={reduced} />}
+          {!preset && fieldOn && <Field tier={tier} reduced={reduced} />}
+          {layerStage >= 3 && <Warmup withWordmark={!preset} gateKey={canvasKey} onReady={onReady} />}
+          {live && !shown && <FirstFrame onFrame={onShown} />}
         </Canvas>
       </Boundary>
     </div>

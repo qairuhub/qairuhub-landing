@@ -1,0 +1,20 @@
+# Scratch Worker for perf/v3.1/scripts/d1-rows: LOCAL ONLY (wrangler dev), never deployed.
+name = "qairuhub-d1-probe-local"
+main = "index.js"
+compatibility_date = "2026-09-01"
+workers_dev = false
+
+[[d1_databases]]
+binding = "DB"
+database_name = "probe-current"
+database_id = "00000000-0000-0000-0000-000000000001"
+
+[[d1_databases]]
+binding = "DB2"
+database_name = "probe-norowid"
+database_id = "00000000-0000-0000-0000-000000000002"
+
+[[d1_databases]]
+binding = "DB3"
+database_name = "probe-norowid-noexpidx"
+database_id = "00000000-0000-0000-0000-000000000003"

@@ -19,6 +19,11 @@
  *
  * Inputs: src/i18n/meta.json (titles/descriptions), src/styles/fonts.preload.json (WP11; optional,
  * falls back to the v2 TTF set), env SITE_ORIGIN (default https://qairuhub.com).
+ *
+ * Preload lists per document: `common`, plus `home` on the home pages, plus `pages[page]` (fonts a
+ * sub-page shows above the fold: its header wordmark and the Anton / Caveat H1), plus `kk` on
+ * Kazakh routes. The home page preloads Inter only: nothing else is needed for its first paint,
+ * and the 3D wordmark TTF is requested by the app after that paint (perf/v3.1/audit-loading.md L2).
  * Idempotent: running it twice on the same dist gives the same output.
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
@@ -59,7 +64,7 @@ function loadPreloads() {
     return FALLBACK_PRELOADS
   }
   const json = JSON.parse(readFileSync(file, 'utf8'))
-  return { common: json.common ?? [], home: json.home ?? [], kk: json.kk ?? [] }
+  return { common: json.common ?? [], home: json.home ?? [], pages: json.pages ?? {}, kk: json.kk ?? [] }
 }
 
 const preloads = loadPreloads()
@@ -78,6 +83,7 @@ function fontType(href) {
 function preloadsFor(page, locale) {
   const list = [...preloads.common]
   if (page === 'home') list.push(...preloads.home)
+  list.push(...(preloads.pages?.[page] ?? []))
   if (locale === 'kk') list.push(...preloads.kk)
   return [...new Set(list)].filter((href) => {
     const onDisk = existsSync(resolve(dist, href.replace(/^\/+/, '')))

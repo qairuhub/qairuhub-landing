@@ -1,9 +1,12 @@
-import { Suspense, useRef } from 'react'
+import { Suspense, useLayoutEffect, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { brand } from '../../i18n/shared'
-import { preloadTTFFont, useTTFFont } from '../../lib/ttf'
-import GlassText, { getGlassGeometry, type GlassTextBevel } from '../../components/three/GlassText'
+import { loadTTFFont, preloadTTFFont, useTTFFont } from '../../lib/ttf'
+import GlassText, { GLASS_PHYSICAL, getGlassGeometry, prebuildGlassGeometry, type GlassTextBevel } from '../../components/three/GlassText'
+import type { TypefaceData } from '../../lib/ttf'
+import { delay, nextTask, wordmarkGateFade } from './warmup'
+import { WORDMARK_FONTS } from './wordmarkFont'
 import { journey, smoothstep } from './journey'
 import { QUALITY } from './quality'
 import { pointer } from './pointer'
@@ -16,7 +19,7 @@ import type { LayerProps } from './types'
  * Sacramento (0.04) collapsed into "gairuhub". Dancing Script is only the fallback if Courgette
  * fails to download or parse. Both are TrueType glyf fonts parsed at runtime by lib/ttf.ts.
  */
-const FONTS = ['/fonts/Courgette-Regular.ttf', '/fonts/DancingScript-Variable.ttf'] as const
+const FONTS = WORDMARK_FONTS
 
 /**
  * Starts the Courgette download + parse. SkyScene calls it on the home page only: sub-pages never
@@ -24,6 +27,47 @@ const FONTS = ['/fonts/Courgette-Regular.ttf', '/fonts/DancingScript-Variable.tt
  */
 export function preloadGlassWordmark(): void {
   preloadTTFFont(FONTS, brand.wordmark)
+  // Build the extrusion (one glyph per task) while the rest of the scene mounts.
+  loadTTFFont(FONTS, brand.wordmark)
+    .then((font) => prebuiltEntry(font).promise)
+    .catch(() => {})
+}
+
+/** Object name of the wordmark group (SkyScene's warm-up compiles it last). */
+export const GLASS_WORDMARK_NAME = 'qh-glass-wordmark'
+
+/* ---- readiness for SkyScene's warm-up: the run is in the scene (or failed / timed out) ---- */
+let markMounted: () => void = () => {}
+const mounted = new Promise<void>((resolve) => (markMounted = resolve))
+/** Resolves once the wordmark mesh is committed to the scene, it failed, or after `timeoutMs`. */
+export function glassWordmarkSettled(timeoutMs = 6000): Promise<void> {
+  return Promise.race([mounted, delay(timeoutMs)])
+}
+/** Rendered by SkyScene's error boundary around the wordmark: a failed font still settles. */
+export function GlassWordmarkFailed() {
+  useLayoutEffect(() => markMounted(), [])
+  return null
+}
+
+/* ---- geometry built one glyph per task before Letters renders (Suspense) ---- */
+const prebuilt = new WeakMap<TypefaceData, { done: boolean; promise: Promise<void> }>()
+function usePrebuiltGeometry(font: TypefaceData) {
+  const entry = prebuiltEntry(font)
+  if (!entry.done) throw entry.promise
+}
+function prebuiltEntry(font: TypefaceData) {
+  let entry = prebuilt.get(font)
+  if (!entry) {
+    const e = { done: false, promise: Promise.resolve() }
+    e.promise = prebuildGlassGeometry(font, brand.wordmark, { height: HEIGHT, curveSegments: CURVE_SEGMENTS, bevel: BEVEL }, nextTask)
+      .catch(() => {})
+      .then(() => {
+        e.done = true
+      })
+    prebuilt.set(font, e)
+    entry = e
+  }
+  return entry
 }
 
 /**
@@ -142,7 +186,7 @@ function aboveFrame(y: number, halfHeight: number, halfWidth: number, yaw: numbe
  * `material.visible` are set every frame — drei skips the transmission pass and three skips the
  * draw for an invisible run, so the day phase costs nothing.
  */
-export default function GlassWordmark(props: LayerProps) {
+export default function GlassWordmark(props: LayerProps & { gateKey: string }) {
   return (
     <Suspense fallback={null}>
       <Letters {...props} />
@@ -151,8 +195,10 @@ export default function GlassWordmark(props: LayerProps) {
 }
 
 /** Suspends on the font; the geometry comes from the module-level cache in GlassText. */
-function Letters({ tier, reduced }: LayerProps) {
+function Letters({ tier, reduced, gateKey }: LayerProps & { gateKey: string }) {
   const font = useTTFFont(FONTS, brand.wordmark)
+  usePrebuiltGeometry(font)
+  useLayoutEffect(() => markMounted(), [])
   const geometry = getGlassGeometry(font, brand.wordmark, { height: HEIGHT, curveSegments: CURVE_SEGMENTS, bevel: BEVEL })
   const bounds = geometry.boundingBox as THREE.Box3
   const runWidth = Math.max(1e-4, bounds.max.x - bounds.min.x)
@@ -163,6 +209,12 @@ function Letters({ tier, reduced }: LayerProps) {
   const mesh = useRef<THREE.Mesh>(null)
   /** lerped mouse parallax, kept apart from the scroll turn so the two compose cleanly */
   const parallax = useRef({ yaw: 0, pitch: 0 }).current
+  /**
+   * Reveal ramp, last applied value. The run is the slowest program to link, so the sky is revealed
+   * without it (SkyScene <Warmup>) and the letters arrive once their program is ready — blended in
+   * over `WORDMARK_FADE_MS` on the low tier, in one frame on the frosted tiers (see below).
+   */
+  const fadeState = useRef({ applied: -1 }).current
   const quality = QUALITY[tier]
 
   useFrame((state) => {
@@ -224,13 +276,29 @@ function Letters({ tier, reduced }: LayerProps) {
       }
     }
 
+    // The run only exists once its program is linked (SkyScene's <Warmup> opens the gate).
+    const fade = wordmarkGateFade(gateKey, reduced)
+    if (fade <= 0) visible = false
+
     // Both flags: drei's transmission pass keys off material.visible, the draw off mesh.visible.
     m.visible = visible
-    ;(m.material as THREE.Material).visible = visible
+    const material = m.material as THREE.Material
+    material.visible = visible
+    // The ramp is applied as opacity ONLY where the recipe is already transparent — the low tier's
+    // MeshPhysicalMaterial stand-in. `material.transparent` is part of three's program cache key
+    // (`parameters.opaque` → `#define OPAQUE`, which pins the fragment alpha to 1), so turning it on
+    // for the frosted MeshTransmissionMaterial would either change nothing (three keeps the linked
+    // program until `needsUpdate`) or link a SECOND program on the main thread in the middle of the
+    // reveal — the exact stall this gate exists to avoid. The frosted run therefore appears in one
+    // frame, over a sky that is already drawn and fully faded in.
+    if (visible && material.transparent && fadeState.applied !== fade) {
+      material.opacity = (GLASS_PHYSICAL.opacity ?? 1) * fade
+      fadeState.applied = fade
+    }
   })
 
   return (
-    <group ref={group}>
+    <group ref={group} name={GLASS_WORDMARK_NAME}>
       <GlassText
         ref={mesh}
         text={brand.wordmark}

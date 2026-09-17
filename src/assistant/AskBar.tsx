@@ -2,22 +2,23 @@ import clsx from 'clsx'
 import {
   Suspense,
   lazy,
+  memo,
   useCallback,
   useEffect,
-  useLayoutEffect,
   useRef,
   useState,
   type CSSProperties,
   type FormEvent,
 } from 'react'
 import { Button } from '../components/ui/Button'
+import { ChunkBoundary } from '../components/ui/ChunkBoundary'
 import { useInView } from '../components/ui/Reveal'
 import { Send, Sparkle, Stop } from '../components/ui/icons'
 import { useRoute, useT } from '../i18n/LocaleProvider'
 import { links } from '../i18n/shared'
 import { useDocumentVisible, useReducedMotion } from '../lib/media'
 import { askText } from './assistant.i18n'
-import { ask, openPanel, preloadClient, stop, useAssistant } from './store'
+import { ask, openPanel, preloadClient, stop, useAssistantSelect, useAssistantValue } from './store'
 import './Assistant.css'
 
 /**
@@ -28,7 +29,12 @@ import './Assistant.css'
  * "Continue in chat" (opens the panel on the same thread) and "Ask something else".
  *
  * The answer view (Answer + Markdown) and the network client are lazy chunks, warmed on the first
- * focus or hover; Turnstile's config is requested on the first focus only.
+ * focus or hover; Turnstile's config is requested on the first focus only. If the answer chunk
+ * can't load, the answer shows as plain text (ChunkBoundary) instead of blanking the page.
+ *
+ * Memoised, and subscribed only to its own slice of the store (the inline answer, its question and
+ * `activeId`): the Launchpad's typewriter steps and card hovers, and answers streaming in the
+ * panel, don't re-render it.
  */
 
 const Answer = lazy(() => import('./Answer'))
@@ -37,6 +43,8 @@ type Phase = 'idle' | 'typing' | 'holding' | 'collapsing'
 const PHASE_MS: Record<Exclude<Phase, 'idle'>, number> = { typing: 800, holding: 2200, collapsing: 400 }
 const START_DELAY_MS = 400
 const REDUCED_CYCLE_MS = 3400
+/** the answer as plain text when its chunk failed to load (keeps the paragraphs apart) */
+const PLAIN_ANSWER: CSSProperties = { whiteSpace: 'pre-line' }
 
 /* ------------------------------------------------------------------ typewriter */
 
@@ -60,7 +68,9 @@ function Typewriter({
   const textRef = useRef<HTMLSpanElement | null>(null)
   const n = prompts.length
 
-  useLayoutEffect(() => {
+  // Passive: measured after the paint, never as a forced layout inside the page's commit
+  // (audit-loading L3). `--w` only offsets the caret, which is hidden until the typing phase.
+  useEffect(() => {
     const el = textRef.current
     if (el) setWidth(el.offsetWidth)
   }, [idx, prompts])
@@ -135,12 +145,11 @@ export interface AskBarProps {
   onPromptChange?: (index: number) => void
 }
 
-export default function AskBar({ onPromptChange }: AskBarProps) {
+function AskBar({ onPromptChange }: AskBarProps) {
   const { locale } = useRoute()
   const t = useT(askText)
   const reduced = useReducedMotion()
   const docVisible = useDocumentVisible()
-  const { messages, activeId } = useAssistant()
   const { ref: rootRef, inView } = useInView<HTMLDivElement>({ once: false, threshold: 0, rootMargin: '0px' })
 
   const [value, setValue] = useState('')
@@ -152,14 +161,19 @@ export default function AskBar({ onPromptChange }: AskBarProps) {
   const warmed = useRef(false)
   const parked = useRef(false)
 
-  const answerIndex = inlineId ? messages.findIndex((m) => m.id === inlineId) : -1
-  const answer = answerIndex >= 0 ? messages[answerIndex] : null
-  const question = answerIndex > 0 ? messages[answerIndex - 1] : null
+  // Message objects keep their identity until patched, so these re-render only for this answer.
+  const activeId = useAssistantValue((s) => s.activeId)
+  const answer = useAssistantSelect((s) => (inlineId ? (s.messages.find((m) => m.id === inlineId) ?? null) : null))
+  const question = useAssistantSelect((s) => {
+    const i = inlineId ? s.messages.findIndex((m) => m.id === inlineId) : -1
+    return i > 0 ? s.messages[i - 1] : null
+  })
   const busy = activeId !== null && activeId === inlineId
   const settled = !!answer && answer.status !== 'pending' && answer.status !== 'streaming'
 
   const warm = useCallback((withNetwork: boolean) => {
-    void import('./Answer')
+    // A failed warm-up is not an error here: the answer view has its own fallback.
+    import('./Answer').catch(() => undefined)
     if (withNetwork && !warmed.current) {
       warmed.current = true
       preloadClient()
@@ -261,9 +275,21 @@ export default function AskBar({ onPromptChange }: AskBarProps) {
         <div className="ask__answer">
           {question && <p className="ask__q">{question.text}</p>}
           <div className="ask__scroll" data-lenis-prevent="">
-            <Suspense fallback={<p className="qa-answer__thinking">{t.thinking}</p>}>
-              <Answer message={answer} />
-            </Suspense>
+            <ChunkBoundary
+              fallback={
+                answer.text || !busy ? (
+                  <p className="qa-md" style={PLAIN_ANSWER}>
+                    {answer.text}
+                  </p>
+                ) : (
+                  <p className="qa-answer__thinking">{t.thinking}</p>
+                )
+              }
+            >
+              <Suspense fallback={<p className="qa-answer__thinking">{t.thinking}</p>}>
+                <Answer message={answer} />
+              </Suspense>
+            </ChunkBoundary>
           </div>
           <div className="ask__actions">
             <Button variant="secondary" onClick={() => openPanel()}>
@@ -281,3 +307,5 @@ export default function AskBar({ onPromptChange }: AskBarProps) {
     </div>
   )
 }
+
+export default memo(AskBar)

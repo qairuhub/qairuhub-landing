@@ -142,10 +142,13 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
        without one (web fonts swap, lazy sections mount, the viewport resizes). Observe the
        body so every consumer of scrollState.limit / progress (the journey backdrop, the
        triptych) sees the new range immediately. --- */
+    /** Set below, once the deep-link placement exists: every height change re-checks the landing. */
+    let onHeightChange = () => {}
     const syncLimit = () => {
       instance.resize()
       const limit = Math.max(1, instance.limit || document.documentElement.scrollHeight - window.innerHeight)
       setScroll({ limit, progress: Math.min(1, Math.max(0, scrollState.y / limit)) })
+      onHeightChange()
     }
     // Seed initial state (e.g. reload mid-page)
     setScroll({ y: window.scrollY, limit: Math.max(1, document.documentElement.scrollHeight - window.innerHeight) })
@@ -192,16 +195,33 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
         return null
       }
     }
+    /* The page keeps settling after the placement: web fonts swap (home preloads none of the
+       display faces any more, so Anton / Caveat can arrive after `load` and add ~200 px above the
+       target) and lazy sections replace their placeholders. While the reader has not touched the
+       page, every height change re-lands the target for this long. */
+    const SETTLE_MS = 4000
     let placed = false
+    let settleUntil = 0
+    let userMoved = false
+    const onIntent = () => {
+      userMoved = true
+    }
+    const INTENT_EVENTS = ['wheel', 'touchstart', 'keydown', 'pointerdown'] as const
+    INTENT_EVENTS.forEach((e) => window.addEventListener(e, onIntent, { capture: true, passive: true }))
     const deepLink = () => {
       const el = deepLinkTarget()
       if (!el) return
-      const underHeader = Math.abs(el.getBoundingClientRect().top) < 2
-      if ((isFreshNavigation && !placed) || underHeader) {
+      const top = el.getBoundingClientRect().top
+      const underHeader = Math.abs(top) < 2
+      // -ANCHOR_OFFSET is where the target belongs (72 px, just under the header).
+      const drifted = placed && !userMoved && performance.now() < settleUntil && Math.abs(top + ANCHOR_OFFSET) > 2
+      if ((isFreshNavigation && !placed) || underHeader || drifted) {
         instance.scrollTo(el, { offset: ANCHOR_OFFSET, immediate: true, force: true })
+        if (!placed) settleUntil = performance.now() + SETTLE_MS
         placed = true
       }
     }
+    onHeightChange = deepLink
     const onLoadHash = requestAnimationFrame(deepLink)
     let afterLoad = 0
     let disposed = false
@@ -224,6 +244,7 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
       cancelAnimationFrame(pendingScroll)
       cancelAnimationFrame(onLoadHash)
       cancelAnimationFrame(afterLoad)
+      INTENT_EVENTS.forEach((e) => window.removeEventListener(e, onIntent, { capture: true }))
       document.removeEventListener('click', onClick)
       instance.destroy()
       delete window.__lenis

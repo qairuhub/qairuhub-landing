@@ -424,6 +424,15 @@ function resource(urls: readonly string[], chars: string): Resource {
   return res
 }
 
+/** The parsed font as a promise (same cache as `useTTFFont`); rejects if every candidate failed. */
+export function loadTTFFont(url: string | readonly string[], chars: string): Promise<TypefaceData> {
+  const res = resource(typeof url === 'string' ? [url] : url, chars)
+  return res.promise.then(() => {
+    if (res.status === 'error') throw res.error
+    return res.value as TypefaceData
+  })
+}
+
 /** Start the download early (e.g. at module evaluation) so the first render does not wait on the network. */
 export function preloadTTFFont(url: string | readonly string[], chars: string): void {
   if (typeof fetch !== 'function') return

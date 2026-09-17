@@ -33,6 +33,9 @@ ALLOWED_ORIGINS = "https://qairuhub.com,https://www.qairuhub.com,https://qairuhu
 SITE_ORIGIN = "https://qairuhub.com"
 # Public Turnstile site key, returned by GET /api/config. Empty until the user creates the widget;
 # the server enforces Turnstile only once the TURNSTILE_SECRET_KEY secret is set.
+# Rollout order matters: set this key and deploy, wait 15 min (GET /api/config is browser-cached for
+# max-age=300 + stale-while-revalidate=600), and only then put the TURNSTILE_SECRET_KEY secret in
+# place. See README.md "Forms, D1 and Turnstile" and functions/api/config.ts.
 TURNSTILE_SITE_KEY = ""
 
 [[d1_databases]]

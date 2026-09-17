@@ -1,0 +1,1066 @@
+{
+ "Announcer-DVhZwXKl.js": {
+  "raw": 562,
+  "gzip": 396,
+  "packages": {
+   "(app)": 373
+  },
+  "topFiles": [
+   {
+    "pkg": "(app)",
+    "file": "src/assistant/Announcer.tsx",
+    "bytes": 373
+   }
+  ],
+  "allFiles": [
+   "(app)/src/assistant/Announcer.tsx"
+  ]
+ },
+ "Answer-BS0Cl-yp.js": {
+  "raw": 5094,
+  "gzip": 2379,
+  "packages": {
+   "(app)": 4814
+  },
+  "topFiles": [
+   {
+    "pkg": "(app)",
+    "file": "src/assistant/Markdown.tsx",
+    "bytes": 3332
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/assistant/Answer.tsx",
+    "bytes": 1482
+   }
+  ],
+  "allFiles": [
+   "(app)/src/assistant/Markdown.tsx",
+   "(app)/src/assistant/Answer.tsx"
+  ]
+ },
+ "Assistant-DzQmx8ea.js": {
+  "raw": 5001,
+  "gzip": 1955,
+  "packages": {
+   "(app)": 4544
+  },
+  "topFiles": [
+   {
+    "pkg": "(app)",
+    "file": "src/assistant/Assistant.tsx",
+    "bytes": 4544
+   }
+  ],
+  "allFiles": [
+   "(app)/src/assistant/Assistant.tsx"
+  ]
+ },
+ "DemoForm-DE2FMPj9.js": {
+  "raw": 12351,
+  "gzip": 5124,
+  "packages": {
+   "(app)": 11964
+  },
+  "topFiles": [
+   {
+    "pkg": "(app)",
+    "file": "src/sections/DemoForm.tsx",
+    "bytes": 8427
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/form.i18n.ts",
+    "bytes": 3537
+   }
+  ],
+  "allFiles": [
+   "(app)/src/sections/DemoForm.tsx",
+   "(app)/src/sections/form.i18n.ts"
+  ]
+ },
+ "HandbookPage-Do4KQi9e.js": {
+  "raw": 80513,
+  "gzip": 22156,
+  "packages": {
+   "(app)": 13779
+  },
+  "topFiles": [
+   {
+    "pkg": "(app)",
+    "file": "src/data/handbook.generated.ts",
+    "bytes": 6689
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/pages/HandbookPage.tsx",
+    "bytes": 5243
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/pages/handbook.i18n.ts",
+    "bytes": 1847
+   }
+  ],
+  "allFiles": [
+   "(app)/src/data/handbook.generated.ts",
+   "(app)/src/pages/HandbookPage.tsx",
+   "(app)/src/pages/handbook.i18n.ts"
+  ]
+ },
+ "handbookSearch-C9lJkn4U.js": {
+  "raw": 8232,
+  "gzip": 4725,
+  "packages": {
+   "(app)": 8175
+  },
+  "topFiles": [
+   {
+    "pkg": "(app)",
+    "file": "../../../../shared/handbookSearch.ts",
+    "bytes": 8175
+   }
+  ],
+  "allFiles": [
+   "(app)/../../../../shared/handbookSearch.ts"
+  ]
+ },
+ "icons-BtZ7qFfY.js": {
+  "raw": 6117,
+  "gzip": 1833,
+  "packages": {
+   "(app)": 5665,
+   "clsx": 369
+  },
+  "topFiles": [
+   {
+    "pkg": "(app)",
+    "file": "src/components/ui/icons.tsx",
+    "bytes": 5665
+   },
+   {
+    "pkg": "clsx",
+    "file": "dist/clsx.mjs",
+    "bytes": 369
+   }
+  ],
+  "allFiles": [
+   "(app)/src/components/ui/icons.tsx",
+   "clsx/dist/clsx.mjs"
+  ]
+ },
+ "index-DI_7TtS3.js": {
+  "raw": 123900,
+  "gzip": 41954,
+  "packages": {
+   "(app)": 103456,
+   "lenis": 18601
+  },
+  "topFiles": [
+   {
+    "pkg": "lenis",
+    "file": "dist/lenis.mjs",
+    "bytes": 18601
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/Header.tsx",
+    "bytes": 8805
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/data/news.ts",
+    "bytes": 4235
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/assistant/AskBar.tsx",
+    "bytes": 4153
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/AgenticCards.tsx",
+    "bytes": 4096
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/offer.i18n.ts",
+    "bytes": 3999
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/data/projects.ts",
+    "bytes": 3798
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/Features.tsx",
+    "bytes": 3793
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/components/ui/Carousel.tsx",
+    "bytes": 3712
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/assistant/AssistantLauncher.tsx",
+    "bytes": 3701
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/App.tsx",
+    "bytes": 3585
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/assistant/store.ts",
+    "bytes": 3535
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/lib/submit.ts",
+    "bytes": 3398
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/Waitlist.tsx",
+    "bytes": 3294
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/lib/SmoothScroll.tsx",
+    "bytes": 3192
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/lib/turnstile.ts",
+    "bytes": 3022
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/header.i18n.ts",
+    "bytes": 2898
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/assistant/assistant.i18n.ts",
+    "bytes": 2744
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/Projects.tsx",
+    "bytes": 2462
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/sky/journey.ts",
+    "bytes": 2243
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/Footer.tsx",
+    "bytes": 2224
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/Storytelling.tsx",
+    "bytes": 2188
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/i18n/shared.ts",
+    "bytes": 1997
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/Supersize.tsx",
+    "bytes": 1985
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/footer.i18n.ts",
+    "bytes": 1766
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/waitlist.i18n.ts",
+    "bytes": 1740
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/News.tsx",
+    "bytes": 1571
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/launchpad.i18n.ts",
+    "bytes": 1551
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/story.i18n.ts",
+    "bytes": 1391
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/projects.i18n.ts",
+    "bytes": 1174
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/components/ui/Reveal.tsx",
+    "bytes": 1170
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/ModelsCTA.tsx",
+    "bytes": 1122
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/main.tsx",
+    "bytes": 1067
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/components/ui/AutoCarousel.tsx",
+    "bytes": 937
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/i18n/locale.ts",
+    "bytes": 922
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/components/ui/Section.tsx",
+    "bytes": 894
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/Logos.tsx",
+    "bytes": 879
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/Integrations.tsx",
+    "bytes": 719
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/components/ui/Button.tsx",
+    "bytes": 699
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/lib/ticker.ts",
+    "bytes": 670
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/assistant/SnailQ.tsx",
+    "bytes": 605
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/lib/media.ts",
+    "bytes": 594
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/cta.i18n.ts",
+    "bytes": 592
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/components/ui/Grid.tsx",
+    "bytes": 555
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/components/ui/LogoMark.tsx",
+    "bytes": 496
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/news.i18n.ts",
+    "bytes": 450
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/components/ui/AnimatedBorder.tsx",
+    "bytes": 337
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/ecosystem.i18n.ts",
+    "bytes": 316
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/tools.i18n.ts",
+    "bytes": 277
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/components/ui/Wordmark.tsx",
+    "bytes": 259
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/i18n/Accent.tsx",
+    "bytes": 233
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/components/ui/Pill.tsx",
+    "bytes": 233
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/hero.i18n.ts",
+    "bytes": 222
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/Hero.tsx",
+    "bytes": 215
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/i18n/LocaleProvider.tsx",
+    "bytes": 212
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/sky/fallback.ts",
+    "bytes": 208
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/lib/scroll.ts",
+    "bytes": 166
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/supersize.i18n.ts",
+    "bytes": 113
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/lib/ease.ts",
+    "bytes": 42
+   }
+  ],
+  "allFiles": [
+   "lenis/dist/lenis.mjs",
+   "(app)/src/sections/Header.tsx",
+   "(app)/src/data/news.ts",
+   "(app)/src/assistant/AskBar.tsx",
+   "(app)/src/sections/AgenticCards.tsx",
+   "(app)/src/sections/offer.i18n.ts",
+   "(app)/src/data/projects.ts",
+   "(app)/src/sections/Features.tsx",
+   "(app)/src/components/ui/Carousel.tsx",
+   "(app)/src/assistant/AssistantLauncher.tsx",
+   "(app)/src/App.tsx",
+   "(app)/src/assistant/store.ts",
+   "(app)/src/lib/submit.ts",
+   "(app)/src/sections/Waitlist.tsx",
+   "(app)/src/lib/SmoothScroll.tsx",
+   "(app)/src/lib/turnstile.ts",
+   "(app)/src/sections/header.i18n.ts",
+   "(app)/src/assistant/assistant.i18n.ts",
+   "(app)/src/sections/Projects.tsx",
+   "(app)/src/sections/sky/journey.ts",
+   "(app)/src/sections/Footer.tsx",
+   "(app)/src/sections/Storytelling.tsx",
+   "(app)/src/i18n/shared.ts",
+   "(app)/src/sections/Supersize.tsx",
+   "(app)/src/sections/footer.i18n.ts",
+   "(app)/src/sections/waitlist.i18n.ts",
+   "(app)/src/sections/News.tsx",
+   "(app)/src/sections/launchpad.i18n.ts",
+   "(app)/src/sections/story.i18n.ts",
+   "(app)/src/sections/projects.i18n.ts",
+   "(app)/src/components/ui/Reveal.tsx",
+   "(app)/src/sections/ModelsCTA.tsx",
+   "(app)/src/main.tsx",
+   "(app)/src/components/ui/AutoCarousel.tsx",
+   "(app)/src/i18n/locale.ts",
+   "(app)/src/components/ui/Section.tsx",
+   "(app)/src/sections/Logos.tsx",
+   "(app)/src/sections/Integrations.tsx",
+   "(app)/src/components/ui/Button.tsx",
+   "(app)/src/lib/ticker.ts",
+   "(app)/src/assistant/SnailQ.tsx",
+   "(app)/src/lib/media.ts",
+   "(app)/src/sections/cta.i18n.ts",
+   "(app)/src/components/ui/Grid.tsx",
+   "(app)/src/components/ui/LogoMark.tsx",
+   "(app)/src/sections/news.i18n.ts",
+   "(app)/src/components/ui/AnimatedBorder.tsx",
+   "(app)/src/sections/ecosystem.i18n.ts",
+   "(app)/src/sections/tools.i18n.ts",
+   "(app)/src/components/ui/Wordmark.tsx",
+   "(app)/src/i18n/Accent.tsx",
+   "(app)/src/components/ui/Pill.tsx",
+   "(app)/src/sections/hero.i18n.ts",
+   "(app)/src/sections/Hero.tsx",
+   "(app)/src/i18n/LocaleProvider.tsx",
+   "(app)/src/sections/sky/fallback.ts",
+   "(app)/src/lib/scroll.ts",
+   "(app)/src/sections/supersize.i18n.ts",
+   "(app)/src/lib/ease.ts"
+  ]
+ },
+ "MembersPage-BWVXHBYP.js": {
+  "raw": 11123,
+  "gzip": 4313,
+  "packages": {
+   "(app)": 10788
+  },
+  "topFiles": [
+   {
+    "pkg": "(app)",
+    "file": "src/pages/members.i18n.ts",
+    "bytes": 5101
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/pages/MembersPage.tsx",
+    "bytes": 5075
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/data/members.ts",
+    "bytes": 612
+   }
+  ],
+  "allFiles": [
+   "(app)/src/pages/members.i18n.ts",
+   "(app)/src/pages/MembersPage.tsx",
+   "(app)/src/data/members.ts"
+  ]
+ },
+ "NotFoundPage-DdjQPMlX.js": {
+  "raw": 1266,
+  "gzip": 730,
+  "packages": {
+   "(app)": 1038
+  },
+  "topFiles": [
+   {
+    "pkg": "(app)",
+    "file": "src/pages/NotFoundPage.tsx",
+    "bytes": 706
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/pages/notFound.i18n.ts",
+    "bytes": 332
+   }
+  ],
+  "allFiles": [
+   "(app)/src/pages/NotFoundPage.tsx",
+   "(app)/src/pages/notFound.i18n.ts"
+  ]
+ },
+ "pageScroll-CjrnWOJZ.js": {
+  "raw": 1527,
+  "gzip": 877,
+  "packages": {
+   "(app)": 1333
+  },
+  "topFiles": [
+   {
+    "pkg": "(app)",
+    "file": "src/pages/pageScroll.ts",
+    "bytes": 1333
+   }
+  ],
+  "allFiles": [
+   "(app)/src/pages/pageScroll.ts"
+  ]
+ },
+ "panel.i18n-Cc0bYlo-.js": {
+  "raw": 2714,
+  "gzip": 1652,
+  "packages": {
+   "(app)": 2666
+  },
+  "topFiles": [
+   {
+    "pkg": "(app)",
+    "file": "src/assistant/panel.i18n.ts",
+    "bytes": 2666
+   }
+  ],
+  "allFiles": [
+   "(app)/src/assistant/panel.i18n.ts"
+  ]
+ },
+ "ProductDemo-BYQbYKZd.js": {
+  "raw": 20215,
+  "gzip": 6781,
+  "packages": {
+   "(app)": 19803
+  },
+  "topFiles": [
+   {
+    "pkg": "(app)",
+    "file": "src/sections/ProductDemo.tsx",
+    "bytes": 11880
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/platform.i18n.ts",
+    "bytes": 7923
+   }
+  ],
+  "allFiles": [
+   "(app)/src/sections/ProductDemo.tsx",
+   "(app)/src/sections/platform.i18n.ts"
+  ]
+ },
+ "r3f-UhlMeCFy.js": {
+  "raw": 225177,
+  "gzip": 71895,
+  "packages": {
+   "@react-three/fiber": 150671,
+   "three-stdlib": 22156,
+   "@monogrid/gainmap-js": 15409,
+   "@react-three/drei": 9712,
+   "fflate": 3712,
+   "react-use-measure": 3134,
+   "use-sync-external-store": 1575,
+   "its-fine": 1361,
+   "suspend-react": 1041,
+   "zustand": 571,
+   "@babel/runtime": 219
+  },
+  "topFiles": [
+   {
+    "pkg": "@react-three/fiber",
+    "file": "dist/events-156d8d12.esm.js",
+    "bytes": 148998
+   },
+   {
+    "pkg": "three-stdlib",
+    "file": "loaders/EXRLoader.js",
+    "bytes": 18008
+   },
+   {
+    "pkg": "@monogrid/gainmap-js",
+    "file": "dist/Loader-DLI-_JDP.js",
+    "bytes": 5665
+   },
+   {
+    "pkg": "@monogrid/gainmap-js",
+    "file": "dist/decode.js",
+    "bytes": 5329
+   },
+   {
+    "pkg": "@monogrid/gainmap-js",
+    "file": "dist/QuadRenderer-Bj1xl_EK.js",
+    "bytes": 4415
+   },
+   {
+    "pkg": "fflate",
+    "file": "esm/browser.js",
+    "bytes": 3712
+   },
+   {
+    "pkg": "three-stdlib",
+    "file": "loaders/RGBELoader.js",
+    "bytes": 3338
+   },
+   {
+    "pkg": "react-use-measure",
+    "file": "dist/index.js",
+    "bytes": 3134
+   },
+   {
+    "pkg": "@react-three/drei",
+    "file": "core/Environment.js",
+    "bytes": 2862
+   },
+   {
+    "pkg": "@react-three/drei",
+    "file": "core/MeshTransmissionMaterial.js",
+    "bytes": 2372
+   },
+   {
+    "pkg": "@react-three/drei",
+    "file": "core/useEnvironment.js",
+    "bytes": 2154
+   },
+   {
+    "pkg": "@react-three/fiber",
+    "file": "dist/react-three-fiber.esm.js",
+    "bytes": 1673
+   },
+   {
+    "pkg": "its-fine",
+    "file": "dist/index.js",
+    "bytes": 1361
+   },
+   {
+    "pkg": "@react-three/drei",
+    "file": "core/Lightformer.js",
+    "bytes": 1123
+   },
+   {
+    "pkg": "suspend-react",
+    "file": "index.js",
+    "bytes": 1041
+   },
+   {
+    "pkg": "use-sync-external-store",
+    "file": "cjs/use-sync-external-store-shim/with-selector.production.js",
+    "bytes": 776
+   },
+   {
+    "pkg": "three-stdlib",
+    "file": "objects/GroundProjectedEnv.js",
+    "bytes": 768
+   },
+   {
+    "pkg": "use-sync-external-store",
+    "file": "cjs/use-sync-external-store-shim.production.js",
+    "bytes": 729
+   },
+   {
+    "pkg": "@react-three/drei",
+    "file": "core/Fbo.js",
+    "bytes": 458
+   },
+   {
+    "pkg": "@react-three/drei",
+    "file": "core/shaderMaterial.js",
+    "bytes": 332
+   },
+   {
+    "pkg": "zustand",
+    "file": "esm/vanilla.mjs",
+    "bytes": 310
+   },
+   {
+    "pkg": "@react-three/drei",
+    "file": "helpers/environment-assets.js",
+    "bytes": 310
+   },
+   {
+    "pkg": "zustand",
+    "file": "esm/traditional.mjs",
+    "bytes": 261
+   },
+   {
+    "pkg": "@babel/runtime",
+    "file": "helpers/esm/extends.js",
+    "bytes": 219
+   },
+   {
+    "pkg": "@react-three/drei",
+    "file": "materials/DiscardMaterial.js",
+    "bytes": 101
+   },
+   {
+    "pkg": "use-sync-external-store",
+    "file": "shim/with-selector.js",
+    "bytes": 42
+   },
+   {
+    "pkg": "three-stdlib",
+    "file": "_polyfill/constants.js",
+    "bytes": 42
+   },
+   {
+    "pkg": "use-sync-external-store",
+    "file": "shim/index.js",
+    "bytes": 28
+   }
+  ],
+  "allFiles": [
+   "@react-three/fiber/dist/events-156d8d12.esm.js",
+   "three-stdlib/loaders/EXRLoader.js",
+   "@monogrid/gainmap-js/dist/Loader-DLI-_JDP.js",
+   "@monogrid/gainmap-js/dist/decode.js",
+   "@monogrid/gainmap-js/dist/QuadRenderer-Bj1xl_EK.js",
+   "fflate/esm/browser.js",
+   "three-stdlib/loaders/RGBELoader.js",
+   "react-use-measure/dist/index.js",
+   "@react-three/drei/core/Environment.js",
+   "@react-three/drei/core/MeshTransmissionMaterial.js",
+   "@react-three/drei/core/useEnvironment.js",
+   "@react-three/fiber/dist/react-three-fiber.esm.js",
+   "its-fine/dist/index.js",
+   "@react-three/drei/core/Lightformer.js",
+   "suspend-react/index.js",
+   "use-sync-external-store/cjs/use-sync-external-store-shim/with-selector.production.js",
+   "three-stdlib/objects/GroundProjectedEnv.js",
+   "use-sync-external-store/cjs/use-sync-external-store-shim.production.js",
+   "@react-three/drei/core/Fbo.js",
+   "@react-three/drei/core/shaderMaterial.js",
+   "zustand/esm/vanilla.mjs",
+   "@react-three/drei/helpers/environment-assets.js",
+   "zustand/esm/traditional.mjs",
+   "@babel/runtime/helpers/esm/extends.js",
+   "@react-three/drei/materials/DiscardMaterial.js",
+   "use-sync-external-store/shim/with-selector.js",
+   "three-stdlib/_polyfill/constants.js",
+   "use-sync-external-store/shim/index.js"
+  ]
+ },
+ "react-D48Lzm2I.js": {
+  "raw": 189647,
+  "gzip": 58876,
+  "packages": {
+   "react-dom": 178067,
+   "react": 7895,
+   "scheduler": 3528
+  },
+  "topFiles": [
+   {
+    "pkg": "react-dom",
+    "file": "cjs/react-dom-client.production.js",
+    "bytes": 174364
+   },
+   {
+    "pkg": "react",
+    "file": "cjs/react.production.js",
+    "bytes": 7477
+   },
+   {
+    "pkg": "scheduler",
+    "file": "cjs/scheduler.production.js",
+    "bytes": 3502
+   },
+   {
+    "pkg": "react-dom",
+    "file": "cjs/react-dom.production.js",
+    "bytes": 3253
+   },
+   {
+    "pkg": "react",
+    "file": "cjs/react-jsx-runtime.production.js",
+    "bytes": 339
+   },
+   {
+    "pkg": "react-dom",
+    "file": "index.js",
+    "bytes": 225
+   },
+   {
+    "pkg": "react-dom",
+    "file": "client.js",
+    "bytes": 225
+   },
+   {
+    "pkg": "react",
+    "file": "jsx-runtime.js",
+    "bytes": 53
+   },
+   {
+    "pkg": "react",
+    "file": "index.js",
+    "bytes": 26
+   },
+   {
+    "pkg": "scheduler",
+    "file": "index.js",
+    "bytes": 26
+   }
+  ],
+  "allFiles": [
+   "react-dom/cjs/react-dom-client.production.js",
+   "react/cjs/react.production.js",
+   "scheduler/cjs/scheduler.production.js",
+   "react-dom/cjs/react-dom.production.js",
+   "react/cjs/react-jsx-runtime.production.js",
+   "react-dom/index.js",
+   "react-dom/client.js",
+   "react/jsx-runtime.js",
+   "react/index.js",
+   "scheduler/index.js"
+  ]
+ },
+ "SkyScene-BHDdzEhX.js": {
+  "raw": 59557,
+  "gzip": 23483,
+  "packages": {
+   "(app)": 41187
+  },
+  "topFiles": [
+   {
+    "pkg": "(app)",
+    "file": "src/sections/sky/CloudSprites.tsx",
+    "bytes": 5776
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/lib/ttf.ts",
+    "bytes": 4987
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/components/three/extrudeGlyphs.ts",
+    "bytes": 3928
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/sky/cloudBake.ts",
+    "bytes": 3128
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/SkyScene.tsx",
+    "bytes": 2888
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/components/three/GlassText.tsx",
+    "bytes": 2829
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/sky/field/Flora.tsx",
+    "bytes": 2618
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/sky/GlassWordmark.tsx",
+    "bytes": 2346
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/sky/Stars.tsx",
+    "bytes": 2149
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/sky/SkyDome.tsx",
+    "bytes": 2012
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/sky/quality.ts",
+    "bytes": 1731
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/sky/field/Grass.tsx",
+    "bytes": 1557
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/sky/Field.tsx",
+    "bytes": 1156
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/sky/field/terrain.ts",
+    "bytes": 1138
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/sky/SceneLights.tsx",
+    "bytes": 949
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/sky/field/Hills.tsx",
+    "bytes": 819
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/sky/field/grassShaders.ts",
+    "bytes": 716
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/sky/pointer.ts",
+    "bytes": 416
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/sky/skyShaders.ts",
+    "bytes": 24
+   },
+   {
+    "pkg": "(app)",
+    "file": "src/sections/sky/shaders.ts",
+    "bytes": 20
+   }
+  ],
+  "allFiles": [
+   "(app)/src/sections/sky/CloudSprites.tsx",
+   "(app)/src/lib/ttf.ts",
+   "(app)/src/components/three/extrudeGlyphs.ts",
+   "(app)/src/sections/sky/cloudBake.ts",
+   "(app)/src/sections/SkyScene.tsx",
+   "(app)/src/components/three/GlassText.tsx",
+   "(app)/src/sections/sky/field/Flora.tsx",
+   "(app)/src/sections/sky/GlassWordmark.tsx",
+   "(app)/src/sections/sky/Stars.tsx",
+   "(app)/src/sections/sky/SkyDome.tsx",
+   "(app)/src/sections/sky/quality.ts",
+   "(app)/src/sections/sky/field/Grass.tsx",
+   "(app)/src/sections/sky/Field.tsx",
+   "(app)/src/sections/sky/field/terrain.ts",
+   "(app)/src/sections/sky/SceneLights.tsx",
+   "(app)/src/sections/sky/field/Hills.tsx",
+   "(app)/src/sections/sky/field/grassShaders.ts",
+   "(app)/src/sections/sky/pointer.ts",
+   "(app)/src/sections/sky/skyShaders.ts",
+   "(app)/src/sections/sky/shaders.ts"
+  ]
+ },
+ "sseClient-CIEp9eTS.js": {
+  "raw": 3804,
+  "gzip": 1740,
+  "packages": {
+   "(app)": 3699
+  },
+  "topFiles": [
+   {
+    "pkg": "(app)",
+    "file": "src/assistant/sseClient.ts",
+    "bytes": 3699
+   }
+  ],
+  "allFiles": [
+   "(app)/src/assistant/sseClient.ts"
+  ]
+ },
+ "three-BncCDUPi.js": {
+  "raw": 738243,
+  "gzip": 185313,
+  "packages": {
+   "three": 585716
+  },
+  "topFiles": [
+   {
+    "pkg": "three",
+    "file": "build/three.core.js",
+    "bytes": 384475
+   },
+   {
+    "pkg": "three",
+    "file": "build/three.module.js",
+    "bytes": 199559
+   },
+   {
+    "pkg": "three",
+    "file": "examples/jsm/loaders/FontLoader.js",
+    "bytes": 1682
+   }
+  ],
+  "allFiles": [
+   "three/build/three.core.js",
+   "three/build/three.module.js",
+   "three/examples/jsm/loaders/FontLoader.js"
+  ]
+ }
+}

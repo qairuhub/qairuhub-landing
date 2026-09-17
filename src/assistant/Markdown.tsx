@@ -1,4 +1,4 @@
-import { Fragment, type MouseEvent, type ReactNode } from 'react'
+import { Fragment, memo, type MouseEvent, type ReactNode } from 'react'
 import { localeBase, type Locale } from '../i18n/locale'
 
 /**
@@ -15,6 +15,8 @@ import { localeBase, type Locale } from '../i18n/locale'
  * - Everything else (other hosts, `http:`, `javascript:`, credentials, ports) renders as plain
  *   text; for a Markdown link only its label is shown.
  * Streaming-safe: an unclosed `**` at the end of the text renders bold instead of as asterisks.
+ * Each block renders through a memoised component with primitive props, so while an answer is
+ * revealed (60 Hz) only its growing last block re-renders.
  */
 
 /** Hosts Q may link to: AGENT-SPEC §6 plus theqairubook's live app (DECISIONS §1). */
@@ -189,32 +191,62 @@ export function parseBlocks(text: string): Block[] {
   return blocks
 }
 
-export default function Markdown({ text, className, ...ctx }: MarkdownContext & { text: string; className?: string }) {
+/** Lines and items never contain a newline (the text is split on them), so it joins them losslessly. */
+const JOIN = '\n'
+
+interface BlockProps extends MarkdownContext {
+  kind: Block['kind']
+  /** the block's lines (`p`) or items (lists), joined with JOIN */
+  content: string
+  /** position in the answer (key prefix of the inline nodes) */
+  index: number
+}
+
+const MarkdownBlock = memo(function MarkdownBlock({ kind, content, index: i, ...ctx }: BlockProps) {
+  const parts = content.split(JOIN)
+  if (kind === 'p') {
+    return (
+      <p>
+        {parts.map((line, j) => (
+          <Fragment key={j}>
+            {j > 0 && <br />}
+            {renderInline(line, ctx, `${i}.${j}.`)}
+          </Fragment>
+        ))}
+      </p>
+    )
+  }
+  const List = kind
+  return (
+    <List>
+      {parts.map((item, j) => (
+        <li key={j}>{renderInline(item, ctx, `${i}.${j}.`)}</li>
+      ))}
+    </List>
+  )
+})
+
+export default function Markdown({
+  text,
+  className,
+  locale,
+  newTabLabel,
+  onInternalLink,
+}: MarkdownContext & { text: string; className?: string }) {
   const blocks = parseBlocks(text)
   return (
     <div className={className}>
-      {blocks.map((b, i) => {
-        if (b.kind === 'p') {
-          return (
-            <p key={i}>
-              {b.lines.map((line, j) => (
-                <Fragment key={j}>
-                  {j > 0 && <br />}
-                  {renderInline(line, ctx, `${i}.${j}.`)}
-                </Fragment>
-              ))}
-            </p>
-          )
-        }
-        const List = b.kind
-        return (
-          <List key={i}>
-            {b.items.map((item, j) => (
-              <li key={j}>{renderInline(item, ctx, `${i}.${j}.`)}</li>
-            ))}
-          </List>
-        )
-      })}
+      {blocks.map((b, i) => (
+        <MarkdownBlock
+          key={i}
+          index={i}
+          kind={b.kind}
+          content={(b.kind === 'p' ? b.lines : b.items).join(JOIN)}
+          locale={locale}
+          newTabLabel={newTabLabel}
+          onInternalLink={onInternalLink}
+        />
+      ))}
     </div>
   )
 }

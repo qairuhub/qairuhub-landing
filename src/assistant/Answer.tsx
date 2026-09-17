@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { memo, useEffect, useRef, useState } from 'react'
 import { useRoute, useT } from '../i18n/LocaleProvider'
 import { addTick } from '../lib/ticker'
 import { useReducedMotion } from '../lib/media'
@@ -15,6 +15,9 @@ import './Answer.css'
  * Streaming text is revealed on the shared ticker at an adaptive, frame-rate independent pace (a
  * backlog drains exponentially, τ 0.16 s, never below 90 chars/s), which smooths token bursts and
  * the single-delta offline answers alike. Reduced motion, restored messages and stopped answers show everything at once.
+ *
+ * Memoised: the store keeps a message's identity until it is patched, so a settled answer doesn't
+ * re-render while another one streams or while the reader types (pass a stable `onInternalLink`).
  */
 
 /** the backlog drains exponentially with this time constant (s), frame-rate independent */
@@ -51,7 +54,7 @@ export interface AnswerProps {
   onInternalLink?: () => void
 }
 
-export default function Answer({ message, onInternalLink }: AnswerProps) {
+function Answer({ message, onInternalLink }: AnswerProps) {
   const { locale } = useRoute()
   const t = useT(panelText)
   const reduced = useReducedMotion()
@@ -104,3 +107,5 @@ export default function Answer({ message, onInternalLink }: AnswerProps) {
     </div>
   )
 }
+
+export default memo(Answer)

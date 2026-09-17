@@ -1,0 +1,104 @@
+/* Sub-page loading placeholder (PageSkeleton.tsx) and the failure notice that replaces it when the
+   chunk never arrives (PageLoadFailed.tsx). Both mirror src/pages/subpage.css: the .subpage padding
+   and min-height, the centred .subpage__intro column, u-body-2 eyebrow, u-h1-small title, u-body-1
+   lede (max 62ch). Flat translucent bars in the card fill: no gradient, no shadow.
+   They live here, in the entry CSS, on purpose — src/pages/subpage.css ships inside the sub-page
+   chunk, which is the one that failed. */
+.page-skel {
+  min-height: 100lvh;
+  padding: calc(var(--header-height) + 88px) 0 120px;
+  opacity: 0;
+  animation: page-skel-in 400ms var(--ease-air) 300ms forwards;
+}
+.page-skel__intro {
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 20px;
+}
+.page-skel__bar {
+  display: block;
+  border-radius: var(--radius-inputs);
+  background: var(--card-fill);
+  animation: page-skel-pulse 1.6s ease-in-out 700ms infinite;
+}
+/* one u-body-2 line (14px × 1.5) */
+.page-skel__eyebrow {
+  width: 128px;
+  height: 12px;
+  margin: 4.5px 0;
+}
+/* one u-h1-small line: the cap height of the 0.85 display line */
+.page-skel__title {
+  width: min(100%, 7.5em);
+  height: 0.7em;
+  margin: 0.075em 0;
+  font-size: clamp(64px, 13.9vw, 200px);
+}
+.page-skel__lede {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: min(100%, 62ch);
+  padding: 5px 0;
+  font-size: 16px;
+}
+.page-skel__lede .page-skel__bar {
+  width: 100%;
+  height: 10px;
+}
+.page-skel__lede .page-skel__bar--short {
+  width: 64%;
+}
+
+@media (max-width: 768px) {
+  .page-skel {
+    padding: calc(var(--header-height) + 48px) 0 80px;
+  }
+  .page-skel__intro {
+    gap: 16px;
+  }
+}
+
+/* ---------- Chunk failure notice (PageLoadFailed.tsx): the .subpage frame, one line and a button */
+.page-fail {
+  min-height: 100lvh;
+  padding: calc(var(--header-height) + 88px) 0 120px;
+  color: var(--white);
+}
+.page-fail__inner {
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 24px;
+  text-align: center;
+}
+.page-fail__body {
+  max-width: 62ch;
+}
+@media (max-width: 768px) {
+  .page-fail {
+    padding: calc(var(--header-height) + 48px) 0 80px;
+  }
+}
+
+@keyframes page-skel-in {
+  to {
+    opacity: 1;
+  }
+}
+@keyframes page-skel-pulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-skel {
+    animation-duration: 1ms;
+  }
+  .page-skel__bar {
+    animation: none;
+  }
+}

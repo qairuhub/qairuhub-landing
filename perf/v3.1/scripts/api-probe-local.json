@@ -1,0 +1,744 @@
+{
+  "mode": "local",
+  "base": "http://127.0.0.1:8793",
+  "at": "2026-09-17T13:05:10.402Z",
+  "rows": [
+    {
+      "name": "config GET",
+      "method": "GET",
+      "path": "/api/config",
+      "status": 200,
+      "wireBytes": 29,
+      "ms": 23,
+      "ttfbMs": 14,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "application/json; charset=utf-8",
+        "cache-control": "public, max-age=300",
+        "content-encoding": "br",
+        "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
+        "cross-origin-resource-policy": "same-origin",
+        "x-content-type-options": "nosniff"
+      },
+      "body": "<29 B>",
+      "note": ""
+    },
+    {
+      "name": "config GET same-origin",
+      "method": "GET",
+      "path": "/api/config",
+      "status": 200,
+      "wireBytes": 29,
+      "ms": 10,
+      "ttfbMs": 7,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "application/json; charset=utf-8",
+        "cache-control": "public, max-age=300",
+        "content-encoding": "br",
+        "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
+        "cross-origin-resource-policy": "same-origin",
+        "x-content-type-options": "nosniff"
+      },
+      "body": "<29 B>",
+      "note": ""
+    },
+    {
+      "name": "config HEAD",
+      "method": "HEAD",
+      "path": "/api/config",
+      "status": 200,
+      "wireBytes": 0,
+      "ms": 7,
+      "ttfbMs": 7,
+      "headers": {
+        "content-type": "application/json; charset=utf-8 | application/json; charset=utf-8",
+        "cache-control": "public, max-age=300 | public, max-age=300",
+        "content-encoding": "br | br",
+        "content-security-policy": "default-src 'none'; frame-ancestors 'none' | default-src 'none'; frame-ancestors 'none'",
+        "cross-origin-resource-policy": "same-origin | same-origin",
+        "x-content-type-options": "nosniff | nosniff"
+      },
+      "body": "",
+      "note": ""
+    },
+    {
+      "name": "config GET cross-site",
+      "method": "GET",
+      "path": "/api/config",
+      "status": 403,
+      "wireBytes": 24,
+      "ms": 7,
+      "ttfbMs": 6,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "application/json; charset=utf-8",
+        "cache-control": "no-store",
+        "content-encoding": "br",
+        "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
+        "cross-origin-resource-policy": "same-origin",
+        "x-content-type-options": "nosniff"
+      },
+      "body": "<24 B>",
+      "note": ""
+    },
+    {
+      "name": "config PUT",
+      "method": "PUT",
+      "path": "/api/config",
+      "status": 405,
+      "wireBytes": 24,
+      "ms": 17,
+      "ttfbMs": 17,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "application/json; charset=utf-8",
+        "allow": "GET, HEAD",
+        "cache-control": "no-store",
+        "content-encoding": "br",
+        "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
+        "cross-origin-resource-policy": "same-origin",
+        "x-content-type-options": "nosniff"
+      },
+      "body": "<24 B>",
+      "note": ""
+    },
+    {
+      "name": "config GET x5 (warm)",
+      "method": "GET",
+      "path": "/api/config",
+      "status": 200,
+      "wireBytes": 29,
+      "ms": 8,
+      "ttfbMs": 7,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "application/json; charset=utf-8",
+        "cache-control": "public, max-age=300",
+        "content-encoding": "br",
+        "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
+        "cross-origin-resource-policy": "same-origin",
+        "x-content-type-options": "nosniff"
+      },
+      "body": "<29 B>",
+      "note": ""
+    },
+    {
+      "name": "config GET x5 (warm)",
+      "method": "GET",
+      "path": "/api/config",
+      "status": 200,
+      "wireBytes": 29,
+      "ms": 6,
+      "ttfbMs": 6,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "application/json; charset=utf-8",
+        "cache-control": "public, max-age=300",
+        "content-encoding": "br",
+        "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
+        "cross-origin-resource-policy": "same-origin",
+        "x-content-type-options": "nosniff"
+      },
+      "body": "<29 B>",
+      "note": ""
+    },
+    {
+      "name": "config GET x5 (warm)",
+      "method": "GET",
+      "path": "/api/config",
+      "status": 200,
+      "wireBytes": 29,
+      "ms": 6,
+      "ttfbMs": 6,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "application/json; charset=utf-8",
+        "cache-control": "public, max-age=300",
+        "content-encoding": "br",
+        "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
+        "cross-origin-resource-policy": "same-origin",
+        "x-content-type-options": "nosniff"
+      },
+      "body": "<29 B>",
+      "note": ""
+    },
+    {
+      "name": "config GET x5 (warm)",
+      "method": "GET",
+      "path": "/api/config",
+      "status": 200,
+      "wireBytes": 29,
+      "ms": 8,
+      "ttfbMs": 7,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "application/json; charset=utf-8",
+        "cache-control": "public, max-age=300",
+        "content-encoding": "br",
+        "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
+        "cross-origin-resource-policy": "same-origin",
+        "x-content-type-options": "nosniff"
+      },
+      "body": "<29 B>",
+      "note": ""
+    },
+    {
+      "name": "config GET x5 (warm)",
+      "method": "GET",
+      "path": "/api/config",
+      "status": 200,
+      "wireBytes": 29,
+      "ms": 6,
+      "ttfbMs": 5,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "application/json; charset=utf-8",
+        "cache-control": "public, max-age=300",
+        "content-encoding": "br",
+        "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
+        "cross-origin-resource-policy": "same-origin",
+        "x-content-type-options": "nosniff"
+      },
+      "body": "<29 B>",
+      "note": ""
+    },
+    {
+      "name": "OPTIONS /api/join preflight",
+      "method": "OPTIONS",
+      "path": "/api/join",
+      "status": 405,
+      "wireBytes": 27,
+      "ms": 7,
+      "ttfbMs": 7,
+      "headers": {
+        "content-length": "27",
+        "content-type": "application/json; charset=utf-8",
+        "allow": "GET, HEAD, POST",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
+        "cross-origin-resource-policy": "same-origin",
+        "x-content-type-options": "nosniff"
+      },
+      "body": "{\"error\":{\"code\":\"method\"}}",
+      "note": ""
+    },
+    {
+      "name": "OPTIONS /api/ask preflight",
+      "method": "OPTIONS",
+      "path": "/api/ask",
+      "status": 405,
+      "wireBytes": 27,
+      "ms": 7,
+      "ttfbMs": 7,
+      "headers": {
+        "content-length": "27",
+        "content-type": "application/json; charset=utf-8",
+        "allow": "POST",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
+        "cross-origin-resource-policy": "same-origin",
+        "x-content-type-options": "nosniff"
+      },
+      "body": "{\"error\":{\"code\":\"method\"}}",
+      "note": ""
+    },
+    {
+      "name": "join GET token",
+      "method": "GET",
+      "path": "/api/join",
+      "status": 200,
+      "wireBytes": 75,
+      "ms": 29,
+      "ttfbMs": 24,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "application/json; charset=utf-8",
+        "cache-control": "no-store",
+        "content-encoding": "br",
+        "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
+        "cross-origin-resource-policy": "same-origin",
+        "x-content-type-options": "nosniff"
+      },
+      "body": "<75 B>",
+      "note": ""
+    },
+    {
+      "name": "join POST no Origin",
+      "method": "POST",
+      "path": "/api/join",
+      "status": 403,
+      "wireBytes": 27,
+      "ms": 7,
+      "ttfbMs": 7,
+      "headers": {
+        "content-length": "27",
+        "content-type": "application/json; charset=utf-8",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
+        "cross-origin-resource-policy": "same-origin",
+        "x-content-type-options": "nosniff"
+      },
+      "body": "{\"error\":{\"code\":\"origin\"}}",
+      "note": ""
+    },
+    {
+      "name": "join POST cross-site Origin",
+      "method": "POST",
+      "path": "/api/join",
+      "status": 403,
+      "wireBytes": 27,
+      "ms": 6,
+      "ttfbMs": 6,
+      "headers": {
+        "content-length": "27",
+        "content-type": "application/json; charset=utf-8",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
+        "cross-origin-resource-policy": "same-origin",
+        "x-content-type-options": "nosniff"
+      },
+      "body": "{\"error\":{\"code\":\"origin\"}}",
+      "note": ""
+    },
+    {
+      "name": "join POST text/plain",
+      "method": "POST",
+      "path": "/api/join",
+      "status": 415,
+      "wireBytes": 32,
+      "ms": 6,
+      "ttfbMs": 6,
+      "headers": {
+        "content-length": "32",
+        "content-type": "application/json; charset=utf-8",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
+        "cross-origin-resource-policy": "same-origin",
+        "x-content-type-options": "nosniff"
+      },
+      "body": "{\"error\":{\"code\":\"bad_request\"}}",
+      "note": ""
+    },
+    {
+      "name": "join POST bad JSON",
+      "method": "POST",
+      "path": "/api/join",
+      "status": 400,
+      "wireBytes": 32,
+      "ms": 12,
+      "ttfbMs": 12,
+      "headers": {
+        "content-length": "32",
+        "content-type": "application/json; charset=utf-8",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
+        "cross-origin-resource-policy": "same-origin",
+        "x-content-type-options": "nosniff"
+      },
+      "body": "{\"error\":{\"code\":\"bad_request\"}}",
+      "note": ""
+    },
+    {
+      "name": "join POST 9 KB body",
+      "method": "POST",
+      "path": "/api/join",
+      "status": 413,
+      "wireBytes": 29,
+      "ms": 10,
+      "ttfbMs": 10,
+      "headers": {
+        "content-length": "29",
+        "content-type": "application/json; charset=utf-8",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
+        "cross-origin-resource-policy": "same-origin",
+        "x-content-type-options": "nosniff"
+      },
+      "body": "{\"error\":{\"code\":\"too_long\"}}",
+      "note": ""
+    },
+    {
+      "name": "join POST array body",
+      "method": "POST",
+      "path": "/api/join",
+      "status": 400,
+      "wireBytes": 32,
+      "ms": 10,
+      "ttfbMs": 10,
+      "headers": {
+        "content-length": "32",
+        "content-type": "application/json; charset=utf-8",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
+        "cross-origin-resource-policy": "same-origin",
+        "x-content-type-options": "nosniff"
+      },
+      "body": "{\"error\":{\"code\":\"bad_request\"}}",
+      "note": ""
+    },
+    {
+      "name": "join POST honeypot",
+      "method": "POST",
+      "path": "/api/join",
+      "status": 200,
+      "wireBytes": 11,
+      "ms": 8,
+      "ttfbMs": 8,
+      "headers": {
+        "content-length": "11",
+        "content-type": "application/json; charset=utf-8",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
+        "cross-origin-resource-policy": "same-origin",
+        "x-content-type-options": "nosniff"
+      },
+      "body": "{\"ok\":true}",
+      "note": "fake 200, nothing stored, no D1 call"
+    },
+    {
+      "name": "join POST no startedAt",
+      "method": "POST",
+      "path": "/api/join",
+      "status": 403,
+      "wireBytes": 34,
+      "ms": 56,
+      "ttfbMs": 56,
+      "headers": {
+        "content-length": "34",
+        "content-type": "application/json; charset=utf-8",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
+        "cross-origin-resource-policy": "same-origin",
+        "x-content-type-options": "nosniff"
+      },
+      "body": "{\"error\":{\"code\":\"verify_failed\"}}",
+      "note": "1 D1 counter write, then 403"
+    },
+    {
+      "name": "join POST invalid fields",
+      "method": "POST",
+      "path": "/api/join",
+      "status": 422,
+      "wireBytes": 67,
+      "ms": 21,
+      "ttfbMs": 18,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "application/json; charset=utf-8",
+        "cache-control": "no-store",
+        "content-encoding": "br",
+        "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
+        "cross-origin-resource-policy": "same-origin",
+        "x-content-type-options": "nosniff"
+      },
+      "body": "<67 B>",
+      "note": "counter write + HMAC check, then 422 before INSERT"
+    },
+    {
+      "name": "ask POST offline SSE",
+      "method": "POST",
+      "path": "/api/ask",
+      "status": 200,
+      "wireBytes": 1126,
+      "ms": 47,
+      "ttfbMs": 43,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "text/event-stream; charset=utf-8",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
+        "cross-origin-resource-policy": "same-origin",
+        "x-accel-buffering": "no",
+        "x-content-type-options": "nosniff"
+      },
+      "body": "<1126 B>",
+      "note": "offline answer (reason disabled); no upstream possible"
+    },
+    {
+      "name": "ask POST bad body",
+      "method": "POST",
+      "path": "/api/ask",
+      "status": 400,
+      "wireBytes": 32,
+      "ms": 13,
+      "ttfbMs": 13,
+      "headers": {
+        "content-length": "32",
+        "content-type": "application/json; charset=utf-8",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
+        "cross-origin-resource-policy": "same-origin",
+        "x-content-type-options": "nosniff"
+      },
+      "body": "{\"error\":{\"code\":\"bad_request\"}}",
+      "note": ""
+    },
+    {
+      "name": "ask GET",
+      "method": "GET",
+      "path": "/api/ask",
+      "status": 405,
+      "wireBytes": 24,
+      "ms": 8,
+      "ttfbMs": 6,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "application/json; charset=utf-8",
+        "allow": "POST",
+        "cache-control": "no-store",
+        "content-encoding": "br",
+        "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
+        "cross-origin-resource-policy": "same-origin",
+        "x-content-type-options": "nosniff"
+      },
+      "body": "<24 B>",
+      "note": ""
+    },
+    {
+      "name": "unknown /api/nope",
+      "method": "GET",
+      "path": "/api/nope",
+      "status": 404,
+      "wireBytes": 33,
+      "ms": 12,
+      "ttfbMs": 9,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "application/json; charset=utf-8",
+        "cache-control": "no-store",
+        "content-encoding": "br",
+        "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
+        "cross-origin-resource-policy": "same-origin",
+        "x-content-type-options": "nosniff"
+      },
+      "body": "<33 B>",
+      "note": ""
+    },
+    {
+      "name": "HTML /",
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "wireBytes": 837,
+      "ms": 37,
+      "ttfbMs": 33,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "text/html; charset=utf-8",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-encoding": "br",
+        "etag": "\"380cddace100eaa8f8252aa542d8beb4\"",
+        "content-security-policy": "default-src 'self'; script-src 'self' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; connect-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self'; worker-src 'self' blob:; manifest-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff"
+      },
+      "body": "<837 B>",
+      "note": ""
+    },
+    {
+      "name": "HTML /members",
+      "method": "GET",
+      "path": "/members",
+      "status": 200,
+      "wireBytes": 581,
+      "ms": 11,
+      "ttfbMs": 11,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "text/html; charset=utf-8",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-encoding": "br",
+        "etag": "\"5467f18240dc84fc5f1ebd2cabb089b5\"",
+        "content-security-policy": "default-src 'self'; script-src 'self' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; connect-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self'; worker-src 'self' blob:; manifest-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff"
+      },
+      "body": "<581 B>",
+      "note": ""
+    },
+    {
+      "name": "HTML /kk/",
+      "method": "GET",
+      "path": "/kk/",
+      "status": 200,
+      "wireBytes": 988,
+      "ms": 9,
+      "ttfbMs": 8,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "text/html; charset=utf-8",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-encoding": "br",
+        "etag": "\"35a72b58ceef8817beba39263d8eb253\"",
+        "content-security-policy": "default-src 'self'; script-src 'self' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; connect-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self'; worker-src 'self' blob:; manifest-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff"
+      },
+      "body": "<988 B>",
+      "note": ""
+    },
+    {
+      "name": "HTML /handbook",
+      "method": "GET",
+      "path": "/handbook",
+      "status": 200,
+      "wireBytes": 599,
+      "ms": 8,
+      "ttfbMs": 7,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "text/html; charset=utf-8",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-encoding": "br",
+        "etag": "\"9244e25fbb0ac02b8df5973112c8d4eb\"",
+        "content-security-policy": "default-src 'self'; script-src 'self' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; connect-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self'; worker-src 'self' blob:; manifest-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff"
+      },
+      "body": "<599 B>",
+      "note": ""
+    },
+    {
+      "name": "asset three.js",
+      "method": "GET",
+      "path": "/assets/three-BncCDUPi.js",
+      "status": 200,
+      "wireBytes": 171232,
+      "ms": 42,
+      "ttfbMs": 19,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "application/javascript",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=31536000, immutable",
+        "content-encoding": "br",
+        "etag": "\"790e2d4d61e176e111256680608a9d7d\"",
+        "content-security-policy": "default-src 'self'; script-src 'self' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; connect-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self'; worker-src 'self' blob:; manifest-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff"
+      },
+      "body": "<171232 B>",
+      "note": ""
+    },
+    {
+      "name": "asset index.css",
+      "method": "GET",
+      "path": "/assets/index-DagKm4TW.css",
+      "status": 200,
+      "wireBytes": 15880,
+      "ms": 13,
+      "ttfbMs": 10,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "text/css; charset=utf-8",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=31536000, immutable",
+        "content-encoding": "br",
+        "etag": "\"712d0ea9863d867e406efaa0cda8118c\"",
+        "content-security-policy": "default-src 'self'; script-src 'self' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; connect-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self'; worker-src 'self' blob:; manifest-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff"
+      },
+      "body": "<15880 B>",
+      "note": ""
+    },
+    {
+      "name": "handbook-index.json",
+      "method": "GET",
+      "path": "/handbook-index.json",
+      "status": 200,
+      "wireBytes": 32813,
+      "ms": 17,
+      "ttfbMs": 10,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "application/json",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=300, must-revalidate",
+        "content-encoding": "br",
+        "etag": "\"803639c794a1d31f531463b68bd11940\"",
+        "content-security-policy": "default-src 'self'; script-src 'self' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; connect-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self'; worker-src 'self' blob:; manifest-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff"
+      },
+      "body": "<32813 B>",
+      "note": ""
+    },
+    {
+      "name": "handbook-index.json If-None-Match",
+      "method": "GET",
+      "path": "/handbook-index.json",
+      "status": 304,
+      "wireBytes": 0,
+      "ms": 9,
+      "ttfbMs": 9,
+      "headers": {
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=300, must-revalidate",
+        "content-encoding": "br",
+        "content-security-policy": "default-src 'self'; script-src 'self' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; connect-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self'; worker-src 'self' blob:; manifest-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff"
+      },
+      "body": "",
+      "note": ""
+    },
+    {
+      "name": "font Courgette TTF",
+      "method": "GET",
+      "path": "/fonts/Courgette-Regular.ttf",
+      "status": 200,
+      "wireBytes": 46786,
+      "ms": 22,
+      "ttfbMs": 13,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "font/ttf",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=31536000, immutable",
+        "content-encoding": "br",
+        "etag": "\"c5e5d91672c76b47e802c155ebb9b30b\"",
+        "content-security-policy": "default-src 'self'; script-src 'self' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; connect-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self'; worker-src 'self' blob:; manifest-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff"
+      },
+      "body": "<46786 B>",
+      "note": ""
+    },
+    {
+      "name": "font Inter woff2",
+      "method": "GET",
+      "path": "/fonts/Inter-latin.woff2",
+      "status": 200,
+      "wireBytes": 119400,
+      "ms": 13,
+      "ttfbMs": 11,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "font/woff2",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=31536000, immutable",
+        "etag": "\"8124a72e3330d958209baeed07fcfa39\"",
+        "content-security-policy": "default-src 'self'; script-src 'self' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; connect-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self'; worker-src 'self' blob:; manifest-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff"
+      },
+      "body": "<119400 B>",
+      "note": ""
+    }
+  ],
+  "sizes": {
+    "handbook-index.json": {
+      "raw": 114986,
+      "gzip6": 36692,
+      "br5": 32813,
+      "br11": 28470
+    },
+    "Courgette-Regular.ttf": {
+      "raw": 122072,
+      "gzip6": 55224,
+      "br11": 44509
+    },
+    "DancingScript-Variable.ttf": {
+      "raw": 133636,
+      "gzip6": 75152,
+      "br11": 62908
+    }
+  },
+  "askOfflineWire": 1126
+}

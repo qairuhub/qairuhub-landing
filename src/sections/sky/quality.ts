@@ -59,12 +59,40 @@ interface NavigatorHints extends Navigator {
 
 type GpuClass = 'discrete' | 'integrated' | 'weak' | 'unknown'
 
+/** localStorage key of the cached probe result: `{ ua, gpu }`. */
+const GPU_KEY = 'qh.gpu'
+
+/**
+ * The GPU class does not change for one browser build on one machine: probe once, remember it
+ * (the probe's throwaway context cost 50–194 ms on every desktop page view). A new user-agent
+ * string (browser update) probes again; the tier is a performance budget, so a stale class after
+ * a GPU swap only costs frame rate until storage is cleared.
+ */
+function probeGpu(): GpuClass {
+  try {
+    const raw = window.localStorage.getItem(GPU_KEY)
+    if (raw) {
+      const hit = JSON.parse(raw) as { ua?: string; gpu?: GpuClass }
+      if (hit.ua === navigator.userAgent && hit.gpu) return hit.gpu
+    }
+  } catch {
+    /* storage blocked: probe */
+  }
+  const gpu = probeGpuNow()
+  try {
+    if (gpu !== 'unknown') window.localStorage.setItem(GPU_KEY, JSON.stringify({ ua: navigator.userAgent, gpu }))
+  } catch {
+    /* ignore */
+  }
+  return gpu
+}
+
 /**
  * One throwaway WebGL context to read the renderer string. Core count alone misleads: a
  * 20-core laptop with an Intel UHD iGPU (the user's machine) must not get the `high` budget —
  * measured there, the glass + space dome at DPR 1.5 ran at ~24 fps on `high`.
  */
-function probeGpu(): GpuClass {
+function probeGpuNow(): GpuClass {
   try {
     const canvas = document.createElement('canvas')
     const gl = canvas.getContext('webgl2') ?? canvas.getContext('webgl')

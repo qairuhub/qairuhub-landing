@@ -148,10 +148,19 @@ export function useAssistant(): AssistantState {
   return useSyncExternalStore(subscribe, getState, getState)
 }
 
-/** A primitive slice (`s => s.panelOpen`): re-renders only when that value changes. */
-export function useAssistantValue<T extends string | number | boolean | null>(select: (s: AssistantState) => T): T {
+/**
+ * Any slice that keeps its identity while unchanged: a message object (`patchMessage` replaces only
+ * the patched one), `activeId`… Re-renders only when `Object.is` sees a new value, so the selector
+ * must return an existing value, never a freshly built object or array.
+ */
+export function useAssistantSelect<T>(select: (s: AssistantState) => T): T {
   const get = () => select(state)
   return useSyncExternalStore(subscribe, get, get)
+}
+
+/** A primitive slice (`s => s.panelOpen`): re-renders only when that value changes. */
+export function useAssistantValue<T extends string | number | boolean | null>(select: (s: AssistantState) => T): T {
+  return useAssistantSelect(select)
 }
 
 let seq = 0
@@ -299,4 +308,9 @@ export function closePanel(): void {
   if (!state.panelOpen) return
   stop()
   set({ panelOpen: false })
+}
+
+/** The panel never appeared (its chunk failed to load): reset the flag, keep any answer streaming. */
+export function cancelPanelOpen(): void {
+  if (state.panelOpen) set({ panelOpen: false })
 }

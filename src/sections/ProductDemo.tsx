@@ -416,9 +416,10 @@ export default function ProductDemo() {
   }, [active])
 
   useLayoutEffect(() => {
-    measure()
     const bar = tabbarRef.current
     if (!bar) return
+    // The observer's first callback runs after the next layout and before paint: no forced
+    // synchronous layout of the whole page inside this commit.
     const ro = new ResizeObserver(measure)
     ro.observe(bar)
     return () => ro.disconnect()

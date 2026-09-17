@@ -18,6 +18,63 @@ interface InViewOptions {
   rootMargin?: string
 }
 
+type EntryListener = (entry: IntersectionObserverEntry) => void
+
+interface SharedObserver {
+  io: IntersectionObserver
+  listeners: Map<Element, Set<EntryListener>>
+}
+
+/**
+ * One IntersectionObserver per option set for the whole page instead of one per element: the
+ * browser's intersection pass then walks a single observer (the home page has dozens of reveals),
+ * and every entry of a pass is delivered in one callback, so React batches the resulting renders.
+ */
+const shared = new Map<string, SharedObserver>()
+
+function observe(el: Element, threshold: number, rootMargin: string, listener: EntryListener): () => void {
+  const key = `${threshold}|${rootMargin}`
+  let entry = shared.get(key)
+  if (!entry) {
+    const listeners = new Map<Element, Set<EntryListener>>()
+    const io = new IntersectionObserver(
+      (records) => {
+        for (const record of records) listeners.get(record.target)?.forEach((l) => l(record))
+      },
+      { threshold, rootMargin },
+    )
+    entry = { io, listeners }
+    shared.set(key, entry)
+  }
+  const { io, listeners } = entry
+  let set = listeners.get(el)
+  if (!set) {
+    set = new Set()
+    listeners.set(el, set)
+    io.observe(el)
+  } else {
+    // Already observed: re-observe so the new listener also gets the initial notification.
+    io.unobserve(el)
+    io.observe(el)
+  }
+  set.add(listener)
+  let active = true
+  return () => {
+    if (!active) return
+    active = false
+    const current = listeners.get(el)
+    if (!current) return
+    current.delete(listener)
+    if (current.size > 0) return
+    listeners.delete(el)
+    io.unobserve(el)
+    if (listeners.size === 0) {
+      io.disconnect()
+      shared.delete(key)
+    }
+  }
+}
+
 /** IntersectionObserver hook. Defaults: fire once, 15% visible, slight bottom inset. */
 export function useInView<T extends Element = HTMLElement>(opts: InViewOptions = {}) {
   const ref = useRef<T | null>(null)
@@ -27,19 +84,16 @@ export function useInView<T extends Element = HTMLElement>(opts: InViewOptions =
   useEffect(() => {
     const el = ref.current
     if (!el) return
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setInView(true)
-          if (once) io.disconnect()
-        } else if (!once) {
-          setInView(false)
-        }
-      },
-      { threshold, rootMargin },
-    )
-    io.observe(el)
-    return () => io.disconnect()
+    const stop = observe(el, threshold, rootMargin, (entry) => {
+      if (entry.isIntersecting) {
+        setInView(true)
+        // Revealed for good: stop observing this element.
+        if (once) stop()
+      } else if (!once) {
+        setInView(false)
+      }
+    })
+    return stop
   }, [once, threshold, rootMargin])
 
   return { ref, inView }

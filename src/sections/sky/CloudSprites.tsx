@@ -7,6 +7,17 @@ import { QUALITY } from './quality'
 import { pointer } from './pointer'
 import { CLOUD_COUNT, createCloudAtlas, type CloudAtlas } from './cloudBake'
 import { cloudSpriteFragment, cloudSpriteVertex } from './shaders'
+import { registerWarmer } from './warmup'
+
+/**
+ * The atlas bake (one heavy fbm cell per frame + a pixel read-back on the first) only starts once
+ * SkyScene has revealed the canvas and had a quiet moment, or as soon as clouds are actually on
+ * screen (descent, the night preset). In space the deck is invisible anyway.
+ */
+let bakeAllowed = false
+export function allowCloudBake(): void {
+  bakeAllowed = true
+}
 
 /**
  * Baked cumulus sprites (docs/JOURNEY-SPEC.md "Clouds" + "Readability").
@@ -355,14 +366,18 @@ export default function CloudSprites({ tier, reduced }: LayerProps) {
   useEffect(() => {
     resources.atlas.reset()
     invalidate()
-    return () => resources.dispose()
+    const off = registerWarmer((renderer) => resources.atlas.compile(renderer))
+    return () => {
+      off()
+      resources.dispose()
+    }
   }, [resources, invalidate])
 
   const last = useRef({ vh: -1, hW: 0, hH: 0, px: 0, moving: true })
 
   useFrame((state) => {
     const { atlas, layers } = resources
-    if (!atlas.done) {
+    if (!atlas.done && (bakeAllowed || journey.clouds > 0)) {
       atlas.step(gl)
       if (!atlas.done) invalidate()
     }

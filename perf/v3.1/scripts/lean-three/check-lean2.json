@@ -1,0 +1,41 @@
+{
+ "identical": true,
+ "report": {
+  "base-low": {
+   "errors": [],
+   "hero": "b82059666174ef8d6e75fe52b96bbe8c",
+   "footer": "5913d8254e8e00b10ee0ccd35fca805d"
+  },
+  "base-medium": {
+   "errors": [],
+   "hero": "7d393a86846008a00975f4fee7f02345",
+   "footer": "7d3ae270aedf64850adbe40a531f76c3"
+  },
+  "base-high": {
+   "errors": [],
+   "hero": "11dbb8c4d9740d8ccc6c73b0f4db826b",
+   "footer": "a8276d0e0d6aa5bf1c825002d7fdf719"
+  },
+  "base-members": {
+   "errors": []
+  },
+  "lean2-low": {
+   "errors": [],
+   "hero": "b82059666174ef8d6e75fe52b96bbe8c",
+   "footer": "5913d8254e8e00b10ee0ccd35fca805d"
+  },
+  "lean2-medium": {
+   "errors": [],
+   "hero": "7d393a86846008a00975f4fee7f02345",
+   "footer": "7d3ae270aedf64850adbe40a531f76c3"
+  },
+  "lean2-high": {
+   "errors": [],
+   "hero": "11dbb8c4d9740d8ccc6c73b0f4db826b",
+   "footer": "a8276d0e0d6aa5bf1c825002d7fdf719"
+  },
+  "lean2-members": {
+   "errors": []
+  }
+ }
+}

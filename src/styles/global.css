@@ -88,8 +88,10 @@
    medium-weight friendly script that stays legible at 28px over clouds; Dancing Script is the
    declared fallback. The DOM face is a 6 KB lowercase WOFF2 subset (the wordmark is always the
    Latin "qairuhub", in every locale). The 3D sculpture fetches the full Courgette-Regular.ttf
-   itself (src/lib/ttf.ts parses glyf; home preloads it as="fetch"), so /members, /handbook and
-   the 404, which have no sculpture, never download the 119 KB TTF. */
+   itself (src/lib/ttf.ts parses glyf; on home the app starts that download right after the first
+   paint, src/sections/sky/wordmarkFont.ts), so /members, /handbook and the 404, which have no
+   sculpture, never download the 119 KB TTF. Sub-pages preload this 6 KB face instead: the header
+   wordmark is their LCP element (fonts.preload.json `pages`). */
 @font-face {
   font-family: "Courgette";
   src: url("/fonts/Courgette-wordmark.woff2") format("woff2");

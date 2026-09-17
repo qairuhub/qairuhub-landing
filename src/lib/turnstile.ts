@@ -81,6 +81,10 @@ function buildTimeKey(): string | null {
 /**
  * The public Turnstile site key, or `null` when none is configured (or the config endpoint is
  * unreachable, e.g. `pnpm dev` without Functions). Requested at most once per page load.
+ *
+ * Uses the HTTP cache: the endpoint sends `max-age=300, stale-while-revalidate=600`, so repeat
+ * views within 5–15 min need no request (see functions/api/config.ts for the key rollout order).
+ * `/api/join` and `/api/ask` stay `no-store`.
  */
 export function getTurnstileSiteKey(): Promise<string | null> {
   if (configPromise) return configPromise
@@ -93,7 +97,6 @@ export function getTurnstileSiteKey(): Promise<string | null> {
         method: 'GET',
         headers: { Accept: 'application/json' },
         credentials: 'same-origin',
-        cache: 'no-store',
         signal: controller.signal,
       })
       if (!res.ok || !(res.headers.get('content-type') ?? '').includes('application/json')) return buildTimeKey()

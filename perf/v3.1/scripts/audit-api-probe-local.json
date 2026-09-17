@@ -1,0 +1,659 @@
+{
+  "mode": "local",
+  "base": "http://127.0.0.1:8802",
+  "at": "2026-09-17T16:26:40.698Z",
+  "rows": [
+    {
+      "name": "config GET",
+      "method": "GET",
+      "path": "/api/config",
+      "status": 200,
+      "wireBytes": 29,
+      "ms": 12,
+      "ttfbMs": 5,
+      "http": "1.1",
+      "earlyHints": false,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "application/json; charset=utf-8",
+        "cache-control": "public, max-age=300",
+        "content-encoding": "br"
+      },
+      "csp": "default-src 'none'; frame-ancestors 'none'…",
+      "body": "<29 B>",
+      "note": "cacheable? (client fetches with cache:no-store)"
+    },
+    {
+      "name": "config GET (2nd)",
+      "method": "GET",
+      "path": "/api/config",
+      "status": 200,
+      "wireBytes": 29,
+      "ms": 4,
+      "ttfbMs": 3,
+      "http": "1.1",
+      "earlyHints": false,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "application/json; charset=utf-8",
+        "cache-control": "public, max-age=300",
+        "content-encoding": "br"
+      },
+      "csp": "default-src 'none'; frame-ancestors 'none'…",
+      "body": "<29 B>",
+      "note": "cf-cache-status would show an edge hit"
+    },
+    {
+      "name": "config HEAD",
+      "method": "HEAD",
+      "path": "/api/config",
+      "status": 200,
+      "wireBytes": 0,
+      "ms": 3,
+      "ttfbMs": 3,
+      "http": "1.1",
+      "earlyHints": false,
+      "headers": {
+        "content-type": "application/json; charset=utf-8 | application/json; charset=utf-8",
+        "cache-control": "public, max-age=300 | public, max-age=300",
+        "content-encoding": "br | br"
+      },
+      "csp": "default-src 'none'; frame-ancestors 'none' | default-src 'no…",
+      "body": "",
+      "note": ""
+    },
+    {
+      "name": "config GET cross-site",
+      "method": "GET",
+      "path": "/api/config",
+      "status": 403,
+      "wireBytes": 24,
+      "ms": 14,
+      "ttfbMs": 13,
+      "http": "1.1",
+      "earlyHints": false,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "application/json; charset=utf-8",
+        "cache-control": "no-store",
+        "content-encoding": "br"
+      },
+      "csp": "default-src 'none'; frame-ancestors 'none'…",
+      "body": "<24 B>",
+      "note": ""
+    },
+    {
+      "name": "join GET token",
+      "method": "GET",
+      "path": "/api/join",
+      "status": 200,
+      "wireBytes": 75,
+      "ms": 32,
+      "ttfbMs": 30,
+      "http": "1.1",
+      "earlyHints": false,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "application/json; charset=utf-8",
+        "cache-control": "no-store",
+        "content-encoding": "br"
+      },
+      "csp": "default-src 'none'; frame-ancestors 'none'…",
+      "body": "<75 B>",
+      "note": "HMAC only, no D1"
+    },
+    {
+      "name": "join POST honeypot",
+      "method": "POST",
+      "path": "/api/join",
+      "status": 200,
+      "wireBytes": 11,
+      "ms": 30,
+      "ttfbMs": 30,
+      "http": "1.1",
+      "earlyHints": false,
+      "headers": {
+        "content-length": "11",
+        "content-type": "application/json; charset=utf-8",
+        "cache-control": "no-store"
+      },
+      "csp": "default-src 'none'; frame-ancestors 'none'…",
+      "body": "{\"ok\":true}",
+      "note": "fake 200, nothing stored, no D1 call"
+    },
+    {
+      "name": "join POST no startedAt",
+      "method": "POST",
+      "path": "/api/join",
+      "status": 403,
+      "wireBytes": 34,
+      "ms": 14,
+      "ttfbMs": 14,
+      "http": "1.1",
+      "earlyHints": false,
+      "headers": {
+        "content-length": "34",
+        "content-type": "application/json; charset=utf-8",
+        "cache-control": "no-store"
+      },
+      "csp": "default-src 'none'; frame-ancestors 'none'…",
+      "body": "{\"error\":{\"code\":\"verify_failed\"}}",
+      "note": "1 D1 batch (counter), then 403 before INSERT"
+    },
+    {
+      "name": "ask POST offline SSE #1",
+      "method": "POST",
+      "path": "/api/ask",
+      "status": 200,
+      "wireBytes": 1126,
+      "ms": 47,
+      "ttfbMs": 45,
+      "http": "1.1",
+      "earlyHints": false,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "text/event-stream; charset=utf-8",
+        "cache-control": "no-store",
+        "x-accel-buffering": "no"
+      },
+      "csp": "default-src 'none'; frame-ancestors 'none'…",
+      "body": "<1126 B>",
+      "note": "offline answer (reason disabled): 1 D1 batch of 2 counter upserts, BM25F search, no upstream"
+    },
+    {
+      "name": "ask POST offline SSE #2",
+      "method": "POST",
+      "path": "/api/ask",
+      "status": 200,
+      "wireBytes": 1126,
+      "ms": 8,
+      "ttfbMs": 7,
+      "http": "1.1",
+      "earlyHints": false,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "text/event-stream; charset=utf-8",
+        "cache-control": "no-store",
+        "x-accel-buffering": "no"
+      },
+      "csp": "default-src 'none'; frame-ancestors 'none'…",
+      "body": "<1126 B>",
+      "note": "offline answer (reason disabled): 1 D1 batch of 2 counter upserts, BM25F search, no upstream"
+    },
+    {
+      "name": "ask POST offline SSE #3",
+      "method": "POST",
+      "path": "/api/ask",
+      "status": 200,
+      "wireBytes": 1126,
+      "ms": 8,
+      "ttfbMs": 7,
+      "http": "1.1",
+      "earlyHints": false,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "text/event-stream; charset=utf-8",
+        "cache-control": "no-store",
+        "x-accel-buffering": "no"
+      },
+      "csp": "default-src 'none'; frame-ancestors 'none'…",
+      "body": "<1126 B>",
+      "note": "offline answer (reason disabled): 1 D1 batch of 2 counter upserts, BM25F search, no upstream"
+    },
+    {
+      "name": "ask POST bad body",
+      "method": "POST",
+      "path": "/api/ask",
+      "status": 400,
+      "wireBytes": 32,
+      "ms": 6,
+      "ttfbMs": 6,
+      "http": "1.1",
+      "earlyHints": false,
+      "headers": {
+        "content-length": "32",
+        "content-type": "application/json; charset=utf-8",
+        "cache-control": "no-store"
+      },
+      "csp": "default-src 'none'; frame-ancestors 'none'…",
+      "body": "{\"error\":{\"code\":\"bad_request\"}}",
+      "note": ""
+    },
+    {
+      "name": "HTML /",
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "wireBytes": 839,
+      "ms": 11,
+      "ttfbMs": 9,
+      "http": "1.1",
+      "earlyHints": false,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "text/html; charset=utf-8",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-encoding": "br",
+        "etag": "\"548bdd2d0c7d869c0b94b50bf3aebeab\""
+      },
+      "csp": "default-src 'self'; script-src 'self' https://challenges.clo…",
+      "body": "<839 B>",
+      "note": ""
+    },
+    {
+      "name": "HTML / (2nd, If-None-Match)",
+      "method": "GET",
+      "path": "/",
+      "status": 304,
+      "wireBytes": 0,
+      "ms": 5,
+      "ttfbMs": 5,
+      "http": "1.1",
+      "earlyHints": false,
+      "headers": {
+        "content-encoding": "br"
+      },
+      "csp": "default-src 'self'; script-src 'self' https://challenges.clo…",
+      "body": "",
+      "note": ""
+    },
+    {
+      "name": "HTML /kk/",
+      "method": "GET",
+      "path": "/kk/",
+      "status": 200,
+      "wireBytes": 989,
+      "ms": 21,
+      "ttfbMs": 20,
+      "http": "1.1",
+      "earlyHints": false,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "text/html; charset=utf-8",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-encoding": "br",
+        "etag": "\"eac02c7bd26f137fb0c8e62805a0eff9\""
+      },
+      "csp": "default-src 'self'; script-src 'self' https://challenges.clo…",
+      "body": "<989 B>",
+      "note": ""
+    },
+    {
+      "name": "HTML /members",
+      "method": "GET",
+      "path": "/members",
+      "status": 200,
+      "wireBytes": 583,
+      "ms": 29,
+      "ttfbMs": 29,
+      "http": "1.1",
+      "earlyHints": false,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "text/html; charset=utf-8",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-encoding": "br",
+        "etag": "\"90e23ae6978cf8871fe897b3ae847c49\""
+      },
+      "csp": "default-src 'self'; script-src 'self' https://challenges.clo…",
+      "body": "<583 B>",
+      "note": ""
+    },
+    {
+      "name": "HTML /handbook",
+      "method": "GET",
+      "path": "/handbook",
+      "status": 200,
+      "wireBytes": 601,
+      "ms": 5,
+      "ttfbMs": 5,
+      "http": "1.1",
+      "earlyHints": false,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "text/html; charset=utf-8",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-encoding": "br",
+        "etag": "\"f8ead8603f548d9ab24a632642a58419\""
+      },
+      "csp": "default-src 'self'; script-src 'self' https://challenges.clo…",
+      "body": "<601 B>",
+      "note": ""
+    },
+    {
+      "name": "404 /nope",
+      "method": "GET",
+      "path": "/nope",
+      "status": 404,
+      "wireBytes": 519,
+      "ms": 7,
+      "ttfbMs": 7,
+      "http": "1.1",
+      "earlyHints": false,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "text/html; charset=utf-8",
+        "cache-control": "no-store",
+        "content-encoding": "br"
+      },
+      "csp": "default-src 'self'; script-src 'self' https://challenges.clo…",
+      "body": "<519 B>",
+      "note": ""
+    },
+    {
+      "name": "asset three.js",
+      "method": "GET",
+      "path": "/assets/three-0YaG8gSa.js",
+      "status": 200,
+      "wireBytes": 171249,
+      "ms": 21,
+      "ttfbMs": 10,
+      "http": "1.1",
+      "earlyHints": false,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "application/javascript",
+        "cache-control": "public, max-age=31536000, immutable",
+        "content-encoding": "br",
+        "etag": "\"e5a6232b17261735caf66d773eeacbdd\""
+      },
+      "csp": "default-src 'self'; script-src 'self' https://challenges.clo…",
+      "body": "<171249 B>",
+      "note": ""
+    },
+    {
+      "name": "asset r3f.js",
+      "method": "GET",
+      "path": "/assets/r3f-sDVfOiCS.js",
+      "status": 200,
+      "wireBytes": 69027,
+      "ms": 10,
+      "ttfbMs": 6,
+      "http": "1.1",
+      "earlyHints": false,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "application/javascript",
+        "cache-control": "public, max-age=31536000, immutable",
+        "content-encoding": "br",
+        "etag": "\"aec9a3f913bd468ab0dc4787f121ce25\""
+      },
+      "csp": "default-src 'self'; script-src 'self' https://challenges.clo…",
+      "body": "<69027 B>",
+      "note": ""
+    },
+    {
+      "name": "asset index.js",
+      "method": "GET",
+      "path": "/assets/index-DJ_SRp8d.js",
+      "status": 200,
+      "wireBytes": 39294,
+      "ms": 8,
+      "ttfbMs": 6,
+      "http": "1.1",
+      "earlyHints": false,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "application/javascript",
+        "cache-control": "public, max-age=31536000, immutable",
+        "content-encoding": "br",
+        "etag": "\"feec9d7ddffde26c999f352285393a43\""
+      },
+      "csp": "default-src 'self'; script-src 'self' https://challenges.clo…",
+      "body": "<39294 B>",
+      "note": ""
+    },
+    {
+      "name": "asset index.css",
+      "method": "GET",
+      "path": "/assets/index-1sZ9ZWhE.css",
+      "status": 200,
+      "wireBytes": 15965,
+      "ms": 8,
+      "ttfbMs": 6,
+      "http": "1.1",
+      "earlyHints": false,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "text/css; charset=utf-8",
+        "cache-control": "public, max-age=31536000, immutable",
+        "content-encoding": "br",
+        "etag": "\"6d861daf13a4f8dfcc55b2d7af5490e5\""
+      },
+      "csp": "default-src 'self'; script-src 'self' https://challenges.clo…",
+      "body": "<15965 B>",
+      "note": ""
+    },
+    {
+      "name": "asset index.js gzip-only client",
+      "method": "GET",
+      "path": "/assets/index-DJ_SRp8d.js",
+      "status": 200,
+      "wireBytes": 42102,
+      "ms": 8,
+      "ttfbMs": 6,
+      "http": "1.1",
+      "earlyHints": false,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "application/javascript",
+        "cache-control": "public, max-age=31536000, immutable",
+        "content-encoding": "gzip",
+        "etag": "\"feec9d7ddffde26c999f352285393a43\""
+      },
+      "csp": "default-src 'self'; script-src 'self' https://challenges.clo…",
+      "body": "<42102 B>",
+      "note": ""
+    },
+    {
+      "name": "handbook-index.json",
+      "method": "GET",
+      "path": "/handbook-index.json",
+      "status": 200,
+      "wireBytes": 32813,
+      "ms": 8,
+      "ttfbMs": 6,
+      "http": "1.1",
+      "earlyHints": false,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "application/json",
+        "cache-control": "public, max-age=300, must-revalidate",
+        "content-encoding": "br",
+        "etag": "\"803639c794a1d31f531463b68bd11940\""
+      },
+      "csp": "default-src 'self'; script-src 'self' https://challenges.clo…",
+      "body": "<32813 B>",
+      "note": ""
+    },
+    {
+      "name": "handbook-index.json If-None-Match",
+      "method": "GET",
+      "path": "/handbook-index.json",
+      "status": 304,
+      "wireBytes": 0,
+      "ms": 5,
+      "ttfbMs": 5,
+      "http": "1.1",
+      "earlyHints": false,
+      "headers": {
+        "cache-control": "public, max-age=300, must-revalidate",
+        "content-encoding": "br"
+      },
+      "csp": "default-src 'self'; script-src 'self' https://challenges.clo…",
+      "body": "",
+      "note": ""
+    },
+    {
+      "name": "sitemap.xml",
+      "method": "GET",
+      "path": "/sitemap.xml",
+      "status": 200,
+      "wireBytes": 260,
+      "ms": 5,
+      "ttfbMs": 5,
+      "http": "1.1",
+      "earlyHints": false,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "application/xml",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-encoding": "br",
+        "etag": "\"af418a9c1e74d5809283d75fb4934cb2\""
+      },
+      "csp": "default-src 'self'; script-src 'self' https://challenges.clo…",
+      "body": "<260 B>",
+      "note": ""
+    },
+    {
+      "name": "robots.txt",
+      "method": "GET",
+      "path": "/robots.txt",
+      "status": 200,
+      "wireBytes": 121,
+      "ms": 4,
+      "ttfbMs": 4,
+      "http": "1.1",
+      "earlyHints": false,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "text/plain; charset=utf-8",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-encoding": "br",
+        "etag": "\"0f53796bfd902c17a55bc0f778dc590e\""
+      },
+      "csp": "default-src 'self'; script-src 'self' https://challenges.clo…",
+      "body": "<121 B>",
+      "note": ""
+    },
+    {
+      "name": "favicon.svg",
+      "method": "GET",
+      "path": "/favicon.svg",
+      "status": 200,
+      "wireBytes": 299,
+      "ms": 6,
+      "ttfbMs": 6,
+      "http": "1.1",
+      "earlyHints": false,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "image/svg+xml",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-encoding": "br",
+        "etag": "\"23c47df0116430fa202564c11575cbd1\""
+      },
+      "csp": "default-src 'self'; script-src 'self' https://challenges.clo…",
+      "body": "<299 B>",
+      "note": ""
+    },
+    {
+      "name": "font Courgette TTF",
+      "method": "GET",
+      "path": "/fonts/Courgette-Regular.ttf",
+      "status": 200,
+      "wireBytes": 46786,
+      "ms": 13,
+      "ttfbMs": 9,
+      "http": "1.1",
+      "earlyHints": false,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "font/ttf",
+        "cache-control": "public, max-age=31536000, immutable",
+        "content-encoding": "br",
+        "etag": "\"c5e5d91672c76b47e802c155ebb9b30b\""
+      },
+      "csp": "default-src 'self'; script-src 'self' https://challenges.clo…",
+      "body": "<46786 B>",
+      "note": ""
+    },
+    {
+      "name": "font Inter-latin woff2",
+      "method": "GET",
+      "path": "/fonts/Inter-latin.woff2",
+      "status": 200,
+      "wireBytes": 119400,
+      "ms": 9,
+      "ttfbMs": 8,
+      "http": "1.1",
+      "earlyHints": false,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "font/woff2",
+        "cache-control": "public, max-age=31536000, immutable",
+        "etag": "\"8124a72e3330d958209baeed07fcfa39\""
+      },
+      "csp": "default-src 'self'; script-src 'self' https://challenges.clo…",
+      "body": "<119400 B>",
+      "note": ""
+    },
+    {
+      "name": "font DancingScript TTF",
+      "method": "GET",
+      "path": "/fonts/DancingScript-Variable.ttf",
+      "status": 200,
+      "wireBytes": 70910,
+      "ms": 12,
+      "ttfbMs": 7,
+      "http": "1.1",
+      "earlyHints": false,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "font/ttf",
+        "cache-control": "public, max-age=31536000, immutable",
+        "content-encoding": "br",
+        "etag": "\"e0c271ff7f08b2b9efab99b29a148e4c\""
+      },
+      "csp": "default-src 'self'; script-src 'self' https://challenges.clo…",
+      "body": "<70910 B>",
+      "note": ""
+    },
+    {
+      "name": "asset missing hash",
+      "method": "GET",
+      "path": "/assets/does-not-exist-123.js",
+      "status": 404,
+      "wireBytes": 519,
+      "ms": 23,
+      "ttfbMs": 23,
+      "http": "1.1",
+      "earlyHints": false,
+      "headers": {
+        "transfer-encoding": "chunked",
+        "content-type": "text/html; charset=utf-8",
+        "cache-control": "no-store",
+        "content-encoding": "br"
+      },
+      "csp": "default-src 'self'; script-src 'self' https://challenges.clo…",
+      "body": "<519 B>",
+      "note": "a stale chunk URL after a deploy"
+    }
+  ],
+  "sizes": {
+    "handbook-index.json": {
+      "raw": 114986,
+      "gzip6": 36692,
+      "br4": 35285,
+      "br11": 28470
+    },
+    "Courgette-Regular.ttf": {
+      "raw": 122072,
+      "gzip6": 55224,
+      "br4": 48568,
+      "br11": 44509
+    },
+    "DancingScript-Variable.ttf": {
+      "raw": 133636,
+      "gzip6": 75152,
+      "br4": 75032,
+      "br11": 62908
+    },
+    "ask offline SSE body": {
+      "raw": 1416,
+      "gzip6": 634,
+      "br4": 622,
+      "br11": 530
+    }
+  }
+}

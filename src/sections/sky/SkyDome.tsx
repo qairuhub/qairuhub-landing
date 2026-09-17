@@ -4,6 +4,7 @@ import * as THREE from 'three'
 import { PALETTE, blendPalette, journey } from './journey'
 import { domeFragment, domeVertex, nebulaFragment } from './skyShaders'
 import type { LayerProps } from './types'
+import { registerWarmer } from './warmup'
 
 /** position of the mid gradient stop (0 top … 1 bottom) — matches the old CSS fallback (55%) */
 const MID_STOP = 0.55
@@ -78,6 +79,20 @@ export default function SkyDome({ reduced }: LayerProps) {
     return { nebulaMaterial, target, scene, camera: new THREE.Camera() }
   }, [geometry])
   material.uniforms.uNebula.value = bake.target.texture
+
+  useEffect(
+    () =>
+      registerWarmer((gl) => {
+        const prev = gl.getRenderTarget()
+        gl.setRenderTarget(bake.target)
+        try {
+          return gl.compileAsync(bake.scene, bake.camera)
+        } finally {
+          gl.setRenderTarget(prev)
+        }
+      }),
+    [bake],
+  )
 
   useEffect(
     () => () => {

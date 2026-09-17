@@ -1,0 +1,59 @@
+{
+ "base-low": {
+  "hasCanvas": true,
+  "errors": [
+   "warning: [.WebGL-0x14bc00428400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+   "warning: THREE.WebGLRenderer: KHR_parallel_shader_compile extension not supported."
+  ],
+  "heroBytes": 1106834,
+  "footerBytes": 887940
+ },
+ "base-medium": {
+  "hasCanvas": true,
+  "errors": [
+   "warning: [.WebGL-0x31cc01933000]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+   "warning: [.WebGL-0x31cc01933000]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)",
+   "warning: THREE.WebGLRenderer: KHR_parallel_shader_compile extension not supported."
+  ],
+  "heroBytes": 1111581,
+  "footerBytes": 924457
+ },
+ "base-high": {
+  "hasCanvas": true,
+  "errors": [
+   "warning: THREE.WebGLRenderer: KHR_parallel_shader_compile extension not supported."
+  ],
+  "heroBytes": 1117940,
+  "footerBytes": 979106
+ },
+ "lean-low": {
+  "hasCanvas": true,
+  "errors": [
+   "warning: THREE.WebGLRenderer: KHR_parallel_shader_compile extension not supported."
+  ],
+  "heroBytes": 1106834,
+  "footerBytes": 887940
+ },
+ "lean-medium": {
+  "hasCanvas": true,
+  "errors": [
+   "warning: THREE.WebGLRenderer: KHR_parallel_shader_compile extension not supported."
+  ],
+  "heroBytes": 1111581,
+  "footerBytes": 924457
+ },
+ "lean-high": {
+  "hasCanvas": true,
+  "errors": [
+   "warning: THREE.WebGLRenderer: KHR_parallel_shader_compile extension not supported."
+  ],
+  "heroBytes": 1117940,
+  "footerBytes": 979106
+ },
+ "base-members": {
+  "errors": []
+ },
+ "lean-members": {
+  "errors": []
+ }
+}

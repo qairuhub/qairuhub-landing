@@ -9,11 +9,14 @@
  *           sources: [{ id, title, url }], book: <index version>, handbook: <index version> }
  *
  * Pipeline: session check (qh_ask cookie or Turnstile, only when TURNSTILE_SECRET_KEY is set) →
- * per-IP rate limits (D1) → BM25F retrieval over the bundled Handbook index → mode decision
- * (kill switch, upstream availability, global daily cap) → OpenAI Responses stream re-emitted as
- * SSE through the PII filter and the prompt-leak guard, or the offline Handbook answer.
- * Questions and answers are never stored or logged; logs carry mode, latency, token usage and an
- * IP-hash prefix only.
+ * counters in one D1 round trip (per-IP minute + day, and the global daily AI counter only when AI
+ * mode is possible and both per-IP limits pass) → 429 on a per-IP limit → BM25F retrieval over the
+ * bundled Handbook index → mode decision (kill switch, upstream availability, global daily cap) →
+ * OpenAI Responses stream re-emitted as SSE through the prompt-leak guard and the PII filter, with
+ * the released text coalesced into `delta` events of ≥ 50 ms or ≥ 160 chars (the first one goes
+ * out at once), or the offline Handbook answer.
+ * Questions and answers are never stored or logged; logs carry mode, latency (`d1Ms` = the counter
+ * batch), token usage and an IP-hash prefix only.
  */
 import indexJson from '../_generated/handbook-index.json'
 import {
@@ -27,7 +30,7 @@ import { boolVar, DEFAULTS, numVar, type Handler } from '../_lib/env'
 import { LEAK_GUARD_TEXT } from '../_lib/leakGuardText'
 import { buildRequest, postResponses, upstreamKind, withoutRejectedParams } from '../_lib/openai'
 import { LeakGuard, PiiFilter } from '../_lib/piiFilter'
-import { astanaDate, hit, maybePurge, nextAstanaMidnight } from '../_lib/ratelimit'
+import { astanaDate, hitAsk, maybePurge, nextAstanaMidnight, type CounterResult } from '../_lib/ratelimit'
 import { errorResponse } from '../_lib/respond'
 import { askCookieHeader, hasValidAskCookie } from '../_lib/session'
 import { createSse, parseEventStream, SSE_HEADERS, type SseStream } from '../_lib/sse'
@@ -38,6 +41,10 @@ import { validateAsk, type AskInput } from '../_lib/validate'
 const INDEX = indexJson as unknown as HandbookIndex
 const FIRST_BYTE_TIMEOUT_MS = 12_000
 const TOTAL_TIMEOUT_MS = 30_000
+/** a `delta` event goes out once this long has passed since the previous one… */
+const COALESCE_MS = 50
+/** …or once this much text is waiting */
+const COALESCE_CHARS = 160
 
 type OfflineReason = 'no_key' | 'disabled' | 'daily_cap' | 'upstream'
 
@@ -57,8 +64,9 @@ export const onRequest: Handler = async (context) => {
   const started = Date.now()
   const nowSec = Math.floor(started / 1000)
   const ip = data.ipHash ?? 'unknown'
+  let d1Ms: number | undefined
   const reject = (res: Response, outcome: string) => {
-    log({ status: res.status, outcome, ms: Date.now() - started, ip: ip.slice(0, 8) })
+    log({ status: res.status, outcome, ms: Date.now() - started, d1Ms, ip: ip.slice(0, 8) })
     return res
   }
 
@@ -75,24 +83,36 @@ export const onRequest: Handler = async (context) => {
     cookies.push(await askCookieHeader(env, nowSec))
   }
 
-  // 3. Per-IP limits.
+  // 3. Counters (one D1 round trip) and per-IP limits. The global AI counter is only touched when
+  //    AI mode is possible, and only counts requests that pass both per-IP limits.
   const db = env.DB
   const today = astanaDate(nowSec)
   const midnight = nextAstanaMidnight(nowSec)
+  const wantAi = boolVar(env.ASK_ENABLED, true) && upstreamKind(env) !== null
+  let global: CounterResult | null = null
   if (db) {
-    const [minute, day] = await hit(
+    const minuteLimit = numVar(env.ASK_PER_IP_PER_MINUTE, DEFAULTS.perIpPerMinute)
+    const dayLimit = numVar(env.ASK_PER_IP_PER_DAY, DEFAULTS.perIpPerDay)
+    const d1Start = Date.now()
+    const counters = await hitAsk(
       db,
-      [
-        { key: `ask:ipm:${ip}`, windowSec: 60 },
-        { key: `ask:ipd:${ip}:${today}`, expiresAt: midnight },
-      ],
+      {
+        minuteKey: `ask:ipm:${ip}`,
+        dayKey: `ask:ipd:${ip}:${today}`,
+        dayExpiresAt: midnight,
+        minuteLimit,
+        dayLimit,
+        ...(wantAi ? { globalKey: `ask:ai:${today}`, globalExpiresAt: midnight + 3600 } : {}),
+      },
       nowSec,
     )
-    if (minute.n > numVar(env.ASK_PER_IP_PER_MINUTE, DEFAULTS.perIpPerMinute)) {
-      const retry = String(Math.max(1, minute.expiresAt - nowSec))
+    d1Ms = Date.now() - d1Start
+    global = counters.global
+    if (counters.minute.n > minuteLimit) {
+      const retry = String(Math.max(1, counters.minute.expiresAt - nowSec))
       return reject(errorResponse(429, 'rate_limited', {}, { 'Retry-After': retry }), 'rate_limited_minute')
     }
-    if (day.n > numVar(env.ASK_PER_IP_PER_DAY, DEFAULTS.perIpPerDay)) {
+    if (counters.day.n > dayLimit) {
       const retry = String(Math.max(1, midnight - nowSec))
       return reject(errorResponse(429, 'rate_limited', {}, { 'Retry-After': retry }), 'rate_limited_day')
     }
@@ -109,21 +129,18 @@ export const onRequest: Handler = async (context) => {
     contextChars: numVar(env.ASK_CONTEXT_CHARS, DEFAULTS.contextChars),
   })
 
-  // 5. Mode.
+  // 5. Mode. Past the limits, `global` was counted in the batch above whenever `wantAi && db`.
   let reason: OfflineReason | null = null
   if (!boolVar(env.ASK_ENABLED, true)) reason = 'disabled'
-  else if (!upstreamKind(env)) reason = 'no_key'
+  else if (!wantAi) reason = 'no_key'
   else if (!db) reason = 'disabled' // without D1 there is no cost cap, so AI stays off
-  else {
-    const [global] = await hit(db, [{ key: `ask:ai:${today}`, expiresAt: midnight + 3600 }], nowSec)
-    if (global.n > numVar(env.ASK_DAILY_CAP, DEFAULTS.dailyCap)) reason = 'daily_cap'
-  }
+  else if ((global?.n ?? 1) > numVar(env.ASK_DAILY_CAP, DEFAULTS.dailyCap)) reason = 'daily_cap'
 
   const sse = createSse()
   const headers = new Headers(SSE_HEADERS)
   for (const c of cookies) headers.append('Set-Cookie', c)
 
-  const meta = { started, ip, previous, minScore }
+  const meta = { started, ip, previous, minScore, d1Ms }
   const work = reason
     ? streamOffline(sse, input, reason, meta)
     : streamAi(sse, env, input, selection.chunks, selection.sources, meta)
@@ -142,6 +159,8 @@ interface RequestMeta {
   ip: string
   previous?: string
   minScore: number
+  /** duration of the D1 counter batch (undefined without D1) */
+  d1Ms?: number
 }
 
 async function streamOffline(sse: SseStream, input: AskInput, reason: OfflineReason, m: RequestMeta): Promise<void> {
@@ -155,6 +174,7 @@ async function streamOffline(sse: SseStream, input: AskInput, reason: OfflineRea
     mode: 'offline',
     reason,
     ms: Date.now() - m.started,
+    d1Ms: m.d1Ms,
     sources: answer.sources.length,
     ip: m.ip.slice(0, 8),
   })
@@ -228,6 +248,7 @@ async function streamAi(
   let metaSent = false
   let forwarded = false
   let firstDeltaMs: number | undefined
+  let deltas = 0
   let outcome: 'completed' | 'failed' | 'incomplete' | 'error' | 'leak' | 'aborted' | 'eof' = 'eof'
   let usage: Usage | undefined
 
@@ -241,7 +262,25 @@ async function streamAi(
     await sendMeta()
     if (firstDeltaMs === undefined) firstDeltaMs = Date.now() - m.started
     forwarded = true
+    deltas++
     return sse.send('delta', { t: text })
+  }
+
+  // Released text waits here and goes out as one `delta` once COALESCE_MS have passed since the
+  // last one or COALESCE_CHARS are waiting; the first text goes out at once (unchanged time to first
+  // token). About 3× fewer events and half the bytes: Cloudflare doesn't compress event streams.
+  // `release(…, true)` sends everything before a normal or partial end; a leak drops it instead.
+  let held = ''
+  let lastSent = 0
+  const release = async (text: string, force = false): Promise<boolean> => {
+    held += text
+    if (!held) return true
+    const now = Date.now()
+    if (!force && forwarded && now - lastSent < COALESCE_MS && held.length < COALESCE_CHARS) return true
+    const out = held
+    held = ''
+    lastSent = now
+    return forward(out)
   }
 
   try {
@@ -253,7 +292,7 @@ async function streamAi(
           outcome = 'leak'
           break
         }
-        if (!(await forward(pii.push(event.delta)))) {
+        if (!(await release(pii.push(event.delta)))) {
           outcome = 'aborted'
           break
         }
@@ -278,19 +317,22 @@ async function streamAi(
     const rest = pii.flush()
     if (leak.finish()) outcome = 'leak'
     else {
-      await forward(rest)
+      await release(rest, true)
       await sendMeta()
       await sse.send('done', { mode: 'ai' })
     }
   }
   if (outcome !== 'completed') {
-    if (outcome === 'leak') log({ level: 'warn', msg: 'leak_blocked' })
+    if (outcome === 'leak') {
+      held = ''
+      log({ level: 'warn', msg: 'leak_blocked' })
+    }
     if (!forwarded && !sse.closed) {
       await streamOffline(sse, input, 'upstream', m)
       log({ level: 'warn', msg: 'upstream_failed_before_delta', outcome, upstream })
       return
     }
-    if (outcome !== 'leak') await forward(pii.flush())
+    if (outcome !== 'leak') await release(pii.flush(), true)
     await sse.send('error', { code: 'upstream_partial' })
   }
   await sse.close()
@@ -301,7 +343,9 @@ async function streamAi(
     upstream,
     outcome,
     ms: Date.now() - m.started,
+    d1Ms: m.d1Ms,
     firstDeltaMs,
+    deltas,
     tokens: usage
       ? {
           in: usage.input_tokens,

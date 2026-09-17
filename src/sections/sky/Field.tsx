@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import type { LayerProps } from './types'
+import { nextTask } from './warmup'
 import { journey, PALETTE } from './journey'
 import { QUALITY } from './quality'
 import { FIELD, HILL_SEGMENTS, createFieldUniforms } from './field/terrain'
@@ -32,26 +33,28 @@ const noop = () => {}
  * field, and drei's <Environment> assigns its texture in a layout effect), otherwise the cache
  * key would differ at render time and the work would be wasted.
  */
-function warmFieldPrograms(gl: THREE.WebGLRenderer, group: THREE.Group, scene: THREE.Scene, camera: THREE.Camera) {
-  const wasVisible = group.visible
-  group.visible = true
+function warmOne(gl: THREE.WebGLRenderer, object: THREE.Object3D, scene: THREE.Scene, camera: THREE.Camera) {
+  gl.compileAsync(object, camera, scene).catch(noop)
+  const toneMapping = gl.toneMapping
+  const target = gl.getRenderTarget()
+  const scratch = new THREE.WebGLRenderTarget(1, 1, { depthBuffer: false, stencilBuffer: false })
+  gl.toneMapping = THREE.NoToneMapping
+  gl.setRenderTarget(scratch)
   try {
-    gl.compileAsync(group, camera, scene).catch(noop)
-
-    const toneMapping = gl.toneMapping
-    const target = gl.getRenderTarget()
-    const scratch = new THREE.WebGLRenderTarget(1, 1, { depthBuffer: false, stencilBuffer: false })
-    gl.toneMapping = THREE.NoToneMapping
-    gl.setRenderTarget(scratch)
-    try {
-      gl.compileAsync(group, camera, scene).catch(noop)
-    } finally {
-      gl.setRenderTarget(target)
-      gl.toneMapping = toneMapping
-      scratch.dispose()
-    }
+    gl.compileAsync(object, camera, scene).catch(noop)
   } finally {
-    group.visible = wasVisible
+    gl.setRenderTarget(target)
+    gl.toneMapping = toneMapping
+    scratch.dispose()
+  }
+}
+
+/** One child (hills / grass chunks / flora) per task, so no task generates all six sources. */
+async function warmFieldPrograms(gl: THREE.WebGLRenderer, group: THREE.Group, scene: THREE.Scene, camera: THREE.Camera, cancelled: () => boolean) {
+  for (const child of [...group.children]) {
+    if (cancelled()) return
+    warmOne(gl, child, scene, camera)
+    await nextTask()
   }
 }
 
@@ -79,12 +82,26 @@ export default function Field({ tier, reduced }: LayerProps) {
     uniforms.uWind.value = reduced ? 0 : 1
   }, [reduced, uniforms])
 
+  // Hills, grass and flora are built in three commits (one task each) instead of one.
+  const [stage, setStage] = useState(1)
   useEffect(() => {
+    if (stage >= 3) return
+    let cancelled = false
+    void nextTask().then(() => {
+      if (!cancelled) setStage((s) => s + 1)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [stage])
+
+  useEffect(() => {
+    if (stage < 3) return
     let cancelled = false
     const run = () => {
       const g = group.current
       if (cancelled || !g) return
-      warmFieldPrograms(gl, g, scene, camera)
+      void warmFieldPrograms(gl, g, scene, camera, () => cancelled)
     }
     // Off the critical path: the first idle slot, or at the latest ~1 s after mount — long before
     // any scroll (Lenis-smoothed) can reach the footer. Safari has no requestIdleCallback.
@@ -95,7 +112,7 @@ export default function Field({ tier, reduced }: LayerProps) {
       if (idle) window.cancelIdleCallback(idle)
       if (timer) window.clearTimeout(timer)
     }
-  }, [gl, scene, camera])
+  }, [gl, scene, camera, stage])
 
   useFrame(() => {
     const g = group.current
@@ -109,8 +126,8 @@ export default function Field({ tier, reduced }: LayerProps) {
   return (
     <group ref={group} position={[0, FIELD.riseFrom, 0]} visible={false}>
       <Hills segments={HILL_SEGMENTS[tier]} uniforms={uniforms} />
-      <Grass count={q.blades} uniforms={uniforms} />
-      <Flora uniforms={uniforms} />
+      {stage >= 2 && <Grass count={q.blades} uniforms={uniforms} />}
+      {stage >= 3 && <Flora uniforms={uniforms} />}
     </group>
   )
 }
