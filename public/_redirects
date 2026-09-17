@@ -1,3 +1,2 @@
-# www is an alias; the canonical host is the apex.
-https://www.qairuhub.com/* https://qairuhub.com/:splat 301
+# www → apex is a zone Redirect Rule (Cloudflare dashboard → Rules), not a Pages redirect.
 /kk /kk/ 301
