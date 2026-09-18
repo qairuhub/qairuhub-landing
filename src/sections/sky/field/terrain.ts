@@ -46,19 +46,21 @@ export const FIELD = {
 export const HILL_SEGMENTS: Record<QualityTier, number> = { high: 128, medium: 96, low: 64 }
 
 /**
- * Colours drawn only inside the field (sRGB hex). Golden hour, contre-jour: the sun is behind the
- * ridge, so the land is a DEEP COOL SILHOUETTE (blue-black base, slate mid) and the only warmth is
- * on the edges the light rims — blade tips, petals, the pistil. Deliberately much darker than the
- * old moonlit green: the footer sits on this, and a silhouette is what buys the copy its contrast.
+ * Colours drawn only inside the field (sRGB hex). Golden hour: the sun is behind the ridge, so the
+ * field is backlit — but it is GRASS, and grass at this hour reads green: a deep green in the
+ * shadow at the base, a warm green up the blade, and a gold rim on the tips the light rakes.
+ * (The first pass made the land a blue-black silhouette; it bought contrast at the price of the
+ * meadow. The copy's contrast is now carried by the sky band geometry — see sky/copyBox.ts — and
+ * by the footer scrim, so the field is free to be green.)
  */
 export const FIELD_COLORS = {
-  grassBase: '#0b1424',
-  grassMid: '#182742',
-  grassTip: '#ffb072',
-  soil: '#101a2c',
+  grassBase: '#132c1c',
+  grassMid: '#3c6f38',
+  grassTip: '#ffc684',
+  soil: '#18311f',
   /** the soil the low sun still rakes — the crest edges and the sun-facing flanks */
-  soilLit: '#5a4358',
-  stalk: '#1c3050',
+  soilLit: '#7c6b43',
+  stalk: '#2d5a33',
   petal: '#a83b46',
   pistil: '#ffd48a',
   cap: '#a3343c',

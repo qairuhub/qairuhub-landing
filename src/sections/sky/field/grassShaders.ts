@@ -98,13 +98,13 @@ varying float vShimmer;
 varying float vDepth;
 
 void main() {
-  // Contre-jour: blue-black at the base, cool slate up the blade, and a warm rim on the tips the
-  // low sun rakes. That rim is the only warm thing in the field — it is what reads as backlight.
+  // Backlit grass: deep green in the shadow at the base, warm green up the blade, gold rim on the
+  // tips the low sun rakes. The rim is what reads as backlight; the green is what reads as a meadow.
   vec3 col = mix(uBase, uMid, smoothstep(0.0, 0.8, vT));
   // Only the height ramp is left per-pixel; the per-blade half of the rim came in as vRim.
   col = mix(col, uTip, smoothstep(0.42, 1.0, vT) * vRim);
-  // Silhouette exposure, cool cast from the violet sky fill.
-  col *= 0.52 * vec3(0.88, 0.95, 1.12) * vTint * (1.0 + 0.12 * vShimmer);
+  // Exposure, with the sunset's warm cast (the violet fill of the first pass drained the green).
+  col *= 0.74 * vec3(1.02, 1.0, 0.90) * vTint * (1.0 + 0.12 * vShimmer);
 
   gl_FragColor = vec4(col, 1.0);
   #include <tonemapping_fragment>
@@ -125,7 +125,7 @@ type Shader = THREE.WebGLProgramParametersWithUniforms
 
 /**
  * Terrain: a view-depth varying and a valley-haze varying (both computed in the vertex stage),
- * then the haze and the post-colour-space mix toward the skyline colour — this replaces
+ * then the post-colour-space mix toward the skyline colour and the haze on top — this replaces
  * scene.fog. `position.y` IS the field's local height, because the Hills mesh sits at identity
  * inside the group, so there is no new attribute and no new GPU buffer.
  */
@@ -148,7 +148,11 @@ export function patchDistanceFade(shader: Shader, u: FieldUniforms) {
     )
     .replace(
       '#include <fog_fragment>',
-      '#include <fog_fragment>\ngl_FragColor.rgb = mix(gl_FragColor.rgb, uMist, vFieldMist * uMistAmount);\ngl_FragColor.rgb = mix(gl_FragColor.rgb, uFade, smoothstep(uFadeNear, uFadeFar, vFieldDepth));',
+      // The fade runs FIRST and the haze SECOND. The other way round the far valley is already
+      // fully faded to the skyline colour by the time the haze is mixed in, so the haze did
+      // nothing exactly where it was meant to do everything — that was the flat dark band the
+      // owner saw under the sun.
+      '#include <fog_fragment>\ngl_FragColor.rgb = mix(gl_FragColor.rgb, uFade, smoothstep(uFadeNear, uFadeFar, vFieldDepth));\ngl_FragColor.rgb = mix(gl_FragColor.rgb, uMist, vFieldMist * uMistAmount);',
     )
 }
 

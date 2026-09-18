@@ -129,10 +129,15 @@ export function midStopFor(horizon: number, sunset: number): number {
  * as a silent-desync hazard; this is the fix.
  */
 export const BAND = {
-  /** darkening multiplied into the sky deep below the hot line — mirrors LOW_COOL in the GLSL */
-  lowTint: [0.17, 0.15, 0.3],
+  /**
+ * Darkening multiplied into the sky deep below the hot line — mirrors LOW_COOL in the GLSL. The
+ * first pass took it to 0.17/0.15/0.30, which read as a black blob under the sun rather than as
+ * land in shadow; the copy's contrast is carried by the band geometry and the footer scrim, not by
+ * crushing this strip.
+ */
+  lowTint: [0.54, 0.48, 0.6],
   /** the band under the line reaches that tint over this many frame fractions */
-  shadeSpan: 0.13,
+  shadeSpan: 0.2,
   /** the sun's azimuth as a fraction of the frame width — just right of the valley notch */
   sunX: 0.57,
   /**
@@ -285,8 +290,8 @@ const vec3 NIGHT_HORIZON = vec3(0.16, 0.31, 0.56);
 // darken without greying, so the band under the sunset keeps the hue it had. The tint TRAVELS with
 // depth — dusty warm right under the band, cool blue-violet further down — which is what turns the
 // widest flat area of the frame into a gradient of hue instead of one plum. See the module doc.
-const vec3 LOW_WARM      = vec3(0.44, 0.28, 0.34);
-const vec3 LOW_COOL      = vec3(0.17, 0.15, 0.30);
+const vec3 LOW_WARM      = vec3(0.80, 0.62, 0.53);
+const vec3 LOW_COOL      = vec3(0.54, 0.48, 0.60);
 
 // polynomial sRGB -> linear (max error < 0.5/255): three pow() per pixel cost ~1.5 ms on an iGPU
 vec3 srgbToLinear(vec3 c) {

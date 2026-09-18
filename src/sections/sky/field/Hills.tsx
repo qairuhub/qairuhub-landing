@@ -21,7 +21,7 @@ const HILL_LIGHT_GAIN = 1.5
  * and this deep blue-violet is most of what you see: the hills read as a silhouette against the
  * glow, which is both the look and what keeps the footer copy on a dark ground.
  */
-const HILL_AMBIENT = '#1b2340'
+const HILL_AMBIENT = '#1d2f22'
 
 export default function Hills({ segments, uniforms }: { segments: number; uniforms: FieldUniforms }) {
   // Built in useMemo, disposed in the effect below (StrictMode's dev double-invoke re-uploads
@@ -42,7 +42,7 @@ export default function Hills({ segments, uniforms }: { segments: number; unifor
       // Darker on the valley floor (low hill profile) and in the near foreground.
       const lift = THREE.MathUtils.smoothstep(hillProfile(x), 0.1, 1.5)
       const near = THREE.MathUtils.smoothstep(z, 3, 9)
-      const shade = (0.45 + 0.55 * lift) * (1 - 0.35 * near)
+      const shade = (0.62 + 0.38 * lift) * (1 - 0.26 * near)
       // The low sun grazing the ridges from the side (see `sunGraze`): the land between the crest
       // lines gets real internal modelling instead of one flat dark mass, which is the single
       // thing the valley band was missing. Where the light reaches, the soil slides toward
@@ -65,12 +65,12 @@ export default function Hills({ segments, uniforms }: { segments: number; unifor
   const material = useMemo(() => {
     const m = new THREE.MeshLambertMaterial({
       vertexColors: true,
-      // Cool multiplier on the soil: the violet hemisphere fill is the only light reaching these
-      // slopes now, and a neutral tint turned them muddy brown-grey.
+      // Neutral-green multiplier on the soil: the cool violet of the first pass turned the whole
+      // valley into one dark blob under the sun, which is exactly what the owner flagged.
       // Scaled by HILL_LIGHT_GAIN: Lambert ignores `scene.environment`, and the Standard version's
       // 0.2 share of the Lightformer rig was most of the light on the slopes (without the
       // gain the ground sampled near-black where the Standard hills read #2a3d2f).
-      color: new THREE.Color('#a5bce8').multiplyScalar(HILL_LIGHT_GAIN),
+      color: new THREE.Color('#bcc9b6').multiplyScalar(HILL_LIGHT_GAIN),
       // The Lightformer rig's white top light and warm fill also put a little red and blue into
       // the soil; the hemisphere + key light cannot reach the near slopes at all, so this flat
       // ambient is what gives the silhouette its shape instead of a dead black mass.

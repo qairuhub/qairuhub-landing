@@ -20,7 +20,7 @@ const noop = () => {}
  */
 const FADE_AZ = 0.5
 /** Peak strength of the valley haze at `journey.sunset` = 1 (grassShaders' `fieldMist`). */
-const MIST_MAX = 0.3
+const MIST_MAX = 0.45
 
 const srgbVec3 = (hex: string) => {
   const v = parseInt(hex.slice(1), 16)
