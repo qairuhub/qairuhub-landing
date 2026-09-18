@@ -31,3 +31,5 @@ perf/v3.1/tmp-dist-maps/
 
 # Claude Code worktrees for parallel agents (they carry their own git metadata).
 .claude/worktrees/
+perf/v3.1/prod/
+perf/v3.1/final/
