@@ -226,6 +226,50 @@ inflates simulated FCP/LCP by roughly 1.5 s (that alone scored home mobile 72 in
 | Assistant chunk boundaries / reload guard | `node perf/v3.1/scripts/audit-assistant-chunk.mjs`, `audit-chunk-reload.mjs` (~75 s: it waits out the 30 s guard) |
 | `/api/config` browser caching | `node perf/v3.1/scripts/audit-config-cache.mjs` |
 
+## The golden-hour ending (v3.2)
+
+The night ending became a sunset (docs/GOLDEN-HOUR-BRIEF.md, docs/JOURNEY-SPEC.md). What that costs,
+measured at the footer at 1440x900 on the Intel UHD reference, as the **paired per-round delta**
+between two `wrangler pages dev` servers alternated inside one browser launch
+(`<scratch>/golden/work/cost3.mjs <baselineUrl> <newUrl> 8`):
+
+| build | footer frame | vs baseline |
+|---|---|---|
+| 36c076a (moonlit night) | 15.65 ms median | — |
+| golden hour | 16.41 ms median | **+0.76 ms** (per-round deltas 0.43–1.65) |
+
+Inside that, isolated by building a variant whose afterglow branch early-outs everywhere:
+
+- **everything except the sky branch is free**: +0.09 ms. The field's valley haze and the grass
+  shader changes are paid for by dropping the stars' draw once their surviving alpha is negligible,
+  and by the dome now drawing **after** the opaque field (renderOrder 20, depth test on) so early-Z
+  can discard the sky under the land. That reorder measured **neutral** on this GPU/driver (−0.08 ms,
+  inside the noise) rather than the win it is on paper — it is kept because it is free here and
+  should pay on a tile-based mobile GPU, not because it was measured to help.
+- **the afterglow branch is the whole cost.** Two things brought it from +1.3 ms to +0.76 ms:
+  1. every glow in it is a **compact-support cubic** (`falloff`, three multiplies and a max) instead
+     of `exp()`. Being exactly zero outside its support is the point: the branch can then be bounded
+     instead of trailing off across the frame.
+  2. the halo above the hot line was shortened from 0.43 to **0.28** of a frame and the hue ladder
+     above it moved into the **gradient's own mid stop**, which the dome pins just above the band
+     (`midStopFor`) and every phase pays for anyway.
+
+Two measurement traps, both of which produced wrong numbers here before they were spotted:
+
+- **Serve the two builds the same way.** The first comparison served the new build from the project
+  `dist/` (so wrangler loaded `wrangler.toml`, its D1 binding and the `functions/` routes) and the
+  baseline from a plain copy. That alone read as +1.2 ms. Copy both into scratch directories and
+  serve them identically.
+- **This laptop throttles.** In an 8-round run the paired delta grew from 0.6 ms (rounds 1–3) to
+  2.1 ms (round 7) as the GPU heated, because the more expensive build degrades faster. Read the
+  early rounds and the median, and re-run with nothing else on the machine.
+
+Lighthouse home on the final build (`--runs=1`, local `wrangler pages dev`): **mobile 94**
+(FCP 2.0 s, LCP 2.7 s, TBT 60 ms, CLS 0), **desktop 100** (FCP 0.5 s, LCP 0.6 s, TBT 0 ms, CLS 0) —
+against 92 / 100 before. Every GPU buffer is
+unchanged at <= 500 KiB (the Mac-corruption check, all three tiers), and no draw call, render pass,
+FBO or texture was added.
+
 Notes for whoever runs these:
 
 - Headed Playwright must use the installed Chrome — `chromium.launch({ channel: 'chrome',

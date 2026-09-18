@@ -1,8 +1,8 @@
 /* =============================================================================
-   Footer — 150vh DOM spacer over the night/field phase of the single SkyScene
-   canvas, with the link row pinned at the bottom (24px margin).
+   Footer — 150vh DOM spacer over the golden-hour / field phase of the single
+   SkyScene canvas, with the link row pinned at the bottom (24px margin).
    Root ignores pointer events (the canvas sits behind everything); the content
-   row re-enables them. Text sits on the raw night sky → .on-sky glow.
+   row re-enables them. Text sits on the raw sky → .on-sky glow, over a scrim.
    ========================================================================== */
 
 .footer {
@@ -47,6 +47,43 @@
 .footer__col--right {
   align-items: flex-end;
   gap: 12px;
+}
+
+/* Scrim under the last block of copy.
+   The golden-hour ending keeps its hot band above this block by construction — the sky derives the
+   band's height from the block's own height (sky/copyBox.ts → skyShaders' `horizonFor`), and the
+   raw sky clears 4.5 : 1 behind every row with this scrim at 0. What is left for the scrim is
+   comfort, not survival, so it is a cosmetic 0.22 / 0.28.
+
+   Both insets are tied to the content box, not to pixel guesses (the old -150/-64 and -190/-80
+   slid the copy out from under its own scrim as soon as a row was added): the box is pinned to the
+   bottom of the frame and grows UPWARD, and `--footer-scrim-lead` puts the scrim's transparent
+   edge exactly that far above whatever the block's top turns out to be. The lead is the same 10 %
+   of the frame the sky holds the band off the copy by (skyShaders' COPY_CLEARANCE), so the scrim
+   is fully on at the first row of type and fully off before the band.
+   Home footer only: the sub-pages' compact footer is on the unchanged night sky. */
+.footer:not(.footer--compact) .footer__content::before {
+  content: "";
+  position: absolute;
+  --footer-scrim-lead: 10vh;
+  --footer-scrim-a: 0.22;
+  inset: calc(-1 * var(--footer-scrim-lead)) 0 calc(-1 * var(--row-margin) - 16px) 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(9, 6, 24, 0) 0,
+    rgba(9, 6, 24, var(--footer-scrim-a)) var(--footer-scrim-lead),
+    rgba(9, 6, 24, var(--footer-scrim-a)) 100%
+  );
+  pointer-events: none;
+}
+/* Portrait, at any width: the frame is narrow enough that the ridges have left the sides, so the
+   block of copy is tall and the rows below its first one sit on the grass rather than on sky. The
+   sky itself still clears 4.5 : 1 with this at 0 — what the deeper value buys is the lit blade tips
+   crossing a line of type, which at 768 x 1024 measured 4.33 : 1 at 0.28 and 4.61 : 1 at 0.32. */
+@media (max-width: 900px), (orientation: portrait) {
+  .footer:not(.footer--compact) .footer__content::before {
+    --footer-scrim-a: 0.32;
+  }
 }
 
 /* Link row: 16px/500, external links carry a 14px ↗.

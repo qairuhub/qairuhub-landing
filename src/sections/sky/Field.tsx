@@ -3,14 +3,35 @@ import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import type { LayerProps } from './types'
 import { nextTask } from './warmup'
-import { journey, PALETTE } from './journey'
+import { blendPalette, journey, PALETTE } from './journey'
 import { QUALITY } from './quality'
-import { FIELD, HILL_SEGMENTS, createFieldUniforms } from './field/terrain'
+import { FIELD, HILL_SEGMENTS, createFieldUniforms, skylineScreenY } from './field/terrain'
+import { BAND, SUN_GLOW, WARM_GLOW, bandMix, horizonFor, midStopFor } from './skyShaders'
 import Hills from './field/Hills'
 import Grass from './field/Grass'
 import Flora from './field/Flora'
 
 const noop = () => {}
+
+/**
+ * The azimuth the far terrain's fade colour is solved at. The far ridge spans the whole frame and
+ * the band is hotter near the sun, so one colour has to stand for all of it: half way between the
+ * sun's own column and the edge of the warmth.
+ */
+const FADE_AZ = 0.5
+/** Peak strength of the valley haze at `journey.sunset` = 1 (grassShaders' `fieldMist`). */
+const MIST_MAX = 0.3
+
+const srgbVec3 = (hex: string) => {
+  const v = parseInt(hex.slice(1), 16)
+  return new THREE.Vector3(((v >> 16) & 255) / 255, ((v >> 8) & 255) / 255, (v & 255) / 255)
+}
+const WARM_V = srgbVec3(WARM_GLOW)
+const SUN_V = srgbVec3(SUN_GLOW)
+const smooth01 = (a: number, b: number, x: number) => {
+  const t = Math.min(1, Math.max(0, (x - a) / (b - a)))
+  return t * t * (3 - 2 * t)
+}
 
 /**
  * Compiles every program the field will ever need, well before the footer is reached.
@@ -59,12 +80,13 @@ async function warmFieldPrograms(gl: THREE.WebGLRenderer, group: THREE.Group, sc
 }
 
 /**
- * The moonlit field at the end of the journey: hills, grass, flowers and mushrooms in ONE group
- * that rises from below the frame on `journey.ground` (0 → 1 over the last 1.5 vh):
+ * The backlit field at the golden-hour end of the journey: hills, grass, flowers and mushrooms in
+ * ONE group that rises from below the frame on `journey.ground` (0 → 1 over the last 1.5 vh):
  * group y = mix(−9, −2.2, ground); nothing renders until ground > 0.01.
  *
- * Draw calls: terrain (1) + grass InstancedMesh (1) + merged flora (1) = 3. Lit by SceneLights;
- * the distance fade toward PALETTE.night.bottom happens in-shader (no scene.fog). Under reduced
+ * Draw calls: terrain (1) + grass InstancedMesh (1) + merged flora (1) = 3 — unchanged. Lit by
+ * SceneLights; the valley haze and the fade toward the skyline colour happen in the same
+ * fragment shaders the field already had (no scene.fog, no new pass). Under reduced
  * motion the wind uniform is 0 and `journey.time` stays at 0 — a static frame.
  *
  * Its shader programs are warmed once after mount (see `warmFieldPrograms`), scheduled on an
@@ -72,7 +94,14 @@ async function warmFieldPrograms(gl: THREE.WebGLRenderer, group: THREE.Group, sc
  */
 export default function Field({ tier, reduced }: LayerProps) {
   const group = useRef<THREE.Group>(null)
-  const uniforms = useMemo(() => createFieldUniforms(PALETTE.night.bottom), [])
+  const uniforms = useMemo(() => createFieldUniforms(PALETTE.afterglow.bottom), [])
+  /** scratch for the per-frame skyline colour — see the useFrame below. No allocation. */
+  const sky = useMemo(
+    () => ({ top: { r: 0, g: 0, b: 0 }, mid: { r: 0, g: 0, b: 0 }, bottom: { r: 0, g: 0, b: 0 } }),
+    [],
+  )
+  /** cached (aspect, viewport height) → where the band and the skyline are; a terrain scan, not per-frame work */
+  const geom = useMemo(() => ({ aspect: -1, height: -1, horizon: 0.55, skyline: 0.56 }), [])
   const q = QUALITY[tier]
   const gl = useThree((s) => s.gl)
   const scene = useThree((s) => s.scene)
@@ -114,13 +143,57 @@ export default function Field({ tier, reduced }: LayerProps) {
     }
   }, [gl, scene, camera, stage])
 
-  useFrame(() => {
+  useFrame((state) => {
     const g = group.current
     if (!g) return
     const ground = journey.ground
     g.visible = ground > 0.01
     g.position.y = FIELD.riseFrom + (FIELD.riseTo - FIELD.riseFrom) * ground
     uniforms.uTime.value = journey.time
+    if (!g.visible) return
+
+    // The colour the far terrain dissolves into is the sky it actually MEETS — the dome's own
+    // output at the skyline — not the foot of the gradient (which left a hard pink seam along the
+    // ridge, orange sky above and mauve valley below). It is derived rather than copied: the
+    // skyline's screen y and the band's hot line come from the same two functions the dome uses,
+    // and the band's strength there from the dome shader's own constants (skyShaders' BAND /
+    // bandMix / LOW_TINT). Retuning the band moves the sky and the terrain together, which is the
+    // desync the review called out. Three palette blends and some scalar maths — no allocation.
+    const aspect = state.size.width / Math.max(1, state.size.height)
+    if (geom.aspect !== aspect || geom.height !== state.size.height) {
+      geom.aspect = aspect
+      geom.height = state.size.height
+      geom.horizon = horizonFor(aspect, state.size.height)
+      geom.skyline = skylineScreenY(aspect)
+    }
+    const sunset = journey.sunset
+    const top = blendPalette('top', sky.top)
+    const mid = blendPalette('mid', sky.mid)
+    const bottom = blendPalette('bottom', sky.bottom)
+    const midStop = midStopFor(geom.horizon, sunset)
+    const t = geom.skyline < midStop ? geom.skyline / midStop : (geom.skyline - midStop) / (1 - midStop)
+    const a = geom.skyline < midStop ? top : mid
+    const b = geom.skyline < midStop ? mid : bottom
+    let r = a.r + (b.r - a.r) * t
+    let gg = a.g + (b.g - a.g) * t
+    let bb = a.b + (b.b - a.b) * t
+    const hy = geom.skyline - geom.horizon
+    const { warm, hot } = bandMix(hy, BAND.riseBase + (1 - BAND.riseBase) * ground)
+    const kWarm = warm * (BAND.warmMix + BAND.warmAz * FADE_AZ) * sunset
+    r += (WARM_V.x - r) * kWarm
+    gg += (WARM_V.y - gg) * kWarm
+    bb += (WARM_V.z - bb) * kWarm
+    const kHot = hot * (BAND.hotMix + BAND.hotAz * FADE_AZ) * sunset
+    r += (SUN_V.x - r) * kHot
+    gg += (SUN_V.y - gg) * kHot
+    bb += (SUN_V.z - bb) * kHot
+    const shade = smooth01(0, BAND.shadeSpan, Math.max(0, hy)) * sunset
+    uniforms.uFade.value.set(
+      r * (1 + (BAND.lowTint[0] - 1) * shade),
+      gg * (1 + (BAND.lowTint[1] - 1) * shade),
+      bb * (1 + (BAND.lowTint[2] - 1) * shade),
+    )
+    uniforms.uMistAmount.value = MIST_MAX * sunset
   })
 
   return (

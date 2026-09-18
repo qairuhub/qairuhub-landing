@@ -155,7 +155,9 @@ export interface GlassBacklight {
  */
 export const GLASS_BACKLIGHT: GlassBacklight = { top: '#9db4ff', bottom: '#1b3a8a', strength: 1 }
 
-/** Draw order of the backlight inside the transmission pass: after the dome (-10), with the stars (-9, additive too — order among additive layers is moot), before the far clouds (-8). */
+/** Draw order of the backlight inside the transmission pass. It is additive and transparent, so it
+ *  draws after every opaque object (the dome included, wherever the dome sits in that list), with
+ *  the stars (-9, additive too — order among additive layers is moot), before the far clouds (-8). */
 const BACKLIGHT_RENDER_ORDER = -9
 
 /**
@@ -192,8 +194,8 @@ interface TransmissionUniforms {
 /**
  * Why not drei's `background` prop: it only swaps `scene.background` for the FBO render, and
  * three draws the background plane before every other object — the sky dome (a fullscreen
- * triangle at renderOrder -10 with no depth test) paints straight over it in that pass as well,
- * so a background texture never reaches the transmission buffer in this scene. This layer is
+ * triangle at the far plane, drawn last among the opaque objects) paints straight over it in that
+ * pass as well, so a background texture never reaches the transmission buffer in this scene. This layer is
  * the same idea one step later in the draw order: a fullscreen additive gradient that is made
  * visible just before drei's transmission pass (priority -1 `useFrame`, mirroring drei's own
  * "material visible, transmission ≠ 0" gate) and hides itself in `onAfterRender` — i.e. after

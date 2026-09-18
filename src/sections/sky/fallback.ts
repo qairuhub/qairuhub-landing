@@ -14,7 +14,13 @@ import { PALETTE } from './journey'
 
 export const FALLBACK_GRADIENT = `linear-gradient(180deg, ${PALETTE.space.top} 0%, ${PALETTE.space.bottom} 100%)`
 
-/** The static night sky of /members and /handbook (SkyScene's `night` preset), as a CSS gradient. */
+/**
+ * The static night sky of /members and /handbook (SkyScene's `night` preset), as a CSS gradient.
+ * The home journey now ends in the golden hour instead (docs/GOLDEN-HOUR-BRIEF.md), but the
+ * sub-pages deliberately stay night — their copy is read top to bottom on the raw sky, with no
+ * field to hide a hot horizon behind — so `PALETTE.night` and this gradient are untouched and
+ * still match each other exactly (journey.ts, `endStop`).
+ */
 export const NIGHT_FALLBACK_GRADIENT = `linear-gradient(180deg, ${PALETTE.night.top} 0%, ${PALETTE.night.mid} 55%, ${PALETTE.night.bottom} 100%)`
 
 /** A page without a scroll story renders one frozen journey preset (V3-BUILD-PLAN WP1 C). */

@@ -1,4 +1,5 @@
 import clsx from 'clsx'
+import { useEffect, useRef } from 'react'
 import { Button } from '../components/ui/Button'
 import { Grid } from '../components/ui/Grid'
 import { RevealGroup } from '../components/ui/Reveal'
@@ -9,6 +10,7 @@ import { href } from '../i18n/locale'
 import { LocaleSwitch } from './Header'
 import { FOOTER_LINKS, FOOTER_SOCIALS, FOOTER_SOURCE_LINKS, text as footerText } from './footer.i18n'
 import { text as headerText } from './header.i18n'
+import { setCopyBox } from './sky/copyBox'
 import './Footer.css'
 
 /** Internal (route/anchor) links form the primary row; external ones move to the quiet row. */
@@ -32,6 +34,30 @@ export default function Footer() {
   const t = useT(footerText)
   const { a11y } = useT(headerText)
   const compact = route.page !== 'home'
+  const content = useRef<HTMLDivElement>(null)
+  /**
+   * Publish the content block's own height to the sky (sky/copyBox.ts). The golden-hour ending
+   * places its hot band above this block and its scrim around it, so a fourth link row or a longer
+   * Kazakh string moves both on their own instead of drifting out from under a hard-coded inset.
+   * Home only — a sub-page's compact footer is in normal flow over a static sky.
+   */
+  useEffect(() => {
+    const el = content.current
+    if (compact || !el || typeof ResizeObserver === 'undefined') return
+    const read = () => {
+      const margin = parseFloat(getComputedStyle(el).bottom) || 0
+      setCopyBox(el.offsetHeight, margin)
+    }
+    read()
+    const ro = new ResizeObserver(read)
+    ro.observe(el)
+    window.addEventListener('resize', read)
+    return () => {
+      ro.disconnect()
+      window.removeEventListener('resize', read)
+      setCopyBox(0, 0)
+    }
+  }, [compact])
   const quietLinks = [
     ...QUIET_LINKS.map(([key, url]) => [key, url, t.links[key]] as const),
     ...FOOTER_SOURCE_LINKS.map(([key, url]) => [key, url, t.source[key]] as const),
@@ -39,7 +65,7 @@ export default function Footer() {
 
   return (
     <footer id="footer" data-theme="dark" className={clsx('footer z-[2]', compact && 'footer--compact')}>
-      <div className="footer__content">
+      <div className="footer__content" ref={content}>
         <Grid hero>
           {compact && (
             <div className="footer__brand">

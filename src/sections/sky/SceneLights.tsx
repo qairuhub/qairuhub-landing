@@ -13,6 +13,21 @@ const SUN_NIGHT = new THREE.Color('#9fb7ff')
 const SUN_POS_DAY = new THREE.Vector3(-6, 8, 6)
 const SUN_POS_NIGHT = new THREE.Vector3(6, 7, 4)
 
+/**
+ * Golden hour (home only — a sub-page's frozen sky keeps the moon, see journey.ts). The key light
+ * is the sun that has just gone down BEHIND the far ridge: low (≈ 5°) and at −z, so every slope
+ * facing the camera falls to the hemisphere fill alone and the field reads as a deep, cool
+ * silhouette, while the crests and the grass tips that face away pick up a warm rim. The fill
+ * turns violet-cobalt to match the zenith — warm key against cool fill is what makes the hour
+ * read as golden (GOLDEN-HOUR-BRIEF, craft notes).
+ */
+const HEMI_SKY_SUNSET = new THREE.Color('#6f70d2')
+const HEMI_GROUND_SUNSET = new THREE.Color('#2a1a2e')
+const SUN_SUNSET = new THREE.Color('#ff9d5e')
+const SUN_POS_SUNSET = new THREE.Vector3(4, 1.3, -15)
+const HEMI_SKY_C = new THREE.Color(HEMI_SKY)
+const HEMI_GROUND_C = new THREE.Color(HEMI_GROUND)
+
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t
 
 /**
@@ -36,7 +51,10 @@ const LIGHTFORMERS = (
  * The ONLY lighting/environment in the scene. A static procedural <Environment> built from
  * three Lightformers (soft white top, cool blue rim from the left, faint warm fill from
  * below-right) is what makes the frosted wordmark read as glass; the hemisphere + directional
- * "sun/moon" light the field and follow the journey (space → day → night) every frame.
+ * sun light the field and follow the journey (space → day → dusk → afterglow, or → moonlit night
+ * on a sub-page) every frame. The wordmark itself picks the golden hour up through its own
+ * transmission pass, which re-renders this sky behind it — the Lightformer rig is deliberately
+ * untouched so the hero in space looks exactly as it does today.
  * No scene.fog — it would fog the sky and stars; the field fades distance in-shader.
  *
  * Memoised: its props (tier, reduced) rarely change, and a parent re-render must not repeat the
@@ -51,11 +69,16 @@ function SceneLights(_props: LayerProps) {
     const s = sun.current
     const day = 1 - journey.space
     const night = journey.night
-    if (h) h.intensity = lerp(lerp(0.35, 0.9, day), 0.4, night)
+    const sunset = journey.sunset
+    if (h) {
+      h.intensity = lerp(lerp(lerp(0.35, 0.9, day), 0.4, night), 0.34, sunset)
+      h.color.lerpColors(HEMI_SKY_C, HEMI_SKY_SUNSET, sunset)
+      h.groundColor.lerpColors(HEMI_GROUND_C, HEMI_GROUND_SUNSET, sunset)
+    }
     if (s) {
-      s.color.lerpColors(SUN_DAY, SUN_NIGHT, night)
-      s.intensity = lerp(lerp(0.5, 1.2, day), 0.6, night)
-      s.position.lerpVectors(SUN_POS_DAY, SUN_POS_NIGHT, night)
+      s.color.lerpColors(SUN_DAY, SUN_NIGHT, night).lerp(SUN_SUNSET, sunset)
+      s.intensity = lerp(lerp(lerp(0.5, 1.2, day), 0.6, night), 1.05, sunset)
+      s.position.lerpVectors(SUN_POS_DAY, SUN_POS_NIGHT, night).lerp(SUN_POS_SUNSET, sunset)
     }
   })
 

@@ -88,7 +88,8 @@ function buildGeometry(count: number) {
  * horizon, with a denser diagonal band and ~4 % larger warm stars). Screen-pixel sizes, vertex
  * twinkle, additive blending; global alpha follows `journey.stars` and the whole draw is
  * skipped (visible=false) while the stars are out. Mouse parallax + a slow upward tilt while
- * descending — never per-vertex work on the CPU.
+ * descending — never per-vertex work on the CPU. At the golden-hour ending `uSunset` keeps only
+ * the high stars (skyShaders.ts) — the first ones out, well above the glow.
  */
 export default function Stars({ tier, reduced }: LayerProps) {
   const dpr = useThree((s) => s.viewport.dpr)
@@ -107,6 +108,7 @@ export default function Stars({ tier, reduced }: LayerProps) {
           uTwinkle: { value: 1 },
           uAlpha: { value: 1 },
           uNight: { value: 0 },
+          uSunset: { value: 0 },
         },
         transparent: true,
         blending: THREE.AdditiveBlending,
@@ -134,14 +136,18 @@ export default function Stars({ tier, reduced }: LayerProps) {
     const p = points.current
     const g = group.current
     if (!p || !g) return
-    const alpha = journey.stars
-    const on = alpha > 0.002
+    // At the golden hour the vertex stage already dims every star by its elevation (skyShaders),
+    // and the survivors near the horizon go to nothing. Once what is left cannot reach a single
+    // 8-bit level, drop the whole points draw rather than paint a frame of invisible sprites.
+    const alpha = journey.stars * (1 - 0.72 * journey.sunset)
+    const on = alpha > 0.004
     p.visible = on
     if (!on) return
     const u = material.uniforms
     u.uTime.value = reduced ? 0 : journey.time
-    u.uAlpha.value = alpha * (1 - 0.1 * journey.night)
+    u.uAlpha.value = journey.stars * (1 - 0.1 * journey.night)
     u.uNight.value = journey.night
+    u.uSunset.value = journey.sunset
     const mx = reduced ? 0 : pointer.x
     const my = reduced ? 0 : pointer.y
     g.rotation.x = Math.min(journey.vh, DRIFT_CAP) * DRIFT - my * PARALLAX

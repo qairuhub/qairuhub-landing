@@ -2,25 +2,30 @@ import { useEffect, useMemo } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { PALETTE, blendPalette, journey } from './journey'
-import { domeFragment, domeVertex, nebulaFragment } from './skyShaders'
+import { copyBox } from './copyBox'
+import { BAND, MID_STOP, SUN_GLOW, WARM_GLOW, domeFragment, domeVertex, horizonFor, midStopFor, nebulaFragment } from './skyShaders'
 import type { LayerProps } from './types'
 import { registerWarmer } from './warmup'
 
-/** position of the mid gradient stop (0 top … 1 bottom) — matches the old CSS fallback (55%) */
-const MID_STOP = 0.55
 /** the nebula is baked at 1/NEBULA_DIV of the canvas resolution (soft haze — nothing sharp in it) */
 const NEBULA_DIV = 4
-
 const srgb = (hex: string) => {
   const v = parseInt(hex.slice(1), 16)
   return new THREE.Vector3(((v >> 16) & 255) / 255, ((v >> 8) & 255) / 255, (v & 255) / 255)
 }
 
 /**
- * The sky itself: a single clip-space triangle drawn first (renderOrder -10, no depth), whose
- * fragment blends the journey gradient with the space nebula + atmosphere limb, the descent
- * whiteout, dusk warmth and the night moon glow (see skyShaders.ts). Uniforms are refreshed
- * every frame from `journey` with no allocation.
+ * The sky itself: a single clip-space triangle whose fragment blends the journey gradient with the
+ * space nebula + atmosphere limb, the descent whiteout, dusk warmth, the golden-hour afterglow and
+ * the sub-pages' moon glow (see skyShaders.ts). Uniforms are refreshed every frame from `journey`
+ * with no allocation.
+ *
+ * It draws LAST among the opaque objects (renderOrder 20, depth test on, depth write off) rather
+ * than first with no depth test. The field is opaque and writes depth, so early-Z then discards
+ * every sky fragment the land covers — about a third of the footer frame, and the third where the
+ * afterglow branch is most expensive. Nothing else changes: the renderer still clears the frame,
+ * the dome still sits at the far plane, and the stars, clouds and wordmark are transparent /
+ * transmissive and were already drawn after all opaque geometry.
  */
 export default function SkyDome({ reduced }: LayerProps) {
   const geometry = useMemo(() => {
@@ -47,10 +52,17 @@ export default function SkyDome({ reduced }: LayerProps) {
           uWhiteout: { value: 0 },
           uDusk: { value: 0 },
           uNight: { value: 0 },
+          uSunset: { value: 0 },
+          uGround: { value: 0 },
+          uHorizon: { value: 0.55 },
+          uAzScale: { value: 1 },
           uDuskGlow: { value: srgb(PALETTE.dusk.glow) },
+          uWarmGlow: { value: srgb(WARM_GLOW) },
+          uSunGlow: { value: srgb(SUN_GLOW) },
         },
         depthWrite: false,
-        depthTest: false,
+        // See the component doc: depth-tested and drawn after the field, for early-Z.
+        depthTest: true,
         toneMapped: false,
       }),
     [],
@@ -106,6 +118,9 @@ export default function SkyDome({ reduced }: LayerProps) {
 
   /** scratch {r,g,b} targets for blendPalette → copied into the vec3 uniforms */
   const rgb = useMemo(() => ({ top: { r: 0, g: 0, b: 0 }, mid: { r: 0, g: 0, b: 0 }, bottom: { r: 0, g: 0, b: 0 } }), [])
+  /** last (aspect, viewport height, copy height) the horizon was solved for — it is a ~2k-sample
+   *  scan of the terrain, so it runs on resize, never per frame. */
+  const horizonCache = useMemo(() => ({ aspect: -1, height: -1, copy: -1, value: 0.55 }), [])
 
   useFrame((state) => {
     const u = material.uniforms
@@ -138,7 +153,24 @@ export default function SkyDome({ reduced }: LayerProps) {
     u.uWhiteout.value = journey.whiteout
     u.uDusk.value = journey.dusk
     u.uNight.value = journey.night
+    u.uSunset.value = journey.sunset
+    u.uGround.value = journey.ground
+
+    const height = state.size.height
+    if (horizonCache.aspect !== aspect || horizonCache.height !== height || horizonCache.copy !== copyBox.heightPx) {
+      horizonCache.aspect = aspect
+      horizonCache.height = height
+      horizonCache.copy = copyBox.heightPx
+      horizonCache.value = horizonFor(aspect, height)
+    }
+    u.uHorizon.value = horizonCache.value
+    // 1 / (half-span)^2 for the azimuth falloff, so the shader needs neither a divide nor a
+    // smoothstep to ask how close a column is to the sun.
+    const azHalf = BAND.azSpan * Math.max(0.62, aspect)
+    u.uAzScale.value = 1 / (azHalf * azHalf)
+    // Pinned to the band at the sunset, plain MID_STOP everywhere else (see midStopFor).
+    u.uMidStop.value = midStopFor(horizonCache.value, journey.sunset)
   })
 
-  return <mesh geometry={geometry} material={material} frustumCulled={false} renderOrder={-10} />
+  return <mesh geometry={geometry} material={material} frustumCulled={false} renderOrder={20} />
 }

@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react'
 import * as THREE from 'three'
-import { FIELD, FIELD_COLORS, createRng, hillHeight, hillProfile, screenY, type FieldUniforms } from './terrain'
+import { FIELD, FIELD_COLORS, createRng, hillHeight, hillProfile, screenY, sunGraze, type FieldUniforms } from './terrain'
 import { grassFragment, grassVertex } from './grassShaders'
 
 /** Share of the blades drawn into the (blurred) glass transmission buffer: 1 / this. */
@@ -39,7 +39,7 @@ export default function Grass({ count, uniforms }: { count: number; uniforms: Fi
       uniforms: {
         uTime: uniforms.uTime,
         uWind: uniforms.uWind,
-        uMoonDir: uniforms.uMoonDir,
+        uSunDir: uniforms.uSunDir,
         uFade: uniforms.uFade,
         uFadeNear: uniforms.uFadeNear,
         uFadeFar: uniforms.uFadeFar,
@@ -111,8 +111,13 @@ export default function Grass({ count, uniforms }: { count: number; uniforms: Fi
 
       const lift = THREE.MathUtils.smoothstep(hillProfile(x), 0.1, 1.5)
       const near = THREE.MathUtils.smoothstep(z, 4, FIELD.grassNear)
-      const l = (0.72 + 0.28 * lift) * (1 - 0.25 * near) * (0.85 + rng() * 0.25)
-      color.setRGB(l, l * (0.97 + rng() * 0.06), l)
+      // The same grazing-light ramp the hills are built with (terrain's `sunGraze`), so a blade on
+      // a flank turned away from the sun is as dark as the ground under it. The fragment shader
+      // reads this tint twice: once as the blade's own exposure, and once to gate the warm rim on
+      // its tips — so the lit crests sparkle per blade instead of banding.
+      const lit = sunGraze(x, z)
+      const l = (0.62 + 0.38 * lift) * (1 - 0.25 * near) * (0.85 + rng() * 0.25) * (0.72 + 0.46 * lit)
+      color.setRGB(l, l * (0.97 + rng() * 0.06), l * (1.0 + 0.1 * (1 - lit)))
       m.setColorAt(j, color)
     }
     const group = new THREE.Group()

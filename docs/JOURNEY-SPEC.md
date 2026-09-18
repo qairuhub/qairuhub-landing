@@ -70,7 +70,8 @@ All in viewport heights; `end` = (document height − viewport) / viewport, min 
 | `whiteout` | bell 1.15 → 1.6 → 2.1, peak 1 | **`0.6 × ss(1.0, 1.3) × (1 − ss(1.3, 1.55))`**: peak 0.6 at 1.3 vh, gone by 1.55 (the plan's 0.8 × with a 1.75 tail left white copy at ≈ 3.4 : 1; 0.6 keeps 1.2 / 1.5 / 1.8 vh at ≥ 4.7 : 1) |
 | `day` | in 1.7 → 2.3 | `ss(1.55, 2.1) × (1 − ss(duskStart, duskStart + 0.9))` |
 | `dusk` | — | `ss(duskStart, duskStart + 0.7) × (1 − ss(duskEnd − 0.3, duskEnd + 0.5))` |
-| `night` | — | `ss(duskEnd − 0.5, end − 0.4)` |
+| `night` | — | `ss(duskEnd − 0.5, end − 0.4)` — the last, ground-level phase |
+| `sunset` | — | `ss(duskEnd − 1.0, end − 0.55)` on home, **0** on a sub-page's static sky: it is what turns that last phase into the golden hour (docs/GOLDEN-HOUR-BRIEF.md). It deliberately LEADS `night` by about half a viewport — the warmth is in the sky before the ground arrives — because on the same curve the two crossfades dipped through a flat violet frame ≈ 1 vh before the end, exactly where the Join form is read |
 | `ground` | — | `ss(end − 1.5, end − 0.05)` |
 | `stars` | out 1.2 → 1.8 | `min(1, 1 − ss(1.15, 1.7) + ss(duskStart + 0.3, duskEnd + 0.2))` |
 | `clouds` | in 0.9 → 1.6 | `ss(0.85, 1.5) × (1 − 0.6 × night)` |
@@ -81,15 +82,84 @@ All in viewport heights; `end` = (document height − viewport) / viewport, min 
 
 with `duskStart = end − 2.5`, `duskEnd = end − 1.2`.
 
-**Palette** (`PALETTE`): space `#03040c / #050818 / #070c24`; descent `#071a4a / #0b3f9a / #1670c8` (v3: bottom darkened from `#1a7be0`, ≈ 5 : 1 for white copy, because the Launchpad is read through the descent); day `#082a64 / #0a48a6 / #1875d0`; dusk `#0d2a66 / #164a9c / #5d5f9c`, glow `#b7707a`; night `#061a3d / #08234d / #0b2c5c`.
+**Palette** (`PALETTE`): space `#03040c / #050818 / #070c24`; descent `#071a4a / #0b3f9a / #1670c8` (v3: bottom darkened from `#1a7be0`, ≈ 5 : 1 for white copy, because the Launchpad is read through the descent); day `#082a64 / #0a48a6 / #1875d0`; dusk `#0d2a66 / #1b4390 / #4d3d74`, glow `#c4735c` (v3.2: the approach into the sunset rather than into night — warmer mid, deeper violet foot, coral glow); **afterglow `#05183f / #8a3a64 / #74495f`** (v3.2); night `#061a3d / #08234d / #0b2c5c`, kept for the sub-pages' static sky.
 
-**Page height.** v3 desktop `end` is planned at ≈ 18.2 vh (plan estimate, v2 14.7; re-measure with `perf.mjs`, which reads every section top from the DOM): Ask bar, Platform CTA row, Projects, News and the 6 × lvh storytelling runway add height; the compact form removes some. Top-anchored phases use absolute vh; bottom-anchored phases use `end − k`, so `#join` reads in dusk → night and the triptych's MEET frame lands at dusk start.
+The afterglow stops are not read literally off the frame, and both departures are load-bearing:
+
+- **`mid` is a warm rose, and the dome pins the mid stop just above the hot band** (`midStopFor`). The
+  ladder cobalt → violet → rose above the band is therefore the dome's own two-stop gradient, which
+  every phase pays for anyway, and the shader only paints the last stretch into coral and gold.
+  The halo used to reach 0.43 of a frame up to do that in the fragment; that was the single most
+  expensive thing in the ending (≈ +1.3 ms at the footer). It now reaches 0.28 and the frame costs
+  +0.76 ms.
+- **`bottom` is lighter and more saturated than the band under the sunset actually reads.** Below
+  the hot line the shader MULTIPLIES the sky by `LOW_WARM` → `LOW_COOL` rather than mixing toward a
+  dark stop, so `#74495f` has to survive being taken down to ≈ `#311931`. Mixing toward an
+  already-dark stop is what made that band a flat dead violet; multiplying a live colour keeps its
+  hue, and it is the difference between "land in shadow" and "empty".
+
+`blendPalette`'s last lerp (`t3`) lands on **afterglow** during the home journey and on **night** for `setStaticJourney('night')` — one swappable end stop, so /members and /handbook keep exactly the moonlit sky they have today (and `fallback.ts`'s `NIGHT_FALLBACK_GRADIENT` keeps matching it).
+
+### Why the sub-pages stayed night (v3.2 decision)
+
+The brief asked for this to be decided deliberately rather than inherited, and the honest answer is
+that the two pages are different problems:
+
+- **Home ends with a picture.** Its last screens are a field, a silhouette and a footer four rows
+  tall at most. A hot horizon is safe there because the land is in front of it and the band is
+  placed above the copy by construction (`horizonFor`).
+- **`/members` and `/handbook` end with text.** They are read top to bottom on the raw sky, with no
+  field and no silhouette to hide a bright horizon behind, and they have no scroll story to move a
+  band through. A golden sky on those pages would be a wash behind body copy — exactly the failure
+  mode the brief's first rule exists to prevent.
+
+The cost of keeping both is one uniform-controlled branch in `domeFragment` and one extra palette
+stop. It is not free, so it is written down here rather than left to be rediscovered:
+
+- `journey.sunset` is **0** on a sub-page and **non-zero whenever `night` is** on home. The moon
+  branch is therefore `uNight > 0.002 && uSunset < 0.002` — uniform-controlled, never taken on home,
+  and never half-mixed. (The first cut gated it on `uSunset < 0.998`, which drew the moon at 25 %
+  through the middle of the home crossfade.)
+- `PALETTE.night` and `NIGHT_FALLBACK_GRADIENT` are untouched, so the CSS placeholder on those pages
+  is still byte-exact against the dome.
+- If a later change makes the sub-pages an evening rather than a night, the moon branch and the
+  `night` stop go with it, and `fallback.ts` follows automatically — it is derived from `PALETTE`.
+
+**Page height.** v3 desktop `end` is planned at ≈ 18.2 vh (plan estimate, v2 14.7; re-measure with `perf.mjs`, which reads every section top from the DOM): Ask bar, Platform CTA row, Projects, News and the 6 × lvh storytelling runway add height; the compact form removes some. Top-anchored phases use absolute vh; bottom-anchored phases use `end − k`, so `#join` reads in dusk → afterglow and the triptych's MEET frame lands at dusk start.
+
+### Where the hot band goes (`horizonFor`, v3.2)
+
+Nothing in the ending is positioned by a per-viewport constant. `skyShaders.horizonFor(aspect,
+viewportHeight)` takes the smaller (higher on screen) of two **measured** terms and clamps it to
+[0.30, 0.62] of the frame:
+
+1. **the field's own visible skyline**, `field/terrain.skylineScreenY(aspect)` — a scan of
+   `hillHeight` over the (x, z) this viewport can actually see, grass fringe included — minus 0.03,
+   so the strongest saturation sits just above the ridge rather than on it;
+2. **the top of the footer's content block**, `sky/copyBox.copyTopFraction(viewportHeight)`, which
+   `Footer.tsx` publishes through a ResizeObserver — minus a 0.10 clearance.
+
+The first wins on a laptop and the second on a phone, and the reason is not obvious: the camera's
+fov is vertical, so a narrow frame does not see less sky, it sees less *width* — and the ridges live
+at x ≈ ±6.5 and ±7. A laptop (aspect 1.60) sees them and its skyline is a crest at **0.561**; a phone
+(aspect 0.46) sees only the valley floor between them and its skyline falls to **0.707**, a seventh
+of the frame lower, while its footer is four rows tall and reaches to 0.60. Measured, not reasoned
+about: a tablet portrait, an ultrawide, a fourth footer row or a longer Kazakh string all land
+somewhere that was solved rather than interpolated.
+
+The same two functions give `Field.tsx` the colour the far terrain fades onto, and `skyShaders.BAND`
+/ `bandMix` give it the band's strength there — so the sky and the terrain cannot silently disagree
+about where the skyline is or what colour it is.
+
+The footer's CSS scrim is tied to the same box: `--footer-scrim-lead` equals the sky's own clearance,
+and the scrim's insets are `calc(-1 * var(--footer-scrim-lead))` and the row margin, so the scrim
+always covers the block whatever the block turns out to be.
 
 ## Static sky for sub-pages (`setStaticJourney`)
 
 | Preset | Used by | Values |
 |---|---|---|
-| `night` | `/members`, `/handbook` (+ KK) | `vh 4`, `end 4`, `night 1`, `stars 1`, `clouds 0.3`, `ground 0`, `space 0`, both wordmark weights 0, `pal.t0..t3 = 1` |
+| `night` | `/members`, `/handbook` (+ KK) | `vh 4`, `end 4`, `night 1`, **`sunset 0`**, `stars 1`, `clouds 0.3`, `ground 0`, `space 0`, both wordmark weights 0, `pal.t0..t3 = 1` **onto the night stop** |
 | `space` | 404 | `vh 0`, `end 4`, `space 1`, `stars 1`, `clouds 0`, everything else 0 |
 
 SkyScene calls it once and never `updateJourney`; it does not mount `GlassWordmark` or `Field` and does not call `preloadGlassWordmark()`. `time` still advances for twinkle and drift.
@@ -127,8 +197,11 @@ The page is one continuous descent. You start **in space**, among the stars, wit
 QairuHub wordmark floating in front of you. As you scroll you **fall through the atmosphere**:
 the black turns deep blue, the stars dissolve, you punch through a layer of clouds and arrive in
 the bright **day sky** where the whole product story lives. Towards the end the light drains into
-**dusk and night**, the stars return, and you land on a **moonlit grass field** — the wordmark
-comes back down and hovers above the valley. Starts under the stars, ends under the stars.
+**dusk**, and you land on a grass field at the **golden hour** — a small low sun sits in the notch
+between the ridges with a soft bloom, the sky runs cobalt → violet → rose → coral → gold down to
+the skyline with a far cloud deck lit along its underside, the land is a cool silhouette with warm
+rims on the crests, and the first stars are out high above. The wordmark comes back down, hovers
+over the valley and picks up the warm light. Starts under the stars, ends under the first of them.
 
 ## One canvas, one render loop
 
@@ -147,8 +220,8 @@ comes back down and hovers above the valley. Starts under the stars, ends under 
 | 0 – 0.9 | SPACE | `#03040c` → `#070c24`, faint violet/blue nebula haze, thin blue atmosphere limb glowing along the bottom edge | full, twinkling, slight parallax | none | centered, huge, refracting the stars; mouse parallax; slow float |
 | 0.9 – 2.2 | DESCENT | lerp to `#0c2d6e` → `#0d59c2` → `#2ea3ff` | fade out by 1.8vh | rise in from below (near layer first) and pass upward past the camera; a soft white "whiteout" flash peaks at ~1.6vh (opacity ≤ .35) as we punch through the cloud deck | drifts up and out of frame by 1.4vh, then unmounts |
 | 2.2 – (end − 2.5) | SKY | day gradient (reference), subtle darkening with depth | none | big soft cumulus, 3 depth layers, slow drift + scroll parallax; sparser than the hero deck | unmounted |
-| (end − 2.5) – (end − 1.2) | DUSK | `#0d2a66` → `#164a9c` → a hint of warm horizon `#5d5f9c` low | fade in | thin, darker undersides | — |
-| (end − 1.2) – end | NIGHT + FIELD | `#061a3d` → `#0b2c5c`; stars full; moon glow | full | few, dark | re-mounts above the valley, descends into place (y from +6 → 3.2), floats |
+| (end − 2.5) – (end − 1.2) | DUSK | `#0d2a66` → `#1b4390` → violet foot `#4d3d74` with a coral wash low — the approach into the sunset | fade in | thin, darker undersides | — |
+| (end − 1.2) – end | AFTERGLOW + FIELD | `#05183f` → `#8a3a64` → `#74495f`, plus a coral-into-gold band on the skyline, a small low sun with a soft bloom in the valley notch, and a three-bar far cloud deck lit along its bottom edge | only the first, high up | few, amber-lit from below | re-mounts above the valley, descends into place (y from +6 → 3.2), floats |
 | footer area | GROUND | hills rise from the bottom edge as `alt → 1` (group translateY from −6 → 0), grass sways, flowers/mushrooms, fog | | | |
 
 `end` = document height − viewport. Use `scrollState.y` and `scrollState.limit` (px) — convert vh
@@ -215,7 +288,13 @@ gradient fallback < 1 s, three.js loaded lazily after first paint.
   noise mush; the punch-through moment feels like flying through cloud (near sprites scale up past the
   camera, brief soft whiteout).
 - Day sky is the saturated reference blue; no banding (dither the gradient in the shader).
-- Night: moon glow (soft radial off-center), stars a touch warmer, hills lit from the moon side, fog.
+- Golden hour (v3.2, home): a **small, low sun** with a soft bloom sitting in the notch between the ridges, a
+  coral-into-gold band hugging the skyline with the strongest saturation just above it, a far cloud deck of three
+  flattened bars lit along their bottom edges and dark on top, and a warm plume hanging under the sun's own column
+  so the gap between the band and the land is not empty. The land is a deep cool silhouette with warm rims that are
+  gated **per blade** (by how squarely it faces the sun and by its own baked tint) so the lit crests sparkle rather
+  than band. Below the hot line the sky is multiplied down, never mixed to a flat stop. The sub-pages keep the moon
+  glow (soft radial off-centre, stars a touch warmer, hills lit from the moon side).
 - The wordmark is unmistakably glass: refractions of stars/clouds visible through the letters,
   crisp rim highlights, slight chromatic fringe, never opaque plastic.
 - Motion is slow and calm (drift ≈ 6–12 px/s), everything eased with `var(--ease)`.
@@ -241,6 +320,38 @@ The first pass failed here: white text over dense white clouds. Rules for v2:
 - Body copy max-width ≤ 62ch; line-height 1.5; never below 16px. Footer links 16px.
 - In the space and night phases, text sits on near-black — verify the header/nav and footer links are
   white, not the light-theme black.
+
+### Measured at the golden-hour ending (v3.2)
+
+Method: `<scratch>/golden/work/sweep.mjs` hides the measured copy, forces one more canvas frame,
+screenshots the plate and samples the **real pixels** behind each text box, every 0.2 vh over the
+last 3.2 vh, at 1440×900 and 390×844, EN and KK. `shots.mjs` does the same at the end stop and adds
+768×1024, 390×844 at dpr 2, 2560×1080 and 1024×768, plus all three quality tiers.
+
+Everything the ending owns passes with room: footer links **13.8–16.6 : 1**, the quiet row
+**8.6–9.9 : 1**, copyright / tagline / language switch **9.9–10.5 : 1**, and the same numbers hold at
+dpr 2, at tablet portrait and on an ultrawide.
+
+**The sky carries it, not the scrim.** With the footer's CSS scrim forced to `display: none`, every
+row still clears 4.5 : 1 against the raw sky at every viewport (worst 6.0 : 1, 768 KK). The one thing
+the scrim does carry is *land*: lit blade tips crossing the quiet link row at tablet portrait, which
+measured 4.33 : 1 at scrim 0.28 and 4.61 : 1 at 0.32 (and **1.70 : 1** on the moonlit-night baseline
+at the same viewport). That is why the portrait scrim is 0.32 and the desktop one 0.22 — comfort and
+foreground, not survival.
+
+### Known pre-existing shortfalls (a separate ticket — NOT the ending's)
+
+These fail against the **untouched day/dusk palette**, were failing before the golden hour, and the
+golden hour improves them. They are logged here rather than patched over by restyling the type,
+which is what the first attempt did (it raised two `DemoForm.css` alphas; that was reverted):
+
+| where | baseline | golden hour | needs |
+|---|---|---|---|
+| `#join` 12px note (`.join__signup-note`, `rgba(--fg, .75)`), 1440 + 390, EN + KK, ~end−0.8 to end−2.2 vh | 3.49–3.71 : 1 | 4.05–4.41 : 1 | 4.5 : 1 |
+| News / Projects date chips (mid-page, day sky) | 2.7–3.4 : 1 | unchanged | 4.5 : 1 |
+
+Both live on the day sky's foot, not on the sunset. Fixing them means either the day palette or the
+type, and either is its own change with its own measurement.
 
 ## Frosted glass wordmark (v2 requirement)
 

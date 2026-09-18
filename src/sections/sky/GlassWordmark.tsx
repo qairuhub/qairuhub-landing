@@ -91,6 +91,44 @@ function prebuiltEntry(font: TypefaceData) {
  * { thickness: 0.022, size: 0.012, offset: 0, segments: 4 } (≈ 0.134 × size) with HEIGHT 0.06.
  */
 const BEVEL: Partial<GlassTextBevel> = { thickness: 0.025, size: 0.02, offset: -0.03, segments: 5 }
+
+/**
+ * The glass in the golden hour.
+ *
+ * The brief names the wordmark as a target for the new light and the rig that lights it is baked
+ * once (`<Environment frames={1}>`, SceneLights) — re-baking it per frame is out of the question,
+ * and that is why the run reads leftover-cool over a coral sky. What is NOT out of the question is
+ * the glass's own volume: three tints transmitted light by the material's colour and by its
+ * attenuation over the path length, and all three are plain properties on a material this frame
+ * already writes to. Shortening the attenuation distance is what makes it read — at the recipe's
+ * 2.0 against a 0.3-thick stroke the light barely picks anything up.
+ *
+ * Per frame: three colour lerps and one number, no allocation, no re-bake, no extra pass. It is a
+ * hint of warmth rather than a full re-light, which is the honest ceiling without touching the rig.
+ */
+interface GlassMaterial extends THREE.Material {
+  color?: THREE.Color
+  emissive?: THREE.Color
+  attenuationColor?: THREE.Color
+  attenuationDistance?: number
+}
+const GLASS_COOL = new THREE.Color('#f3f7ff')
+const GLASS_WARM = new THREE.Color('#ffeedd')
+const GLASS_ATTEN_COOL = new THREE.Color('#dbe6ff')
+const GLASS_ATTEN_WARM = new THREE.Color('#ffc59b')
+const GLASS_EMISSIVE_COOL = new THREE.Color('#9db4ff')
+const GLASS_EMISSIVE_WARM = new THREE.Color('#ffc8a2')
+const ATTEN_DISTANCE = { cool: 2, warm: 1.15 }
+
+function warmGlass(material: GlassMaterial, sunset: number): void {
+  if (!material.color) return
+  material.color.lerpColors(GLASS_COOL, GLASS_WARM, sunset)
+  if (material.emissive) material.emissive.lerpColors(GLASS_EMISSIVE_COOL, GLASS_EMISSIVE_WARM, sunset)
+  if (material.attenuationColor) {
+    material.attenuationColor.lerpColors(GLASS_ATTEN_COOL, GLASS_ATTEN_WARM, sunset)
+    material.attenuationDistance = ATTEN_DISTANCE.cool + (ATTEN_DISTANCE.warm - ATTEN_DISTANCE.cool) * sunset
+  }
+}
 /**
  * Extrusion depth (× size). Side-on during the spin the depth reads as weight, so it thins with the
  * stroke (v2 0.14, v3 first pass 0.08 still read chunky at scroll ≈ 300): DECISIONS §9 fallback depth.
@@ -284,6 +322,7 @@ function Letters({ tier, reduced, gateKey }: LayerProps & { gateKey: string }) {
     m.visible = visible
     const material = m.material as THREE.Material
     material.visible = visible
+    warmGlass(material as GlassMaterial, journey.sunset)
     // The ramp is applied as opacity ONLY where the recipe is already transparent — the low tier's
     // MeshPhysicalMaterial stand-in. `material.transparent` is part of three's program cache key
     // (`parameters.opaque` → `#define OPAQUE`, which pins the fragment alpha to 1), so turning it on

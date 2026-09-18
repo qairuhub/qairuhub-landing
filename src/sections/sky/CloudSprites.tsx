@@ -44,7 +44,8 @@ export function allowCloudBake(): void {
  * alpha ≤ .95 and a coverage cap (≤ 30 % of the viewport, by scaling alpha) — the cap, not
  * dimming, is what keeps the copy readable — on portrait viewports, where every sprite is wider than the frame and the
  * lanes cannot clear the copy, the day alpha is eased down a further 35 %; dusk tints lavender
- * with darker bellies; night keeps only the far layer, faint and dark (edge shapes, no grey blob).
+ * with darker bellies; the ending keeps only the far layer — faint and dark on a sub-page's night
+ * sky, amber-lit over a violet belly at the home journey's golden hour.
  *
  * Reduced motion: no sway/bob/mouse parallax — static positions that still follow the scroll.
  */
@@ -70,6 +71,8 @@ const PAL = {
   day: { lit: 0xf4f7fb, shade: 0x8ea3c4 },
   dusk: { lit: 0xc8b8d8, shade: 0x55507e },
   night: { lit: 0x4a5878, shade: 0x243050 },
+  /** golden hour: lit from BELOW by the buried sun — amber tops over a deep violet belly */
+  sunset: { lit: 0xffb06a, shade: 0x5a2f56 },
   whiteout: { lit: 0xffffff, shade: 0xeef3ff },
 } as const
 /** per-instance tint range: white → #f2f6ff (barely cool, so the tops stay white) */
@@ -99,6 +102,8 @@ const CENTRE_CELL = 1
 const CENTRE_ALPHA = 0.22
 /** Night: the far layer (the only one kept) fades to this share of `journey.clouds`… */
 const NIGHT_FAR_ALPHA = 0.25
+/** …and a little more of it at the golden hour, where the amber-lit edges are part of the picture. */
+const SUNSET_FAR_ALPHA = 0.4
 /** …and rises by this many world units, so no grey blob sits in the valley between the hills. */
 const NIGHT_FAR_LIFT = 3
 /** The centre-lane sprite fades out over this `journey.night` window (alpha 0 from the upper bound
@@ -342,13 +347,26 @@ function buildResources(tier: LayerProps['tier'], gl: THREE.WebGLRenderer): Reso
 
 /* ------------------------------------------------------------------ component */
 
-/** bright (descent) → day → dusk → night, then towards pure white by the whiteout. Linear colours, no allocation. */
-const paletteBlend = (out: THREE.Color, day: number, dusk: number, night: number, white: number, litSide: boolean) => {
+/**
+ * bright (descent) → day → dusk → night → sunset, then towards pure white by the whiteout. Linear
+ * colours, no allocation. `sunset` is 0 on a sub-page, so its frozen night deck is untouched; on
+ * home it tracks `night`, so the deck ends amber-lit rather than grey.
+ */
+const paletteBlend = (
+  out: THREE.Color,
+  day: number,
+  dusk: number,
+  night: number,
+  sunset: number,
+  white: number,
+  litSide: boolean,
+) => {
   const p = litSide ? 'lit' : 'shade'
   out.setHex(PAL.bright[p])
   if (day > 0) out.lerp(scratchPal.setHex(PAL.day[p]), day)
   if (dusk > 0) out.lerp(scratchPal.setHex(PAL.dusk[p]), dusk)
   if (night > 0) out.lerp(scratchPal.setHex(PAL.night[p]), night)
+  if (sunset > 0) out.lerp(scratchPal.setHex(PAL.sunset[p]), sunset)
   if (white > 0) out.lerp(scratchPal.setHex(PAL.whiteout[p]), white)
   return out
 }
@@ -392,6 +410,9 @@ export default function CloudSprites({ tier, reduced }: LayerProps) {
     const day = journey.day
     const dusk = journey.dusk
     const night = journey.night
+    const sunset = journey.sunset
+    // the far layer keeps a little more presence at the golden hour than it does at night
+    const farAlpha = NIGHT_FAR_ALPHA + (SUNSET_FAR_ALPHA - NIGHT_FAR_ALPHA) * sunset
     const whiteout = journey.whiteout
     const moving = !reduced
     const scrolled = journey.vh !== last.current.vh
@@ -441,7 +462,7 @@ export default function CloudSprites({ tier, reduced }: LayerProps) {
       const wo = whiteout * def.whiteout
       const scale = 1 + 0.8 * wo
       const arr = L.pos.array as Float32Array
-      const layerAlpha = journey.clouds * (def.night ? 1 - (1 - NIGHT_FAR_ALPHA) * night : 1 - night)
+      const layerAlpha = journey.clouds * (def.night ? 1 - (1 - farAlpha) * night : 1 - night)
       const frameArea = 4 * hW * hH
       const offY = -def.rise * (1 - rise) + my * def.mouse * 0.6 + (def.night ? NIGHT_FAR_LIFT * night : 0)
       const offX = mx * def.mouse
@@ -493,7 +514,7 @@ export default function CloudSprites({ tier, reduced }: LayerProps) {
       const def = L.def
       const u = L.material.uniforms
       const wo = whiteout * def.whiteout
-      let a = journey.clouds * (def.night ? 1 - (1 - NIGHT_FAR_ALPHA) * night : 1 - night)
+      let a = journey.clouds * (def.night ? 1 - (1 - farAlpha) * night : 1 - night)
       a *= lerp(1, dayAlpha, day)
       a = lerp(a, 1, wo)
       u.uOpacity.value = a
@@ -507,8 +528,8 @@ export default function CloudSprites({ tier, reduced }: LayerProps) {
         -def.rise * (1 - rise) + my * def.mouse * 0.6 + (def.night ? NIGHT_FAR_LIFT * night : 0),
         0,
       )
-      paletteBlend(L.lit, day, dusk, night, wo, true)
-      paletteBlend(L.shade, day, dusk, night, wo, false)
+      paletteBlend(L.lit, day, dusk, night, sunset, wo, true)
+      paletteBlend(L.shade, day, dusk, night, sunset, wo, false)
       // centre-lane sprite: alpha 0 once night > NIGHT_CENTRE_FADE[1] (tiny upload, only on change)
       if (L.centre >= 0 && L.centreFade !== centreFade) {
         L.centreFade = centreFade
