@@ -1,8 +1,15 @@
 {
   "siteName": "QairuHub",
-  "ogLocale": { "en": "en_US", "kk": "kk_KZ" },
+  "ogLocale": {
+    "en": "en_US",
+    "kk": "kk_KZ"
+  },
   "logo": "/favicon.svg",
-  "sameAs": ["https://instagram.com/qairuhub", "https://t.me/qairuhub", "https://github.com/qairuhub"],
+  "sameAs": [
+    "https://instagram.com/qairuhub",
+    "https://t.me/qairuhub",
+    "https://github.com/qairuhub"
+  ],
   "pages": {
     "home": {
       "en": {
@@ -38,6 +45,18 @@
         "path": "/kk/handbook",
         "title": "The QairuHub Handbook — QairuHub",
         "description": "QairuHub туралы бәрі бір жерде: біз кімбіз, қалай қосылуға болады, бағдарламалар, платформа, құндылықтар, жоспарлар және жиі қойылатын сұрақтар."
+      }
+    },
+    "links": {
+      "en": {
+        "path": "/links",
+        "title": "Links — QairuHub",
+        "description": "Every QairuHub link in one place: sign-ups that are open right now, our Telegram, Instagram and the main site."
+      },
+      "kk": {
+        "path": "/kk/links",
+        "title": "Сілтемелер — QairuHub",
+        "description": "QairuHub сілтемелері бір бетте: қазір ашық тіркелулер, Telegram, Instagram және негізгі сайт."
       }
     },
     "notFound": {

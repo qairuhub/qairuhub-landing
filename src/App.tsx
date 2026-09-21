@@ -37,6 +37,7 @@ const SkyScene = lazy(() => import('./sections/SkyScene'))
 /* Sub-pages are separate chunks: the home bundle never pays for them. */
 const MembersPage = lazy(() => import('./pages/MembersPage'))
 const HandbookPage = lazy(() => import('./pages/HandbookPage'))
+const LinksPage = lazy(() => import('./pages/LinksPage'))
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
 
 /*
@@ -239,7 +240,15 @@ export default function App() {
           // in the first 30 s, which is when a first-visit failure happens).
           <ChunkBoundary fallback={<PageLoadFailed />} onError={reloadOnceForChunkError}>
             <Suspense fallback={<PageSkeleton />}>
-              {page === 'members' ? <MembersPage /> : page === 'handbook' ? <HandbookPage /> : <NotFoundPage />}
+              {page === 'members' ? (
+                <MembersPage />
+              ) : page === 'handbook' ? (
+                <HandbookPage />
+              ) : page === 'links' ? (
+                <LinksPage />
+              ) : (
+                <NotFoundPage />
+              )}
             </Suspense>
           </ChunkBoundary>
         )}

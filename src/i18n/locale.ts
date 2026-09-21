@@ -8,7 +8,7 @@
  */
 
 export type Locale = 'en' | 'kk'
-export type Page = 'home' | 'members' | 'handbook' | 'notFound'
+export type Page = 'home' | 'members' | 'handbook' | 'links' | 'notFound'
 export type LocaleBase = '/' | '/kk/'
 
 export interface Route {
@@ -20,7 +20,7 @@ export interface Route {
 /** A per-section dictionary: `satisfies Dict<SectionText>` makes TS enforce KK completeness. */
 export type Dict<T> = { en: T; kk: T }
 
-export type HrefTarget = '/' | 'members' | 'handbook' | `#${string}` | `handbook#${string}`
+export type HrefTarget = '/' | 'members' | 'handbook' | 'links' | `#${string}` | `handbook#${string}`
 
 export const LOCALES: readonly Locale[] = ['en', 'kk']
 
@@ -62,6 +62,7 @@ export function parseRoute(pathname: string): Route {
   if (slug === '') page = 'home'
   else if (slug === 'members') page = 'members'
   else if (slug === 'handbook') page = 'handbook'
+  else if (slug === 'links') page = 'links'
   else page = 'notFound'
 
   return { locale, page, base: localeBase(locale) }
@@ -72,6 +73,7 @@ export function pagePath(page: Page, locale: Locale): string {
   const base = localeBase(locale)
   if (page === 'members') return `${base}members`
   if (page === 'handbook') return `${base}handbook`
+  if (page === 'links') return `${base}links`
   return base
 }
 
@@ -89,6 +91,7 @@ export function href(route: Pick<Route, 'locale'>, to: HrefTarget): string {
   if (to.startsWith('#')) return `${base}${to}`
   if (to === 'members') return `${base}members`
   if (to === 'handbook') return `${base}handbook`
+  if (to === 'links') return `${base}links`
   // `handbook#anchor`
   return `${base}${to}`
 }

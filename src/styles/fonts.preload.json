@@ -1,10 +1,31 @@
 {
-  "common": ["/fonts/Inter-latin.woff2"],
+  "common": [
+    "/fonts/Inter-latin.woff2"
+  ],
   "home": [],
   "pages": {
-    "members": ["/fonts/Courgette-wordmark.woff2", "/fonts/Anton-latin.woff2", "/fonts/Caveat-latin.woff2"],
-    "handbook": ["/fonts/Courgette-wordmark.woff2", "/fonts/Anton-latin.woff2", "/fonts/Caveat-latin.woff2"],
-    "notFound": ["/fonts/Courgette-wordmark.woff2", "/fonts/Anton-latin.woff2", "/fonts/Caveat-latin.woff2"]
+    "members": [
+      "/fonts/Courgette-wordmark.woff2",
+      "/fonts/Anton-latin.woff2",
+      "/fonts/Caveat-latin.woff2"
+    ],
+    "handbook": [
+      "/fonts/Courgette-wordmark.woff2",
+      "/fonts/Anton-latin.woff2",
+      "/fonts/Caveat-latin.woff2"
+    ],
+    "notFound": [
+      "/fonts/Courgette-wordmark.woff2",
+      "/fonts/Anton-latin.woff2",
+      "/fonts/Caveat-latin.woff2"
+    ],
+    "links": [
+      "/fonts/Courgette-wordmark.woff2",
+      "/fonts/Anton-latin.woff2"
+    ]
   },
-  "kk": ["/fonts/Oswald-600-cyrillic.woff2", "/fonts/Inter-cyrillic.woff2"]
+  "kk": [
+    "/fonts/Oswald-600-cyrillic.woff2",
+    "/fonts/Inter-cyrillic.woff2"
+  ]
 }

@@ -27,6 +27,9 @@ const cases = [
   ['/kk/members/', { locale: 'kk', page: 'members', base: '/kk/' }],
   ['/handbook', { locale: 'en', page: 'handbook', base: '/' }],
   ['/kk/handbook', { locale: 'kk', page: 'handbook', base: '/kk/' }],
+  ['/links', { locale: 'en', page: 'links', base: '/' }],
+  ['/links/', { locale: 'en', page: 'links', base: '/' }],
+  ['/kk/links', { locale: 'kk', page: 'links', base: '/kk/' }],
   ['/nope', { locale: 'en', page: 'notFound', base: '/' }],
   ['/kk/nope', { locale: 'kk', page: 'notFound', base: '/kk/' }],
   // what Cloudflare Pages / static servers may expose
@@ -58,6 +61,8 @@ check('href pages', () => {
   assert.equal(href(en('/'), 'members'), '/members')
   assert.equal(href(en('/kk/'), 'members'), '/kk/members')
   assert.equal(href(en('/'), 'handbook'), '/handbook')
+  assert.equal(href(en('/'), 'links'), '/links')
+  assert.equal(href(en('/kk/'), 'links'), '/kk/links')
   assert.equal(href(en('/kk/handbook'), 'handbook#privacy-on-this-site'), '/kk/handbook#privacy-on-this-site')
 })
 check('switchLocaleHref keeps page and hash', () => {
@@ -66,6 +71,7 @@ check('switchLocaleHref keeps page and hash', () => {
   assert.equal(switchLocaleHref(en('/'), 'kk', '#offer'), '/kk/#offer')
   assert.equal(switchLocaleHref(en('/kk/'), 'en', 'offer'), '/#offer')
   assert.equal(switchLocaleHref(en('/handbook'), 'kk'), '/kk/handbook')
+  assert.equal(switchLocaleHref(en('/links'), 'kk'), '/kk/links')
   assert.equal(switchLocaleHref(en('/kk/handbook'), 'en', ''), '/handbook')
   assert.equal(switchLocaleHref(en('/nope'), 'kk', '#'), '/kk/')
 })

@@ -1,0 +1,134 @@
+/* =============================================================================
+   /links — link-in-bio rows. Air tokens only, same surfaces as the other sub-pages
+   (--card-fill / --card-line, radii from the scale, no shadows, no backdrop-filter:
+   it would re-blur the WebGL sky every frame).
+   The column is narrow on purpose: this page is opened from a phone, from a bio link.
+   ========================================================================== */
+
+.links-page {
+  gap: 56px;
+}
+
+.links-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: min(560px, 100%);
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+}
+
+.link-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 76px;
+  padding: 16px 20px;
+  border: 1px solid var(--card-line);
+  border-radius: var(--radius-cards);
+  background: var(--card-fill);
+  color: var(--white);
+  text-decoration: none;
+  transition:
+    background-color 0.4s var(--ease),
+    border-color 0.4s var(--ease),
+    translate 0.4s var(--ease);
+}
+.link-row:hover,
+.link-row:focus-visible {
+  background: rgba(var(--white-rgb), 0.1);
+  border-color: rgba(var(--white-rgb), 0.28);
+  translate: 0 -2px;
+}
+
+/* The row we want pressed first: filled, not just bigger, so it reads as the one action. */
+.link-row--featured {
+  min-height: 92px;
+  border-color: rgba(var(--white-rgb), 0.34);
+  background: rgba(var(--white-rgb), 0.13);
+}
+
+.link-row__icon {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  background: rgba(var(--white-rgb), 0.1);
+  color: var(--white);
+}
+.link-row--featured .link-row__icon {
+  background: rgba(var(--white-rgb), 0.18);
+}
+
+.link-row__text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.link-row__label {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  overflow-wrap: anywhere;
+}
+.link-row__badge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(var(--white-rgb), 0.16);
+  color: var(--white);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.link-row__note {
+  color: rgba(var(--white-rgb), 0.72);
+  overflow-wrap: anywhere;
+}
+
+.link-row__arrow {
+  flex: none;
+  opacity: 0.6;
+  transition:
+    opacity 0.4s var(--ease),
+    translate 0.4s var(--ease);
+}
+.link-row:hover .link-row__arrow,
+.link-row:focus-visible .link-row__arrow {
+  opacity: 1;
+  translate: 2px -2px;
+}
+
+.links-page__footnote {
+  width: min(560px, 100%);
+  margin: 28px auto 0;
+  color: rgba(var(--white-rgb), 0.72);
+  text-align: center;
+}
+
+@media (max-width: 560px) {
+  .link-row {
+    gap: 14px;
+    padding: 14px 16px;
+  }
+  .link-row__icon {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .link-row,
+  .link-row__arrow {
+    transition: none;
+  }
+  .link-row:hover,
+  .link-row:focus-visible {
+    translate: none;
+  }
+}

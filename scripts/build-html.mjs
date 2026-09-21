@@ -11,6 +11,8 @@
  *   dist/kk/members.html    /kk/members   members · kk
  *   dist/handbook.html      /handbook     handbook · en
  *   dist/kk/handbook.html   /kk/handbook  handbook · kk
+ *   dist/links.html         /links        links · en
+ *   dist/kk/links.html      /kk/links     links · kk
  *   dist/404.html           any other miss   notFound · en
  *   dist/kk/404.html        misses under /kk/ notFound · kk (Pages picks the nearest 404.html)
  *
@@ -103,6 +105,8 @@ const ROUTES = [
   { page: 'members', locale: 'kk', out: 'kk/members.html' },
   { page: 'handbook', locale: 'en', out: 'handbook.html' },
   { page: 'handbook', locale: 'kk', out: 'kk/handbook.html' },
+  { page: 'links', locale: 'en', out: 'links.html' },
+  { page: 'links', locale: 'kk', out: 'kk/links.html' },
   { page: 'notFound', locale: 'en', out: '404.html' },
   // Pages serves the nearest 404.html walking up from the missing path, so /kk/* misses get a KK head.
   { page: 'notFound', locale: 'kk', out: 'kk/404.html' },
